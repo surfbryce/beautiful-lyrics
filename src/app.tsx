@@ -10,10 +10,14 @@ import './stylings/main.scss'
 	.lyrics-lyricsContent-lyric - Lyric that hasn't been sung (IF the following classes don't exist)
 	.lyrics-lyricsContent-highlight - Lyric that has been sung
 	.lyrics-lyricsContent-active - Current lyric being sung
+
+	.main-nowPlayingView-coverArt - This is the overarching container for the cover-art image element
+	.main-nowPlayingWidget-coverArt - This is the overarching container for the cover-art image element
 */
 
 // Covert-Art
-const CoverArtClass = 'FqmFsMhuF4D0s35Z62Js'//'cover-art-image'
+const NowPlayingCoverArtClass = '.main-nowPlayingWidget-coverArt img'
+const CardCoverArtClass = '.main-nowPlayingView-coverArt img'
 const CoverArtLoadedClass = 'main-image-loaded'
 
 type Callback = (() => void)
@@ -67,7 +71,19 @@ const WaitForLoadedCoverArt = (element: HTMLImageElement) => {
 
 const CheckCoverArtElements = () => {
 	// Grab our elements
-	const elements = (Array.from(document.body.querySelectorAll(`.${CoverArtClass}`)) as [HTMLImageElement])
+	const elements = []
+	{
+		const nowPlayingCoverArt = document.body.querySelector(NowPlayingCoverArtClass) as (HTMLImageElement | null)
+		const cardCoverArt = document.body.querySelector(CardCoverArtClass) as (HTMLImageElement | null)
+
+		if (nowPlayingCoverArt) {
+			elements.push(nowPlayingCoverArt)
+		}
+
+		if (cardCoverArt) {
+			elements.push(cardCoverArt)
+		}
+	}
 
 	// Grab our largest image (physical size will determine this)
 	let targetElement: HTMLImageElement | undefined
