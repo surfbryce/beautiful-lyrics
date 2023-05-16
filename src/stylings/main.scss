@@ -1,28 +1,46 @@
+/*
+	We have to override the unsung lyric color since Spotifys black text doesn't work too well
+	with gradient-color backgrounds. It works with the solid-color background because the contrast
+	between the unsung text, the sung/active text, and the background itself is completely balanced.
+
+	With gradient backgrounds the contrast differs in many different places and black text creates
+	a stark inbalance in contrast between the white text and the varying contrast points in the gradient
+	background.
+
+	The color chosen is close to that of the already sung lyrics but fainter to create a more balanced
+	and distinguishable contrast between the sung and unsung lyrics.
+*/
 .lyrics-lyrics-container, .lyrics-background {
 	--lyrics-color-inactive: rgb(240 240 240 / 51%) !important;
 }
 
+// This makes the controls inherit some of the color from the background making them fit in better
 .main-nowPlayingView-lyricsControls, .main-lyricsCinema-controls, .main-nowPlayingView-lyricsTitle button {
 	mix-blend-mode: overlay;
 }
 
+// We need to override the hover effect since we changed the way the text is filled-in
 .lyric:hover {
 	text-shadow: 0 0 0px var(--lyrics-color-active) !important;
 }
 
+// When the active text grows in size we want more space between it and the surrounding lines
 .lyrics-lyricsContent-active {
     margin-top: 0.25em;
     margin-bottom: 0.25em;
 }
 
-.lyrics-background {
+// This is the entire lyrics configuration used to create the gradient backgrounds
+.lyrics-background { // This is the overarching container, the parent of the container class
 	overflow: hidden;
 	position: relative;
 
+	// This is needed so that the gradient-background can be visible
 	&.main-nowPlayingView-sectionHeaderSpacing.main-nowPlayingView-lyricsGradient, &.os-viewport .lyrics-lyrics-background {
 		background-color: rgba(0, 0, 0, 0);
 	}
 
+	// These are full-screen background specific classes to make the gradient-background work/show properly
 	&.os-viewport {
 		overflow: visible;
 		position: absolute;
@@ -40,6 +58,20 @@
 		margin-bottom: -15%;
 	}
 
+	/*
+		The idea behind this is to create a gradient-background that resembles Apple Music.
+
+		We could technically simulate blob-merging of these colors and extract colors out of the
+		cover-art. However - that is ridiculously expensive computationaly - and more importantly;
+		I don't want to extract the colors from the cover-art in the first place.
+
+		The easier solution is to use the cover-art as an image and blur it. To simulate blob-merging
+		we have two circles with the image (two images cropped circularly) blurred significantly. We then
+		apply a blend-mode to one of the circles and layer it on top. This helps sell the illusion that
+		these colors are merging in blobs.
+	*/
+
+	// As the name suggests, this contains the color/back images - which make up the gradient itself
 	&-container {
 		position: absolute;
 		top: 0;
@@ -54,6 +86,7 @@
 		filter: saturate(1.5) brightness(0.8);
 	}
 
+	// Sharable properties
 	&-color, &-back {
 		width: 200%;
 		position: absolute;
@@ -61,6 +94,7 @@
 		animation: rotate 35s linear infinite;
 	}
 
+	// The primary image which gives the blending effect it's illusional property
 	&-color {
 		right: 0;
 		top: 0;
@@ -85,6 +119,7 @@
 		mix-blend-mode: revert;
 	}
 
+	// Additional image to cover space that the primary image doesn't cover (and to develop blob-blending)
 	&-back {
 		left: 0;
 		bottom: 0;
