@@ -1,0 +1,105 @@
+.lyrics-lyrics-container, .lyrics-background {
+	--lyrics-color-inactive: rgb(240 240 240 / 51%) !important;
+}
+
+.main-nowPlayingView-lyricsControls, .main-lyricsCinema-controls, .main-nowPlayingView-lyricsTitle button {
+	mix-blend-mode: overlay;
+}
+
+.lyric:hover {
+	text-shadow: 0 0 0px var(--lyrics-color-active) !important;
+}
+
+.lyrics-lyricsContent-active {
+    margin-top: 0.25em;
+    margin-bottom: 0.25em;
+}
+
+.lyrics-background {
+	overflow: hidden;
+	position: relative;
+
+	&.main-nowPlayingView-sectionHeaderSpacing.main-nowPlayingView-lyricsGradient, &.os-viewport .lyrics-lyrics-background {
+		background-color: rgba(0, 0, 0, 0);
+	}
+
+	&.os-viewport {
+		overflow: visible;
+		position: absolute;
+	}
+
+	&.os-viewport > &-container {
+		position: sticky;
+
+		max-width: 35%;
+		max-height: 30%;
+
+		scale: 290% 340%;
+		transform-origin: left top;
+
+		margin-bottom: -15%;
+	}
+
+	&-container {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		pointer-events: none;
+		z-index: -1;
+		overflow: hidden;
+		border-radius: inherit;
+
+		filter: saturate(1.5) brightness(0.8);
+	}
+
+	&-color, &-back {
+		width: 200%;
+		position: absolute;
+		border-radius: 100em;
+		animation: rotate 35s linear infinite;
+	}
+
+	&-color {
+		right: 0;
+		top: 0;
+		filter: blur(40px);
+		z-index: 10;
+
+		/*
+			This was previously Luminosity.
+
+			The issue with pretty much every blend mode is that random-clipping will happen
+			on the smaller lyric components (minified and small). This clipping usually would show up
+			as rounded rectangles that showed the background color and not the blurred colors; kind of
+			like a random mask was applied to it.
+
+			Revert is the only blend mode that doesn't have this issue. There is no visual trade-off and
+			arguably looks better than Luminosity.
+
+			Color-dodge is also another cool option - unlike the other two it's not like blob-merging
+			and is more like a trippy but satisfying effect - unfortuantely; it suffers from the same issue
+			as Luminosity.
+		*/
+		mix-blend-mode: revert;
+	}
+
+	&-back {
+		left: 0;
+		bottom: 0;
+		filter: blur(40px);
+		z-index: 1;
+		animation-direction: reverse;
+		animation-delay: 10s;
+	}
+}
+
+@keyframes rotate {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}

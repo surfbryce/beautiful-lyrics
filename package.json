@@ -1,0 +1,18 @@
+{
+  "name": "beautiful-lyrics",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "spicetify-creator",
+    "build-local": "spicetify-creator --out=dist --minify",
+    "watch": "spicetify-creator --watch",
+	"start": "spicetify-creator & spicetify config extensions beautiful-lyrics.js & spicetify apply enable-devtools",
+	"real": "spicetify-creator & spicetify config extensions beautiful-lyrics.js & spicetify apply"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/react": "^18.2.6",
+    "@types/react-dom": "^18.2.4",
+    "spicetify-creator": "^1.0.13"
+  }
+}
