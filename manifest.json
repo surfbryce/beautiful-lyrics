@@ -2,7 +2,7 @@
 	{
 	  "name": "Beautiful Lyrics",
 	  "description": "Beautifies Lyrics by adding a Dynamic Background AND Uplifting the Text",
-	  "preview": "./preview.gif",
+	  "preview": "./previews/icon.gif",
 	  "main": "./dist/beautiful-lyrics.js",
 	  "readme": "README.md",
 	  "authors": [
