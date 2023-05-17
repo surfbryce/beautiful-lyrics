@@ -1,5 +1,8 @@
 import './stylings/main.scss'
 
+// Store our Spicetify-Classes
+const SpotifyPlayer = Spicetify.Player
+
 /*
 	Classes to focus on:
 	.lyrics-lyrics-background - This is the background for the big lyrics. It's just a single div no children.
@@ -16,101 +19,56 @@ import './stylings/main.scss'
 */
 
 // Covert-Art
-const NowPlayingCoverArtClass = '.main-nowPlayingWidget-coverArt img'
-const CardCoverArtClass = '.main-nowPlayingView-coverArt img'
-const CoverArtLoadedClass = 'main-image-loaded'
-
 type Callback = (() => void)
-let CleanCoverArt: (Callback | undefined)
-let CurrentCoverArtElement: (HTMLImageElement | undefined)
-let CurrentCovertArtImage: (string | undefined)
+let CoverArt: (
+	{
+		Large: string;
+		Big: string;
+		Defualt: string;
+		Small: string;
+	}
+	| undefined
+)
 const CoverArtUpdates: Map<HTMLElement, Callback> = new Map()
 
-const TryToCleanCoverArt = () => {
-	CleanCoverArt?.()
-	CleanCoverArt = undefined
-}
-
-const CheckIfCoverArtLoaded = (element: HTMLImageElement) => {
-	let currentImage: (string | undefined)
-
-	if (element.classList.contains(CoverArtLoadedClass)) {
-		currentImage = element.src
+{
+	type TrackMetadata = {
+		image_xlarge_url: string;
+		image_large_url: string;
+		image_url: string;
+		image_small_url: string;
 	}
 
-	if (currentImage !== CurrentCovertArtImage) {
-		CurrentCovertArtImage = currentImage
+	const Update = () => {
+		// Grab the currently displayed cover-art
+		const trackMetadata = SpotifyPlayer.data?.track?.metadata as (TrackMetadata | undefined)
+		
+		// Now evaluate our cover-art
+		const newCoverArt = (
+			trackMetadata ? {
+				Large: trackMetadata.image_xlarge_url,
+				Big: trackMetadata.image_large_url,
+				Defualt: trackMetadata.image_url,
+				Small: trackMetadata.image_small_url
+			}
+			: undefined
+		)
 
-		for (const update of CoverArtUpdates.values()) {
-			update()
+		// Now determine if there was an update or not
+		if (newCoverArt?.Defualt !== CoverArt?.Defualt) {
+			// Update our cover-art
+			CoverArt = newCoverArt
+
+			// Update our cover-art image
+			for(const [_, callback] of CoverArtUpdates) {
+				callback()
+			}
 		}
 	}
-}
+	
+	SpotifyPlayer.addEventListener("songchange", Update)
 
-const WaitForLoadedCoverArt = (element: HTMLImageElement) => {
-	// Clear anything we were running beforehand
-	TryToCleanCoverArt()
-
-	// Check immediately if we are loaded
-	CheckIfCoverArtLoaded(element)
-
-	// Watch for changes
-	const observer = new MutationObserver(
-		() => {
-			CheckIfCoverArtLoaded(element)
-		}
-	)
-
-	observer.observe(element, {attributes: true, attributeFilter: ['class', 'src'], childList: false, subtree: false})
-
-	// Setup our cleaner
-	CleanCoverArt = () => {
-		observer.disconnect()
-	}
-}
-
-const CheckCoverArtElements = () => {
-	// Grab our elements
-	const elements = []
-	{
-		const nowPlayingCoverArt = document.body.querySelector(NowPlayingCoverArtClass) as (HTMLImageElement | null)
-		const cardCoverArt = document.body.querySelector(CardCoverArtClass) as (HTMLImageElement | null)
-
-		if (nowPlayingCoverArt) {
-			elements.push(nowPlayingCoverArt)
-		}
-
-		if (cardCoverArt) {
-			elements.push(cardCoverArt)
-		}
-	}
-
-	// Grab our largest image (physical size will determine this)
-	let targetElement: HTMLImageElement | undefined
-	let largestArea = 0
-
-	for(const element of elements) { 
-		const imageArea = (element.naturalWidth * element.naturalHeight)
-
-		if(imageArea > largestArea) {
-			largestArea = imageArea
-			targetElement = element
-		}
-	}
-
-	// Make sure that we actually have cover-art
-	if (targetElement === undefined) {
-		CurrentCoverArtElement = undefined, CurrentCovertArtImage = undefined
-		TryToCleanCoverArt()
-
-		return
-	}
-
-	// Now wait for our image to load
-	if (targetElement !== CurrentCoverArtElement) {
-		CurrentCoverArtElement = targetElement, CurrentCovertArtImage = undefined
-		WaitForLoadedCoverArt(targetElement)
-	}
+	Update()
 }
 
 // Lyric Types
@@ -149,8 +107,10 @@ const ManageLyricsBackground = (background: LyricObject): Callback => {
 
 	// Now handle updating the images themselves
 	const Update = () => {
-		colorImage.src = CurrentCovertArtImage ?? ''
-		backImage.src = CurrentCovertArtImage ?? ''
+		const source = (CoverArt?.Defualt ?? '')
+
+		colorImage.src = source
+		backImage.src = source
 	}
 
 	// Immediately update ourselves and handle updating automatically
@@ -246,18 +206,42 @@ const ActiveLyricsContainerCleaners: ActiveLyricCleaners = {
 	FullScreen: undefined
 }
 
+const GetLyricFontSizeInRem = (lyric: HTMLDivElement): number => {
+	/*
+		The idea here is that we can get the font-size of our text in pixels.
+
+		We know that the font-size in CSS is in rem-units. We also know that the documents
+		font-size is equievelant to 1rem. So what we can then do is get the computed styles
+		for both elements and divide their font-sizes to get the font-size in rem-units.
+	*/
+	const style = getComputedStyle(lyric), rootStyle = getComputedStyle(document.documentElement)
+	const lyricFontSizeInPixels = parseFloat(style.fontSize), rootFontSizeInPixels = parseFloat(rootStyle.fontSize)
+
+	return(lyricFontSizeInPixels / rootFontSizeInPixels)
+}
+
 const ManageLyricsContainer = (container: LyricObject): Callback => {
 	// Create our storage for each lyric
+	type LyricsData = {
+		Observer: MutationObserver,
+		LayoutOrder: number,
+		State: LyricState
+	}
 	const lyrics: Map<
 		HTMLDivElement,
-		{
-			Observer: MutationObserver,
-			LayoutOrder: number,
-			State: LyricState
-		}
+		LyricsData
 	> = new Map()
 
 	// Handle updating our lyrics
+	let fontSizeInRem: number = 0
+
+	const UpdateFontSize = (lyric: HTMLDivElement, data: LyricsData) => {
+		lyric.style.fontSize = (
+			(data.State == "Active") ? `${fontSizeInRem + ActiveLyricSizeIncrease}rem`
+			: ''
+		)
+	}
+
 	const Update = () => {
 		// Go through our lyrics and update their states (and also gather our active layout-order)
 		let activeLayoutOrder: (number | undefined)
@@ -307,23 +291,7 @@ const ManageLyricsContainer = (container: LyricObject): Callback => {
 			}
 
 			// Update our font-size
-			if (isActive) {
-				/*
-					The idea here is that we can get the font-size of our text in pixels.
-
-					We know that the font-size in CSS is in rem-units. We also know that the documents
-					font-size is equievelant to 1rem. So what we can then do is get the computed styles
-					for both elements and divide their font-sizes to get the font-size in rem-units.
-				*/
-				const style = getComputedStyle(lyric), rootStyle = getComputedStyle(document.documentElement)
-				const lyricFontSizeInPixels = parseFloat(style.fontSize), rootFontSizeInPixels = parseFloat(rootStyle.fontSize)
-				const fontSizeInRem = (lyricFontSizeInPixels / rootFontSizeInPixels)
-
-				// Now we can set our font-size in rem-units
-				lyric.style.fontSize = `${fontSizeInRem + ActiveLyricSizeIncrease}rem`
-			} else {
-				lyric.style.fontSize = ''
-			}
+			UpdateFontSize(lyric, data)
 
 			// Update our lyric appearance according to our blur
 			lyric.style.color = "transparent"
@@ -333,6 +301,7 @@ const ManageLyricsContainer = (container: LyricObject): Callback => {
 
 	// Handle finding our lyrics
 	let observer: MutationObserver
+	let fontResizeObserver: (ResizeObserver | undefined)
 
 	{
 		// Helper-Method to store Lyrics
@@ -341,8 +310,22 @@ const ManageLyricsContainer = (container: LyricObject): Callback => {
 			const layoutOrder = Array.from(container.children).indexOf(lyric)
 
 			// Create our observer to watch for class-changes
-			const observer = new MutationObserver(Update)
-			observer.observe(lyric, {attributes: true, attributeFilter: ['class'], childList: false, subtree: false})
+			const mutationObserver = new MutationObserver(Update)
+			mutationObserver.observe(lyric, {attributes: true, attributeFilter: ['class'], childList: false, subtree: false})
+
+			// Create our observer to watch for size-changes
+			if ((fontResizeObserver === undefined) && (lyric.innerText.length === 0)) {
+				fontResizeObserver = new ResizeObserver(
+					_ => {
+						fontSizeInRem = GetLyricFontSizeInRem(lyric)
+						
+						for(const [lyricToUpdate, data] of lyrics) {
+							UpdateFontSize(lyricToUpdate, data)
+						}
+					}
+				)
+				fontResizeObserver.observe(lyric)
+			}
 
 			// Store our lyric
 			lyrics.set(
@@ -396,8 +379,9 @@ const ManageLyricsContainer = (container: LyricObject): Callback => {
 
 	// Return our cleaner for external management
 	return () => {
-		// Disconnect our primary observer
+		// Disconnect our observers
 		observer.disconnect()
+		fontResizeObserver?.disconnect()
 
 		// Go through and disconnect all of our lyric-observers
 		for(const lyric of lyrics.values()) {
@@ -440,7 +424,6 @@ const CheckForLyricsContainers = () => {
 // Main watcher
 async function main() {
   	// Check for any initial elements
-	CheckCoverArtElements()
 	CheckForLyricsBackgrounds()
 	CheckForLyricsContainers()
 
@@ -455,7 +438,6 @@ async function main() {
 	*/
 	new MutationObserver(
 		() => {
-			CheckCoverArtElements()
 			CheckForLyricsBackgrounds()
 			CheckForLyricsContainers()
 		}
