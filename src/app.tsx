@@ -225,7 +225,8 @@ const ManageLyricsContainer = (container: LyricObject): Callback => {
 	type LyricsData = {
 		Observer: MutationObserver,
 		LayoutOrder: number,
-		State: LyricState
+		State: LyricState,
+		IsFontSizeObserver: boolean
 	}
 	const lyrics: Map<
 		HTMLDivElement,
@@ -314,6 +315,8 @@ const ManageLyricsContainer = (container: LyricObject): Callback => {
 			mutationObserver.observe(lyric, {attributes: true, attributeFilter: ['class'], childList: false, subtree: false})
 
 			// Create our observer to watch for size-changes
+			let isFontSizeObserver = false
+
 			if ((fontResizeObserver === undefined) && (lyric.innerText.length === 0)) {
 				fontResizeObserver = new ResizeObserver(
 					_ => {
@@ -325,6 +328,8 @@ const ManageLyricsContainer = (container: LyricObject): Callback => {
 					}
 				)
 				fontResizeObserver.observe(lyric)
+
+				isFontSizeObserver = true
 			}
 
 			// Store our lyric
@@ -332,7 +337,8 @@ const ManageLyricsContainer = (container: LyricObject): Callback => {
 				lyric, {
 					Observer: observer,
 					LayoutOrder: layoutOrder,
-					State: "Unsung"
+					State: "Unsung",
+					IsFontSizeObserver: isFontSizeObserver
 				}
 			)
 
@@ -363,6 +369,13 @@ const ManageLyricsContainer = (container: LyricObject): Callback => {
 
 					for(const node of mutationRecord.removedNodes) {
 						if (node instanceof HTMLDivElement) {
+							const data = lyrics.get(node)
+
+							if (data?.IsFontSizeObserver) {
+								fontResizeObserver?.disconnect()
+								fontResizeObserver = undefined
+							}
+
 							lyrics.delete(node)
 						}
 					}
