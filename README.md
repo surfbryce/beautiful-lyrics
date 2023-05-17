@@ -1,7 +1,7 @@
 # Beautiful Lyrics
 🌟 Starring the project helps this extension get seen by more people - which means more Beautiful Lyrics! 
 
-![Github Version](https://img.shields.io/github/v/release/surfbryce/beautiful-lyrics?display_name=release&label=version) [![Github Stars badge](https://img.shields.io/github/stars/surfbryce/beautiful-lyrics?style=social)](https://github.com/surfbryce/beautiful-lyrics/)
+[![Github Version](https://img.shields.io/github/v/release/surfbryce/beautiful-lyrics?display_name=release&label=version)](https://github.com/surfbryce/beautiful-lyrics/) [![Github Stars badge](https://img.shields.io/github/stars/surfbryce/beautiful-lyrics?style=social)](https://github.com/surfbryce/beautiful-lyrics/)
 
 ![Thumbnail](./previews/thumbnail.gif)
 ### Takes the built-in Spotify lyrics and gives them a complete uplift!
