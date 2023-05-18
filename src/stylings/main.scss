@@ -15,6 +15,11 @@
 }
 
 // Right-card styling
+.lyrics-background .main-trackInfo-artists {
+	opacity: 0.75;
+	filter: brightness(1.15);
+}
+
 .main-nowPlayingView-coverArt {
 	opacity: 0.85;
     box-shadow: #00000045 0 9px 20px 0px;
@@ -22,6 +27,18 @@
 
 .main-nowPlayingView-section {
 	background-color: var(--background-tinted-base) !important;
+}
+
+
+// Improves scroll-bar
+.os-host:has(.lyrics-background) .os-scrollbar {
+	padding: 5px;
+
+	.os-scrollbar-handle {
+		mix-blend-mode: overlay;
+		/*background-color: rgb(11 11 11 / 35%) !important;*/
+		background-color: rgba(252, 249, 249, 0.117) !important;
+	}
 }
 
 /*
@@ -50,12 +67,14 @@
 		background-color: rgba(0, 0, 0, 0);
 	}
 
-	// These are full-screen background specific classes to make the gradient-background work/show properly
-	&.os-viewport {
-		overflow: visible;
+	&.os-viewport, &.os-padding {
 		position: absolute;
 	}
 
+	// These are full-screen background specific classes to make the gradient-background work/show properly
+	&.os-viewport:not(:has(.main-nowPlayingView-content)) {
+		overflow: visible;
+	}
 	&.os-viewport:not(:has(.main-nowPlayingView-content)) > &-container {
 		position: sticky;
 
@@ -69,7 +88,7 @@
 	}
 
 	// These are right-side card background specific classes to adjust for contrast issues
-	&.os-viewport:has(.main-nowPlayingView-content) &-container {
+	&.os-padding:has(.main-nowPlayingView-content) &-container {
 		filter: saturate(2) brightness(0.7);
 	}
 
@@ -96,7 +115,7 @@
 		pointer-events: none;
 		z-index: -1;
 		overflow: hidden;
-		border-radius: inherit;
+		border-radius: var(--border-radius-1);
 
 		filter: saturate(1.5) brightness(0.8);
 	}
