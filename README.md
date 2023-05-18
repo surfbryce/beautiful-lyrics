@@ -8,10 +8,10 @@
 
 The background has been given a *Dynamic* Color Background that blends through the colors of the Cover-Art beautifully. Lyrics have also been given a more cleaner and satisfying appearance inspired by Apple Music.
 
-Both the **Full-Screen** AND **Collapsed/Expanded Card** Lyrics are affected with these beautiful upgrades.
+Both the **Full-Screen** AND **Side-Card** Lyrics are affected with these beautiful upgrades.
 
 ## Previews
-Collapsed/Panel/Fullscreen
+Collapsed/Card/Fullscreen
 
 ![All Components Preview](./previews/all-components-preview.gif)
 
