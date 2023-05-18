@@ -141,7 +141,6 @@
 		filter: blur(40px);
 		z-index: 1;
 		animation-direction: reverse;
-		animation-delay: 10s;
 	}
 }
 
@@ -151,5 +150,18 @@
 	}
 	100% {
 		transform: rotate(360deg);
+	}
+}
+
+:root {
+	--beautiful-lyrics-random-degree: 258deg;
+}
+
+@keyframes rotate {
+	0% {
+		transform: rotate(var(--beautiful-lyrics-random-degree));
+	}
+	100% {
+		transform: rotate(calc(var(--beautiful-lyrics-random-degree) + 360deg));
 	}
 }
