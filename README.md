@@ -11,21 +11,26 @@ The background has been given a *Dynamic* Color Background that blends through t
 Both the **Full-Screen** AND **Collapsed/Expanded Card** Lyrics are affected with these beautiful upgrades.
 
 ## Previews
-Fullscreen
-
-![Fullscreen Preview](./previews/fullscreen-preview.gif)
-
 Collapsed/Panel/Fullscreen
 
 ![All Components Preview](./previews/all-components-preview.gif)
 
-Panel
+Fullscreen
 
-![Small Preview](./previews/icon.gif)
+![Fullscreen Preview](./previews/fullscreen-preview.gif)
+
+Card
+
+![Small Preview](./previews/card-preview.gif)
 
 Collapsed
 
 ![Collapsed Preview](./previews/collapsed-preview.gif)
+
+## FAQ
+- **The background isn't showing up! How come?**
+	- Make sure that your Spicetify AND Spotify are updated to the most recent versions. Update Spicetify using these [instructions](https://spicetify.app/docs/getting-started/#updating) - to update Spotify click your PFP and if there is an option to update click it.
+	- If you are on the latest versions then it must be an issue with the extension - so leave a report!
 
 ## Have an issue/idea? Go ahead and send them!
 
