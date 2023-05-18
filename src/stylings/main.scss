@@ -89,6 +89,7 @@
 
 	// These are right-side card background specific classes to adjust for contrast issues
 	&.os-padding:has(.main-nowPlayingView-content) &-container {
+		border-radius: var(--border-radius-1);
 		filter: saturate(2) brightness(0.7);
 	}
 
@@ -115,7 +116,6 @@
 		pointer-events: none;
 		z-index: -1;
 		overflow: hidden;
-		border-radius: var(--border-radius-1);
 
 		filter: saturate(1.5) brightness(0.8);
 	}
