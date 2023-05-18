@@ -1,21 +1,5 @@
-/*
-	We have to override the unsung lyric color since Spotifys black text doesn't work too well
-	with gradient-color backgrounds. It works with the solid-color background because the contrast
-	between the unsung text, the sung/active text, and the background itself is completely balanced.
-
-	With gradient backgrounds the contrast differs in many different places and black text creates
-	a stark inbalance in contrast between the white text and the varying contrast points in the gradient
-	background.
-
-	The color chosen is close to that of the already sung lyrics but fainter to create a more balanced
-	and distinguishable contrast between the sung and unsung lyrics.
-*/
-.lyrics-lyrics-container, .lyrics-background {
-	--lyrics-color-inactive: rgb(240 240 240 / 51%) !important;
-}
-
 // This makes the controls inherit some of the color from the background making them fit in better
-.main-nowPlayingView-lyricsControls, .main-lyricsCinema-controls, .main-nowPlayingView-lyricsTitle button {
+.main-nowPlayingView-lyricsControls, .main-lyricsCinema-controls /*, .main-nowPlayingView-lyricsTitle button*/ {
 	mix-blend-mode: overlay;
 }
 
@@ -28,6 +12,32 @@
 .lyrics-lyricsContent-active {
     margin-top: 0.25em;
     margin-bottom: 0.25em;
+}
+
+// Right-card styling
+.main-nowPlayingView-coverArt {
+	opacity: 0.85;
+    box-shadow: #00000045 0 9px 20px 0px;
+}
+
+.main-nowPlayingView-section {
+	background-color: var(--background-tinted-base) !important;
+}
+
+/*
+	We have to override the unsung lyric color since Spotifys black text doesn't work too well
+	with gradient-color backgrounds. It works with the solid-color background because the contrast
+	between the unsung text, the sung/active text, and the background itself is completely balanced.
+
+	With gradient backgrounds the contrast differs in many different places and black text creates
+	a stark inbalance in contrast between the white text and the varying contrast points in the gradient
+	background.
+
+	The color chosen is close to that of the already sung lyrics but fainter to create a more balanced
+	and distinguishable contrast between the sung and unsung lyrics.
+*/
+.lyrics-lyrics-container, .main-nowPlayingView-section {
+	--lyrics-color-inactive: rgb(240 240 240 / 51%) !important;
 }
 
 // This is the entire lyrics configuration used to create the gradient backgrounds
@@ -46,7 +56,7 @@
 		position: absolute;
 	}
 
-	&.os-viewport > &-container {
+	&.os-viewport:not(:has(.main-nowPlayingView-content)) > &-container {
 		position: sticky;
 
 		max-width: 35%;
@@ -56,6 +66,11 @@
 		transform-origin: left top;
 
 		margin-bottom: -18vh;
+	}
+
+	// These are right-side card background specific classes to adjust for contrast issues
+	&.os-viewport:has(.main-nowPlayingView-content) &-container {
+		filter: saturate(2) brightness(0.7);
 	}
 
 	/*

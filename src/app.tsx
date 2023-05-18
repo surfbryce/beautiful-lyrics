@@ -85,7 +85,7 @@ type LyricContainerType = ("NowPlaying" | "FullScreen")
 
 // Lyric Backgrounds
 const FullScreenLyricsBackgroundClass = 'os-viewport .lyrics-lyrics-container'
-const NowPlayingLyricsBackgroundClass = 'main-nowPlayingView-sectionHeaderSpacing'
+const NowPlayingLyricsBackgroundClass = 'os-viewport .main-nowPlayingView-content' // 'main-nowPlayingView-sectionHeaderSpacing'
 
 const ActiveLyricsBackgrounds: ActiveLyricObjects = {
 	NowPlaying: undefined,
@@ -174,7 +174,10 @@ const CheckLyricsBackground = (
 
 const CheckForLyricsBackgrounds = () => {
 	// Grab our now-playing and full-screen containers if possible
-	const nowPlaying = document.body.querySelector(`.${NowPlayingLyricsBackgroundClass}`) as (HTMLElement | null)
+	let nowPlaying = document.body.querySelector(`.${NowPlayingLyricsBackgroundClass}`) as (HTMLElement | null)
+	nowPlaying = (nowPlaying?.parentElement ?? null) // This gets us to os-content
+	nowPlaying = (nowPlaying?.parentElement ?? null) // Thos gets us to os-viewport
+
 	let fullScreen = document.body.querySelector(`.${FullScreenLyricsBackgroundClass}`) as (HTMLElement | null)
 	fullScreen = (fullScreen?.parentElement ?? null) // This gets us to os-content
 	fullScreen = (fullScreen?.parentElement ?? null) // Thos gets us to os-viewport
