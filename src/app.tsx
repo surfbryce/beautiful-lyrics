@@ -472,19 +472,22 @@ async function main() {
 
 		const CheckForUpdate = async () => {
 			fetch(
-				'https://cdn.jsdelivr.net/gh/surfbryce/beautiful-lyrics@main/package.json',
+				'https://cdn.jsdelivr.net/gh/surfbryce/beautiful-lyrics@main/dist/beautiful-lyrics.js',
 				{
 					cache: 'no-cache'
 				}
 			)
-			.then(response => response.json())
+			.then(response => response.text())
 			.then(data => {
 				// Grab our cached version
-				const cachedVersion = data.version
+				const cachedVersion = data.match(/\d+\.\d+\.\d+/)?.[0]
 				let nextUpdateCheck = 5 // Always measured in minutes
 
 				// Make sure that we aren't the same version AND that we haven't already notified the user
-				if ((cachedVersion !== ExtensionVersion) && (cachedVersion !== versionAtNotification)) {
+				if (
+					(cachedVersion !== undefined)
+					&& ((cachedVersion !== ExtensionVersion) && (cachedVersion !== versionAtNotification))
+				) {
 					// Update the version we notified them for
 					versionAtNotification = cachedVersion
 
