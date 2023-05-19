@@ -469,7 +469,7 @@ async function main() {
 		let versionAtNotification: (string | undefined)
 
 		const CheckForUpdate = async () => {
-			fetch('https://cdn.jsdelivr.net/gh/surfbryce/beautiful-lyrics@latest/package.json')
+			fetch('https://cdn.jsdelivr.net/gh/surfbryce/beautiful-lyrics@main/package.json')
 			.then(response => response.json())
 			.then(data => {
 				// Grab our cached version
