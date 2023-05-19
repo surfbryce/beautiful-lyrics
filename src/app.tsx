@@ -1,4 +1,5 @@
 import './stylings/main.scss'
+import {version as ExtensionVersion} from '../package.json'
 
 // Store our Spicetify-Classes
 const SpotifyPlayer = Spicetify.Player
@@ -462,6 +463,56 @@ async function main() {
 		document.body,
 		{attributes: false, childList: true, subtree: true}
 	)
+
+	// Handle auto-update checking
+	{
+		let versionAtNotification: (string | undefined)
+
+		const CheckForUpdate = async () => {
+			fetch('https://cdn.jsdelivr.net/gh/surfbryce/beautiful-lyrics@latest/package.json')
+			.then(response => response.json())
+			.then(data => {
+				// Grab our cached version
+				const cachedVersion = data.version
+				let nextUpdateCheck = 5 // Always measured in minutes
+
+				// Make sure that we aren't the same version AND that we haven't already notified the user
+				if ((cachedVersion !== ExtensionVersion) && (cachedVersion !== versionAtNotification)) {
+					// Update the version we notified them for
+					versionAtNotification = cachedVersion
+
+					// Now send out the notifcation
+					Spicetify.showNotification(
+						`<h3>Beautiful Lyrics has a new Update!</h3>
+						<h4 style = 'margin-top: 4px; margin-bottom: 4px; font-weight: normal;'>Reinstall the Extension to get it.</h4>
+						<span style = 'opacity: 0.75;'>Version ${ExtensionVersion} -> ${cachedVersion}</span>`,
+						(
+							((parseFloat(cachedVersion) - parseFloat(ExtensionVersion)) < 0)
+							|| (Math.abs(parseInt(cachedVersion) - parseInt(ExtensionVersion)) >= 1)
+						),
+						7500
+					)
+
+					// Now that we have notified the user we can wait a little to notify them again
+					nextUpdateCheck = 15
+				}
+
+				// Check for an update again in a little bit
+				setTimeout(CheckForUpdate, ((nextUpdateCheck * 60) * 1000))
+			})
+		}
+
+		const WaitForSpicetifyNotification = () => {
+			if (Spicetify.showNotification === undefined) {
+				setTimeout(WaitForSpicetifyNotification, 0)
+			} else {
+				// Check for an update immediately
+				CheckForUpdate()
+			}
+		}
+
+		WaitForSpicetifyNotification()
+	}
 }
 
 export default main;
