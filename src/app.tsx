@@ -85,7 +85,8 @@ type ActiveLyricCleaners = {
 type LyricContainerType = ("NowPlaying" | "FullScreen")
 
 // Lyric Backgrounds
-const FullScreenLyricsBackgroundClass = 'os-viewport .lyrics-lyrics-container'
+const FullScreenLyricsDetectionClass = 'os-viewport .lyrics-lyrics-container'
+const FullScreenLyricsBackgroundClass = 'under-main-view'
 const NowPlayingLyricsBackgroundClass = 'os-padding .main-nowPlayingView-content' // 'main-nowPlayingView-sectionHeaderSpacing'
 
 const ActiveLyricsBackgrounds: ActiveLyricObjects = {
@@ -180,13 +181,14 @@ const CheckForLyricsBackgrounds = () => {
 	nowPlaying = (nowPlaying?.parentElement ?? null) // Thos gets us to os-viewport
 	nowPlaying = (nowPlaying?.parentElement ?? null) // Thos gets us to os-padding
 
-	let fullScreen = document.body.querySelector(`.${FullScreenLyricsBackgroundClass}`) as (HTMLElement | null)
-	fullScreen = (fullScreen?.parentElement ?? null) // This gets us to os-content
-	fullScreen = (fullScreen?.parentElement ?? null) // Thos gets us to os-viewport
+	const fullScreenDoesExist = (document.body.querySelector(`.${FullScreenLyricsDetectionClass}`) !== null)
 
 	// Now check them
 	CheckLyricsBackground(nowPlaying, "NowPlaying")
-	CheckLyricsBackground(fullScreen, "FullScreen")
+	CheckLyricsBackground(
+		(fullScreenDoesExist ? document.body.querySelector(`.${FullScreenLyricsBackgroundClass}`) : null),
+		"FullScreen"
+	)
 }
 
 // Lyrics
@@ -469,7 +471,12 @@ async function main() {
 		let versionAtNotification: (string | undefined)
 
 		const CheckForUpdate = async () => {
-			fetch('https://cdn.jsdelivr.net/gh/surfbryce/beautiful-lyrics@main/package.json')
+			fetch(
+				'https://cdn.jsdelivr.net/gh/surfbryce/beautiful-lyrics@main/package.json',
+				{
+					cache: 'no-cache'
+				}
+			)
 			.then(response => response.json())
 			.then(data => {
 				// Grab our cached version
