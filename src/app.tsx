@@ -25,7 +25,7 @@ let CoverArt: (
 	{
 		Large: string;
 		Big: string;
-		Defualt: string;
+		Default: string;
 		Small: string;
 	}
 	| undefined
@@ -49,14 +49,14 @@ const CoverArtUpdates: Map<HTMLElement, Callback> = new Map()
 			trackMetadata ? {
 				Large: trackMetadata.image_xlarge_url,
 				Big: trackMetadata.image_large_url,
-				Defualt: trackMetadata.image_url,
+				Default: trackMetadata.image_url,
 				Small: trackMetadata.image_small_url
 			}
 			: undefined
 		)
 
 		// Now determine if there was an update or not
-		if (newCoverArt?.Defualt !== CoverArt?.Defualt) {
+		if (newCoverArt?.Default !== CoverArt?.Default) {
 			// Update our cover-art
 			CoverArt = newCoverArt
 
@@ -109,7 +109,7 @@ const ManageLyricsBackground = (background: LyricObject): Callback => {
 
 	// Now handle updating the images themselves
 	const Update = () => {
-		const source = (CoverArt?.Defualt ?? '')
+		const source = (CoverArt?.Default ?? '')
 
 		colorImage.src = source
 		backImage.src = source
