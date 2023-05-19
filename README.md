@@ -31,6 +31,8 @@ Collapsed
 - **The background isn't showing up! How come?**
 	- Make sure that your Spicetify AND Spotify are updated to the most recent versions. Update Spicetify using these [instructions](https://spicetify.app/docs/getting-started/#updating) - to update Spotify click your PFP and if there is an option to update click it.
 	- If you are on the latest versions then it must be an issue with the extension - so leave a report!
+- **I just installed the extension, but I don't have any of the new stuff!**
+	- The way the Spicetify Marketplace works is that there is a server that will grab the file for the extension - if it already grabbed it - it will keep the last version it grabbed for a little while (this could be a couple hours to a whole day). Then when someone comes along asking for it and the server doesn't want to have the old-version anymore it'll hand you the new version!<br><br>Luckily the latest version of the Extension - starting at 2.3.0 - comes with a built-in update-checker. If it detects an update is available it will let you know!
 
 ## Have an issue/idea? Go ahead and send them!
 
