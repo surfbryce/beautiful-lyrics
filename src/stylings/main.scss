@@ -29,6 +29,10 @@
 	background-color: var(--background-tinted-base) !important;
 }
 
+#Desktop_PanelContainer_Id[aria-label="Now Playing View"] {
+    background: none !important;
+}
+
 
 // Improves scroll-bar
 .os-host:has(.lyrics-background),
