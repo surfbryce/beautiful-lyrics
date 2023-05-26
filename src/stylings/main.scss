@@ -14,23 +14,24 @@
     margin-bottom: 0.25em;
 }
 
-// Right-card styling
-.lyrics-background .main-trackInfo-artists {
-	opacity: 0.75;
-	filter: brightness(1.15);
-}
+aside[aria-label="Now Playing View"] {
+    .main-nowPlayingView-content {
+		background: transparent;
+	}
 
-.main-nowPlayingView-coverArt {
-	opacity: 0.85;
-    box-shadow: #00000045 0 9px 20px 0px;
-}
-
-.main-nowPlayingView-section {
-	background-color: var(--background-tinted-base) !important;
-}
-
-#Desktop_PanelContainer_Id[aria-label="Now Playing View"] {
-    background: none !important;
+	.lyrics-background .main-trackInfo-artists {
+		opacity: 0.75;
+		filter: brightness(1.15);
+	}
+	
+	.main-nowPlayingView-coverArt {
+		opacity: 0.85;
+		box-shadow: #00000045 0 9px 20px 0px;
+	}
+	
+	.main-nowPlayingView-section {
+		background-color: var(--background-tinted-base) !important;
+	}
 }
 
 
@@ -104,7 +105,7 @@
 
 	// These are right-side card background specific classes to adjust for contrast issues
 	&.os-padding:has(.main-nowPlayingView-content) &-container {
-		border-radius: var(--border-radius-1);
+		border-radius: 8px;
 		filter: saturate(2) brightness(0.7);
 	}
 
