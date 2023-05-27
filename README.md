@@ -44,4 +44,4 @@ Collapsed
 
 ## Have an issue/idea? Go ahead and send them!
 
-[![Github Bug badge](https://img.shields.io/github/issues/surfbryce/beautiful-lyrics)](https://github.com/surfbryce/beautiful-lyrics/issues)
+[![Github Bug badge](https://img.shields.io/github/issues/surfbryce/beautiful-lyrics/bug)](https://github.com/surfbryce/beautiful-lyrics/issues)
