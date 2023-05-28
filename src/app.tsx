@@ -1,452 +1,359 @@
-import './stylings/main.scss'
+// Packages
+import {Maid} from '../../Packages/Maid'
+
+// Project Details
 import {version as ExtensionVersion} from '../package.json'
 
-// Store our Spicetify-Classes
-const SpotifyPlayer = Spicetify.Player
+// Services
+import {GlobalMaid} from './Services/Session'
+import {GetCoverArt, CoverArtUpdated} from './Services/CoverArt'
 
-/*
-	Classes to focus on:
-	.lyrics-lyrics-background - This is the background for the big lyrics. It's just a single div no children.
-	.main-nowPlayingView-section - This is the parent container for the tiny lyrics. Contains header/lyrics.
-	.main-image-loaded - This is the cover-art image that we'll use
+// Stylings
+import './Stylings/main.scss'
 
-	.lyrics-lyricsContent-unsynced - Lyric that can't be synced - if we have this ignore the following classes
-	.lyrics-lyricsContent-lyric - Lyric that hasn't been sung (IF the following classes don't exist)
-	.lyrics-lyricsContent-highlight - Lyric that has been sung
-	.lyrics-lyricsContent-active - Current lyric being sung
-
-	.main-nowPlayingView-coverArt - This is the overarching container for the cover-art image element
-	.main-nowPlayingWidget-coverArt - This is the overarching container for the cover-art image element
-*/
-
-// Covert-Art
-type Callback = (() => void)
-let CoverArt: (
-	{
-		Large: string;
-		Big: string;
-		Default: string;
-		Small: string;
-	}
-	| undefined
-)
-const CoverArtUpdates: Map<HTMLElement, Callback> = new Map()
+// Live Background Management
+let CheckForLiveBackgrounds: (() => void)
 
 {
-	type TrackMetadata = {
-		image_xlarge_url: string;
-		image_large_url: string;
-		image_url: string;
-		image_small_url: string;
-	}
+	// Types
+	type BackgroundContainer = ("VanillaFullScreen" | "VanillaSideCard")
 
-	const Update = () => {
-		// Grab the currently displayed cover-art
-		const trackMetadata = SpotifyPlayer.data?.track?.metadata as (TrackMetadata | undefined)
-		
-		// Now evaluate our cover-art
-		const newCoverArt = (
-			trackMetadata ? {
-				Large: trackMetadata.image_xlarge_url,
-				Big: trackMetadata.image_large_url,
-				Default: trackMetadata.image_url,
-				Small: trackMetadata.image_small_url
+	// Define our queries for each background-container
+	const BackgroundQuerys: Map<BackgroundContainer, string> = new Map()
+	BackgroundQuerys.set('VanillaFullScreen', '#main:has(.os-content > .lyrics-lyrics-container) .under-main-view')
+	BackgroundQuerys.set('VanillaSideCard', 'aside[aria-label="Now Playing View"] .os-padding')
+
+	// Create our maid to manage our background-containers
+	const BackgroundMaids = GlobalMaid.Give(new Maid(), "LiveBackgrounds")
+
+	// Handle managing our background-containers
+	const ManageLiveBackground = (containerType: BackgroundContainer, container: HTMLDivElement) => {
+		// Create our maid
+		const backgroundMaid = BackgroundMaids.Give(new Maid(), containerType)
+
+		// Create our container and child-images
+		const backgroundContainer = backgroundMaid.Give(document.createElement('div'))
+		backgroundContainer.classList.add('lyrics-background-container')
+
+		const [
+			colorImage,
+			backImage,
+			backCenterImage
+		] = backgroundMaid.GiveItems(
+			document.createElement('img'), document.createElement('img'), document.createElement('img')
+		)
+		colorImage.classList.add('lyrics-background-color'),
+		backImage.classList.add('lyrics-background-back'),
+		backCenterImage.classList.add('lyrics-background-back-center')
+		backgroundContainer.appendChild(colorImage),
+		backgroundContainer.appendChild(backImage),
+		backgroundContainer.appendChild(backCenterImage)
+
+		// Now handle updating the images themselves
+		const Update = () => {
+			const source = (GetCoverArt()?.Default ?? '')
+
+			colorImage.src = source
+			backImage.src = source
+			backCenterImage.src = source
+		}
+
+		// Immediately update ourselves and handle updating automatically
+		backgroundMaid.Give(CoverArtUpdated.Connect(Update))
+		Update()
+
+		// Handle applying our background-class
+		const CheckClass = () => {
+			if (container.classList.contains('lyrics-background')) {
+				return
 			}
-			: undefined
+
+			container.classList.add('lyrics-background')
+		}
+
+		// Immediately check our class and watch for changes
+		CheckClass()
+
+		const observer = backgroundMaid.Give(new MutationObserver(CheckClass))
+		observer.observe(
+			container,
+			{attributes: true, attributeFilter: ['class'], childList: false, subtree: false}
 		)
 
-		// Now determine if there was an update or not
-		if (newCoverArt?.Default !== CoverArt?.Default) {
-			// Update our cover-art
-			CoverArt = newCoverArt
+		// Add our container to the background
+		container.prepend(backgroundContainer)
 
-			// Update our cover-art image
-			for(const [_, callback] of CoverArtUpdates) {
-				callback()
+		// Handle removing our class
+		backgroundMaid.Give(() => container.classList.remove('lyrics-background'))
+	}
+
+	// Handle checking for background existence updates
+	CheckForLiveBackgrounds = () => {
+		// Go through each background-container and check if it exists
+		for(const [containerType, query] of BackgroundQuerys) {
+			// Grab our container
+			const container = document.body.querySelector(query)
+
+			// Make sure our container has changed existence state
+			const exists = BackgroundMaids.Has(containerType)
+			if (exists ? (container !== null) : (container === null)) {
+				continue
+			}
+
+			// If it exists then manage it - otherwise - just clean out our Maid item
+			if (container === null) {
+				BackgroundMaids.Clean(containerType)
+			} else {
+				ManageLiveBackground(containerType, (container as HTMLDivElement))
 			}
 		}
 	}
-	
-	SpotifyPlayer.addEventListener("songchange", Update)
-
-	Update()
 }
 
-// Lyric Types
-type LyricObject = HTMLElement
-type ActiveLyricObjects = {
-	NowPlaying: (LyricObject | undefined),
-	FullScreen: (LyricObject | undefined)
-}
-type ActiveLyricCleaners = {
-	NowPlaying: (Callback | undefined),
-	FullScreen: (Callback | undefined)
-}
-type LyricContainerType = ("NowPlaying" | "FullScreen")
-
-// Lyric Backgrounds
-const FullScreenLyricsDetectionClass = 'os-viewport .lyrics-lyrics-container'
-const FullScreenLyricsBackgroundClass = 'under-main-view'
-const NowPlayingLyricsBackgroundClass = 'os-padding .main-nowPlayingView-content' // 'main-nowPlayingView-sectionHeaderSpacing'
-
-const ActiveLyricsBackgrounds: ActiveLyricObjects = {
-	NowPlaying: undefined,
-	FullScreen: undefined
-}
-const ActiveLyricsBackgroundCleaners: ActiveLyricCleaners = {
-	NowPlaying: undefined,
-	FullScreen: undefined
-}
-
-const ManageLyricsBackground = (background: LyricObject): Callback => {
-	// Create our container and child-images
-	const container = document.createElement('div')
-	container.classList.add('lyrics-background-container')
-
-	const colorImage = document.createElement('img'), backImage = document.createElement('img')
-	colorImage.classList.add('lyrics-background-color'), backImage.classList.add('lyrics-background-back')
-	container.appendChild(colorImage), container.appendChild(backImage)
-
-	// Now handle updating the images themselves
-	const Update = () => {
-		const source = (CoverArt?.Default ?? '')
-
-		colorImage.src = source
-		backImage.src = source
-	}
-
-	// Immediately update ourselves and handle updating automatically
-	CoverArtUpdates.set(background, Update)
-	Update()
-
-	// Handle applying our background-class
-	const CheckClass = () => {
-		if (background.classList.contains('lyrics-background')) {
-			return
-		}
-
-		background.classList.add('lyrics-background')
-	}
-
-	// Immediately check our class and watch for changes
-	CheckClass()
-
-	const observer = new MutationObserver(CheckClass)
-	observer.observe(background, {attributes: true, attributeFilter: ['class'], childList: false, subtree: false})
-
-	// Add our container to the background
-	background.prepend(container)
-	
-	// Return our cleaner for external management
-	return () => {
-		// Stop observing for class-changes
-		observer.disconnect()
-
-		// Destroy our container
-		container.remove()
-
-		// Remove our styling
-		background.classList.remove('lyrics-background')
-
-		// Remove our update-callback
-		CoverArtUpdates.delete(background)
-	}
-}
-
-const CheckLyricsBackground = (
-	background: (LyricObject | null), backgroundType: LyricContainerType
-) => {
-	// First determine if we need to update our background at all
-	if (background === ActiveLyricsBackgrounds[backgroundType]) {
-		return
-	}
-
-	// Clear our previous background
-	ActiveLyricsBackgroundCleaners[backgroundType]?.()
-	ActiveLyricsBackgroundCleaners[backgroundType] = undefined
-
-	// Now manage the background
-	if (background) {
-		ActiveLyricsBackgroundCleaners[backgroundType] = ManageLyricsBackground(background)
-	}
-
-	// Update our active
-	ActiveLyricsBackgrounds[backgroundType] = (background ?? undefined)
-}
-
-const CheckForLyricsBackgrounds = () => {
-	// Grab our now-playing and full-screen containers if possible
-	let nowPlaying = document.body.querySelector(`.${NowPlayingLyricsBackgroundClass}`) as (HTMLElement | null)
-	nowPlaying = (nowPlaying?.parentElement ?? null) // This gets us to os-content
-	nowPlaying = (nowPlaying?.parentElement ?? null) // Thos gets us to os-viewport
-	nowPlaying = (nowPlaying?.parentElement ?? null) // Thos gets us to os-padding
-
-	const fullScreenDoesExist = (document.body.querySelector(`.${FullScreenLyricsDetectionClass}`) !== null)
-
-	// Now check them
-	CheckLyricsBackground(nowPlaying, "NowPlaying")
-	CheckLyricsBackground(
-		(fullScreenDoesExist ? document.body.querySelector(`.${FullScreenLyricsBackgroundClass}`) : null),
-		"FullScreen"
-	)
-}
-
-// Lyrics
-type LyricState = ("Unsynced" | "Unsung" | "Active" | "Sung")
-
-const FullScreenLyricsContainerClass = 'lyrics-lyrics-contentWrapper'
-const NowPlayingLyricsContainerClass = 'main-nowPlayingView-lyricsContent'
-const LyricClass = 'lyrics-lyricsContent-lyric'
-const UnsyncedLyricClass = 'lyrics-lyricsContent-unsynced'
-const HighlightedLyricClass = 'lyrics-lyricsContent-highlight'
-const ActiveLyricClass = 'lyrics-lyricsContent-active'
-
-const DistanceToMaximumBlur = 4 // Any lyrics beyond this unit of distance away will be at full-blur
-const ActiveLyricSizeIncrease = 0.5 // This is measured in rem Units as all Spotify fonts are rendered with them
-
-const ActiveLyricsContainers: ActiveLyricObjects = {
-	NowPlaying: undefined,
-	FullScreen: undefined
-}
-const ActiveLyricsContainerCleaners: ActiveLyricCleaners = {
-	NowPlaying: undefined,
-	FullScreen: undefined
-}
-
-const GetLyricFontSizeInRem = (lyric: HTMLDivElement): number => {
-	/*
-		The idea here is that we can get the font-size of our text in pixels.
-
-		We know that the font-size in CSS is in rem-units. We also know that the documents
-		font-size is equievelant to 1rem. So what we can then do is get the computed styles
-		for both elements and divide their font-sizes to get the font-size in rem-units.
-	*/
-	const style = getComputedStyle(lyric), rootStyle = getComputedStyle(document.documentElement)
-	const lyricFontSizeInPixels = parseFloat(style.fontSize), rootFontSizeInPixels = parseFloat(rootStyle.fontSize)
-
-	return(lyricFontSizeInPixels / rootFontSizeInPixels)
-}
-
-const ManageLyricsContainer = (container: LyricObject): Callback => {
-	// Create our storage for each lyric
+// Lyrics Management (Soon to be phased out for custom lyric system)
+let CheckForLyricContainers: (() => void)
+{
+	// Types
+	type LyricState = ("Unsynced" | "Unsung" | "Active" | "Sung")
+	type LyricContainer = ("VanillaFullScreen" | "VanillaSideCard")
 	type LyricsData = {
-		Observer: MutationObserver,
 		LayoutOrder: number,
 		State: LyricState,
 		IsFontSizeObserver: boolean
 	}
-	const lyrics: Map<
-		HTMLDivElement,
-		LyricsData
-	> = new Map()
 
-	// Handle updating our lyrics
-	let fontSizeInRem: number = 0
+	// Behavior Constants
+	const DistanceToMaximumBlur = 4 // Any lyrics beyond this unit of distance away will be at full-blur
+	const ActiveLyricSizeIncrease = 0.5 // This is measured in rem Units as all Spotify fonts are rendered with them
 
-	const UpdateFontSize = (lyric: HTMLDivElement, data: LyricsData) => {
-		lyric.style.fontSize = (
-			(data.State == "Active") ? `${fontSizeInRem + ActiveLyricSizeIncrease}rem`
-			: ''
-		)
+	// Create our maid
+	const LyricMaids = GlobalMaid.Give(new Maid(), "Lyrics")
+
+	// Define our queries for container
+	const ContainerQuerys: Map<LyricContainer, string> = new Map()
+	ContainerQuerys.set('VanillaFullScreen', '.lyrics-lyrics-contentWrapper')
+	ContainerQuerys.set('VanillaSideCard', '.main-nowPlayingView-lyricsContent')
+
+	// Lyric-State Classes
+	const LyricClass = 'lyrics-lyricsContent-lyric'
+	const UnsyncedLyricClass = 'lyrics-lyricsContent-unsynced'
+	const HighlightedLyricClass = 'lyrics-lyricsContent-highlight'
+	const ActiveLyricClass = 'lyrics-lyricsContent-active'
+
+	// Font Method
+	const GetLyricFontSizeInRem = (lyric: HTMLDivElement): number => {
+		/*
+			The idea here is that we can get the font-size of our text in pixels.
+	
+			We know that the font-size in CSS is in rem-units. We also know that the documents
+			font-size is equievelant to 1rem. So what we can then do is get the computed styles
+			for both elements and divide their font-sizes to get the font-size in rem-units.
+		*/
+		const style = getComputedStyle(lyric), rootStyle = getComputedStyle(document.documentElement)
+		const lyricFontSizeInPixels = parseFloat(style.fontSize), rootFontSizeInPixels = parseFloat(rootStyle.fontSize)
+	
+		return(lyricFontSizeInPixels / rootFontSizeInPixels)
 	}
 
-	const Update = () => {
-		// Go through our lyrics and update their states (and also gather our active layout-order)
-		let activeLayoutOrder: (number | undefined)
-		for(const [lyric, data] of lyrics) {
-			const classes = lyric.classList
+	// Now manage our lyric-containers
+	const ManageLyricContainer = (containerType: LyricContainer, container: HTMLDivElement) => {
+		// Create our maid
+		const containerMaid = LyricMaids.Give(new Maid(), containerType)
 
-			if (classes.contains(ActiveLyricClass)) {
-				data.State = "Active"
-				activeLayoutOrder = data.LayoutOrder
-			} else if (classes.contains(UnsyncedLyricClass)) {
-				data.State = "Unsynced"
-			} else if (classes.contains(HighlightedLyricClass)) {
-				data.State = "Sung"
-			} else {
-				data.State = "Unsung"
-			}
-		}
+		// Create our storage for each lyric
+		const lyrics: Map<
+			HTMLDivElement,
+			LyricsData
+		> = new Map()
 
-		// Go through our lyrics and handle updating their appearance
-		for(const [lyric, data] of lyrics) {
-			// Determine if we should be considered active
-			const isActive = (data.State === "Active")
-			const isFocused = (isActive || (data.State === "Unsynced"))
+		// Handle updating our lyrics
+		let fontSizeInRem: number = 0
 
-			// Determine our blur
-			let blur: number
-			if (isFocused) {
-				blur = 0
-			} else if (activeLayoutOrder === undefined) { // Means that all lyrics have been passed
-				blur = DistanceToMaximumBlur
-			} else {
-				const distance = Math.min(Math.abs(data.LayoutOrder - activeLayoutOrder), DistanceToMaximumBlur)
-
-				blur = distance
-			}
-
-			// Determine our text-color
-			let textColor = (
-				isFocused ? "var(--lyrics-color-active)"
-				: (data.State === "Sung") ? "var(--lyrics-color-passed)"
-				: "var(--lyrics-color-inactive)"
+		const UpdateFontSize = (lyric: HTMLDivElement, data: LyricsData) => {
+			lyric.style.fontSize = (
+				(data.State == "Active") ? `${fontSizeInRem + ActiveLyricSizeIncrease}rem`
+				: ''
 			)
+		}
 
-			// Give ourselves the lyric class
-			if (lyric.classList.contains('lyric') === false) {
-				lyric.classList.add('lyric')
+		const Update = () => {
+			// Go through our lyrics and update their states (and also gather our active layout-order)
+			let activeLayoutOrder: (number | undefined)
+			for(const [lyric, data] of lyrics) {
+				const classes = lyric.classList
+
+				if (classes.contains(ActiveLyricClass)) {
+					data.State = "Active"
+					activeLayoutOrder = data.LayoutOrder
+				} else if (classes.contains(UnsyncedLyricClass)) {
+					data.State = "Unsynced"
+				} else if (classes.contains(HighlightedLyricClass)) {
+					data.State = "Sung"
+				} else {
+					data.State = "Unsung"
+				}
 			}
 
-			// Update our font-size
-			UpdateFontSize(lyric, data)
+			// Go through our lyrics and handle updating their appearance
+			for(const [lyric, data] of lyrics) {
+				// Determine if we should be considered active
+				const isActive = (data.State === "Active")
+				const isFocused = (isActive || (data.State === "Unsynced"))
 
-			// Update our lyric appearance according to our blur
-			lyric.style.color = "transparent"
-			lyric.style.textShadow = `0 0 ${blur}px ${textColor}`
+				// Determine our blur
+				let blur: number
+				if (isFocused) {
+					blur = 0
+				} else if (activeLayoutOrder === undefined) { // Means that all lyrics have been passed
+					blur = DistanceToMaximumBlur
+				} else {
+					const distance = Math.min(Math.abs(data.LayoutOrder - activeLayoutOrder), DistanceToMaximumBlur)
+
+					blur = distance
+				}
+
+				// Determine our text-color
+				let textColor = (
+					isFocused ? "var(--lyrics-color-active)"
+					: (data.State === "Sung") ? "var(--lyrics-color-passed)"
+					: "var(--lyrics-color-inactive)"
+				)
+
+				// Give ourselves the lyric class
+				if (lyric.classList.contains('lyric') === false) {
+					lyric.classList.add('lyric')
+				}
+
+				// Update our font-size
+				UpdateFontSize(lyric, data)
+
+				// Update our lyric appearance according to our blur
+				lyric.style.color = "transparent"
+				lyric.style.textShadow = `0 0 ${blur}px ${textColor}`
+			}
 		}
-	}
 
-	// Handle finding our lyrics
-	let observer: MutationObserver
-	let fontResizeObserver: (ResizeObserver | undefined)
+		// Handle finding our lyrics
+		let observer: MutationObserver
 
-	{
-		// Helper-Method to store Lyrics
-		const StoreLyric = (lyric: HTMLDivElement) => {
-			// Find our layout-order
-			const layoutOrder = Array.from(container.children).indexOf(lyric)
+		{
+			// Helper-Method to store Lyrics
+			const StoreLyric = (lyric: HTMLDivElement) => {
+				// Create our maid
+				const lyricMaid = containerMaid.Give(new Maid(), lyric)
 
-			// Create our observer to watch for class-changes
-			const mutationObserver = new MutationObserver(Update)
-			mutationObserver.observe(lyric, {attributes: true, attributeFilter: ['class'], childList: false, subtree: false})
+				// Find our layout-order
+				const layoutOrder = Array.from(container.children).indexOf(lyric)
 
-			// Create our observer to watch for size-changes
-			let isFontSizeObserver = false
+				// Create our observer to watch for class-changes
+				const mutationObserver = lyricMaid.Give(new MutationObserver(Update))
+				mutationObserver.observe(lyric, {attributes: true, attributeFilter: ['class'], childList: false, subtree: false})
 
-			if ((fontResizeObserver === undefined) && (lyric.innerText.length === 0)) {
-				fontResizeObserver = new ResizeObserver(
-					_ => {
-						fontSizeInRem = GetLyricFontSizeInRem(lyric)
-						
-						for(const [lyricToUpdate, data] of lyrics) {
-							UpdateFontSize(lyricToUpdate, data)
+				// Create our observer to watch for size-changes
+				let isFontSizeObserver = false
+
+				if ((containerMaid.Has("FontResizeObserver") === false) && (lyric.innerText.length === 0)) {
+					// Create our resize-observer
+					const resizeObserver = containerMaid.Give(
+						new ResizeObserver(
+							_ => {
+								fontSizeInRem = GetLyricFontSizeInRem(lyric)
+								
+								for(const [lyricToUpdate, data] of lyrics) {
+									UpdateFontSize(lyricToUpdate, data)
+								}
+							}
+						),
+						"FontResizeObserver"
+					)
+					resizeObserver.observe(lyric)
+
+					// When we are destroyed handle disconnecting our observer (so we can make a new one)
+					lyricMaid.Give(() => containerMaid.Clean("FontResizeObserver"))
+
+					// Mark that we are a font-size observer
+					isFontSizeObserver = true
+				}
+
+				// Store our lyric
+				lyrics.set(
+					lyric, {
+						LayoutOrder: layoutOrder,
+						State: "Unsung",
+						IsFontSizeObserver: isFontSizeObserver
+					}
+				)
+
+				// Force-update
+				Update()
+			}
+
+			const CheckNode = (node: Node) => {
+				if (
+					(node instanceof HTMLDivElement)
+					&& node.classList.contains(LyricClass)
+				) {
+					StoreLyric(node)
+				}
+			}
+
+			// Handle lyric-child changes
+			observer = containerMaid.Give(
+				new MutationObserver(
+					(mutationRecords) => {
+						for(const mutationRecord of mutationRecords) {
+							if (mutationRecord.type !== 'childList') {
+								continue
+							}
+	
+							for(const node of mutationRecord.removedNodes) {
+								if (node instanceof HTMLDivElement) {
+									lyrics.delete(node)
+									containerMaid.Clean(node)
+								}
+							}
+
+							for(const node of mutationRecord.addedNodes) {
+								CheckNode(node)
+							}
 						}
 					}
 				)
-				fontResizeObserver.observe(lyric)
-
-				isFontSizeObserver = true
-			}
-
-			// Store our lyric
-			lyrics.set(
-				lyric, {
-					Observer: observer,
-					LayoutOrder: layoutOrder,
-					State: "Unsung",
-					IsFontSizeObserver: isFontSizeObserver
-				}
 			)
+			observer.observe(container, {attributes: false, childList: true, subtree: false})
 
-			// Force-update
-			Update()
-		}
-
-		const CheckNode = (node: Node) => {
-			if (
-				(node instanceof HTMLDivElement)
-				&& node.classList.contains(LyricClass)
-			) {
-				StoreLyric(node)
+			// Grab our initial lyrics
+			for(const node of container.childNodes) {
+				CheckNode(node)
 			}
 		}
+	}
 
-		// Handle lyric-child changes
-		observer = new MutationObserver(
-			(mutationRecords) => {
-				for(const mutationRecord of mutationRecords) {
-					if (mutationRecord.type !== 'childList') {
-						continue
-					}
+	// Handle checking for existence changes in our lyric-containers
+	CheckForLyricContainers = () => {
+		// Go through each background-container and check if it exists
+		for(const [containerType, query] of ContainerQuerys) {
+			// Grab our container
+			const container = document.body.querySelector(query)
 
-					for(const node of mutationRecord.addedNodes) {
-						CheckNode(node)
-					}
-
-					for(const node of mutationRecord.removedNodes) {
-						if (node instanceof HTMLDivElement) {
-							const data = lyrics.get(node)
-
-							if (data?.IsFontSizeObserver) {
-								fontResizeObserver?.disconnect()
-								fontResizeObserver = undefined
-							}
-
-							lyrics.delete(node)
-						}
-					}
-				}
+			// Make sure our container has changed existence state
+			const exists = LyricMaids.Has(containerType)
+			if (exists ? (container !== null) : (container === null)) {
+				continue
 			}
-		)
-		observer.observe(container, {attributes: false, childList: true, subtree: false})
 
-		// Grab our initial lyrics
-		for(const node of container.childNodes) {
-			CheckNode(node)
+			// If it exists then manage it - otherwise - just clean out our Maid item
+			if (container === null) {
+				LyricMaids.Clean(containerType)
+			} else {
+				ManageLyricContainer(containerType, (container as HTMLDivElement))
+			}
 		}
 	}
-
-	// Return our cleaner for external management
-	return () => {
-		// Disconnect our observers
-		observer.disconnect()
-		fontResizeObserver?.disconnect()
-
-		// Go through and disconnect all of our lyric-observers
-		for(const lyric of lyrics.values()) {
-			lyric.Observer.disconnect()
-		}
-	}
-}
-
-const CheckLyricsContainer = (
-	container: (LyricObject | null), containerType: LyricContainerType
-) => {
-	// First determine if we need to update our container at all
-	if (container === ActiveLyricsContainers[containerType]) {
-		return
-	}
-
-	// Clear our previous container
-	ActiveLyricsContainerCleaners[containerType]?.()
-	ActiveLyricsContainerCleaners[containerType] = undefined
-
-	// Now manage the container
-	if (container) {
-		ActiveLyricsContainerCleaners[containerType] = ManageLyricsContainer(container)
-	}
-
-	// Update our active
-	ActiveLyricsContainers[containerType] = (container ?? undefined)
-}
-
-const CheckForLyricsContainers = () => {
-	// Grab our now-playing and full-screen containers if possible
-	const nowPlaying = document.body.querySelector(`.${NowPlayingLyricsContainerClass}`) as (HTMLElement | null)
-	let fullScreen = document.body.querySelector(`.${FullScreenLyricsContainerClass}`) as (HTMLElement | null)
-
-	// Now check them
-	CheckLyricsContainer(nowPlaying, "NowPlaying")
-	CheckLyricsContainer(fullScreen, "FullScreen")
 }
 
 // Main watcher
 async function main() {
-  	// Check for any initial elements
-	CheckForLyricsBackgrounds()
-	CheckForLyricsContainers()
-
 	/*
 		Now watch for DOM changes to determine if we need to update.
 
@@ -456,15 +363,23 @@ async function main() {
 		larger cover-art versions since they have higher-resolution image. It also comes with the benefit
 		that hot-reloading what elements we are using is easier.
 	*/
-	new MutationObserver(
-		() => {
-			CheckForLyricsBackgrounds()
-			CheckForLyricsContainers()
-		}
-	).observe(
+	const observer = GlobalMaid.Give(
+		new MutationObserver(
+			() => {
+				CheckForLiveBackgrounds()
+				CheckForLyricContainers()
+			}
+		)
+	)
+	
+	observer.observe(
 		document.body,
 		{attributes: false, childList: true, subtree: true}
 	)
+
+	// Check for any initial elements
+	CheckForLiveBackgrounds()
+	CheckForLyricContainers()
 
 	// Handle auto-update checking
 	{
