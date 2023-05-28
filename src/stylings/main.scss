@@ -44,7 +44,6 @@ aside[aria-label="Now Playing View"] {
 
 		.os-scrollbar-handle {
 			mix-blend-mode: overlay;
-			/*background-color: rgb(11 11 11 / 35%) !important;*/
 			background-color: rgba(252, 249, 249, 0.117) !important;
 		}
 	}
@@ -81,6 +80,16 @@ aside[aria-label="Now Playing View"] {
 	}
 }
 
+// Lyric-Plus CSS
+.lyrics-lyricsContainer-LyricsBackground {
+	background-color: transparent !important;
+	background-image: none !important;
+}
+
+#main:has(.under-main-view.lyrics-background) .Root__top-bar {
+	mix-blend-mode: screen;
+}
+
 // This is the entire lyrics configuration used to create the gradient backgrounds
 .lyrics-background { // This is the overarching container, the parent of the container class
 	overflow: hidden;
@@ -95,11 +104,19 @@ aside[aria-label="Now Playing View"] {
 	&.os-viewport:not(:has(.main-nowPlayingView-content)) {
 		overflow: initial;
 	}
-	&.under-main-view > &-container {
+	#main:not(:has(.lyrics-lyricsContainer-LyricsBackground)) &.under-main-view > &-container {
 		max-width: 35%;
 		max-height: 30%;
 
 		scale: 290% 340%;
+		transform-origin: left top;
+	}
+
+	#main:has(.lyrics-lyricsContainer-LyricsBackground) &.under-main-view > &-container {
+		max-width: 25%;
+		max-height: 40%;
+
+		scale: 400% 250%;
 		transform-origin: left top;
 	}
 
