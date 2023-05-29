@@ -1,10 +1,9 @@
 {
   "name": "beautiful-lyrics",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "private": true,
   "scripts": {
-    "build": "spicetify-creator",
-    "build-local": "spicetify-creator --out=dist --minify",
+    "build": "spicetify-creator --out=dist --minify",
     "watch": "spicetify-creator --watch",
 	"start": "spicetify-creator & spicetify config extensions beautiful-lyrics.js & spicetify apply enable-devtools",
 	"production": "spicetify-creator & spicetify config extensions beautiful-lyrics.js- & spicetify apply enable-devtools"
