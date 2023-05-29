@@ -4,14 +4,10 @@ import {Maid} from '../../Packages/Maid'
 // Services
 import {GlobalMaid} from './Services/Session'
 import {GetCoverArt, CoverArtUpdated} from './Services/CoverArt'
+import './Services/AutoUpdater'
 
 // Stylings
 import './Stylings/main.scss'
-
-// Update Constants (Measured in Minutes)
-const NextFailedUpdateCheck = 1
-const NextSuccessfulUpdateCheck = 5
-const NextDidUpdateCheck = 15
 
 // Live Background Management
 let CheckForLiveBackgrounds: (() => void)
