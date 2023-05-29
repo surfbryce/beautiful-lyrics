@@ -41,7 +41,7 @@ Collapsed
 			- "Show lyrics in the right sidebar"
 			- "Enable Panel Size Coordination"
 - **I just installed the extension, but I don't have any of the new stuff!**
-	- The way the Spicetify Marketplace works is that there is a server that will grab the file for the extension - if it already grabbed it - it will keep the last version it grabbed for a little while (this could be a couple hours to a whole day). Then when someone comes along asking for it and the server doesn't want to have the old-version anymore it'll hand you the new version!<br><br>Luckily the latest version of the Extension - starting at 2.3.0 - comes with a built-in update-checker. If it detects an update is available it will let you know!
+	- If you are on Version 2.4.0 or greater the extension should automatically update itself to the latest version **as soon as the newest version comes out** - you don't have to wait for Spicetify to detect a new version - which could take up to *24 hours*!
 
 ## Have an issue/idea? Go ahead and send them!
 
