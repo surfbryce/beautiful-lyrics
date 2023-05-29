@@ -113,7 +113,7 @@ const CheckForUpdate = async () => {
 		// Make sure that we have a difference in version AND that we aren't below the first auto-update version
 		if (
 			isDifferent
-			&& ((cachedVersion.Major > 2) || ((cachedVersion.Major == 2) && (cachedVersion.Minor >= 3)))
+			&& ((cachedVersion.Major > 2) || ((cachedVersion.Major == 2) && (cachedVersion.Minor >= 4)))
 		) {
 			// Now send out the notifcation
 			Spicetify.showNotification(
