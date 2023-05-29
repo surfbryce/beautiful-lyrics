@@ -18,7 +18,7 @@ let CheckForLiveBackgrounds: (() => void)
 
 	// Define our queries for each background-container
 	const BackgroundQuerys: Map<BackgroundContainer, string> = new Map()
-	BackgroundQuerys.set('VanillaFullScreen', '#main:has(.os-content > .lyrics-lyrics-container) .under-main-view')
+	BackgroundQuerys.set('VanillaFullScreen', '#main:has(.os-content .lyrics-lyrics-container) .under-main-view')
 	BackgroundQuerys.set('VanillaSideCard', 'aside[aria-label="Now Playing View"] .os-padding')
 	BackgroundQuerys.set(
 		'LyricsPlusFullScreen',
