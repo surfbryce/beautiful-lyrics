@@ -1,6 +1,6 @@
 {
   "name": "beautiful-lyrics",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "private": true,
   "scripts": {
     "build": "spicetify-creator --out=dist --minify",
