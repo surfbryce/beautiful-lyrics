@@ -14,7 +14,7 @@
     margin-bottom: 0.25em;
 }
 
-aside[aria-label="Now Playing View"] {
+aside:has(.main-nowPlayingView-section) {
     .main-nowPlayingView-content {
 		background: transparent;
 	}
