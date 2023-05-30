@@ -120,7 +120,7 @@ aside:has(.main-nowPlayingView-section) {
 		transform-origin: left top;
 	}
 
-	&.under-main-view &-container {
+	#main:not(:has(.lyrics-lyricsContainer-LyricsBackground)) &.under-main-view &-container {
 		z-index: 1;
 	}
 
