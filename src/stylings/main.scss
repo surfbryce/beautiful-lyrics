@@ -120,6 +120,10 @@ aside:has(.main-nowPlayingView-section) {
 		transform-origin: left top;
 	}
 
+	&.under-main-view &-container {
+		z-index: 1;
+	}
+
 	// These are right-side card background specific classes to adjust for contrast issues
 	&.os-padding:has(.main-nowPlayingView-content) &-container {
 		border-radius: 8px;
