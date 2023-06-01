@@ -1,10 +1,11 @@
 // Packages
 import {Maid} from '../../Packages/Maid'
 
-// Services
-import {GlobalMaid} from './Services/Session'
-import {GetCoverArt, CoverArtUpdated} from './Services/CoverArt'
-import './Services/AutoUpdater'
+// Initial Services
+import {GlobalMaid, IsSpicetifyLoaded, SpicetifyLoaded} from './Services/Session'
+import {GetCoverArt, CoverArtUpdated, Start as StartCoverArt} from './Services/CoverArt'
+import {Start as StartAutoUpdater} from './Services/AutoUpdater'
+import {Start as StartSongs} from './Services/Songs'
 
 // Stylings
 import './Stylings/main.scss'
@@ -356,6 +357,22 @@ let CheckForLyricContainers: (() => void)
 
 // Main watcher
 async function main() {
+	// Wait until we're loaded
+	await new Promise<void>(
+		resolve => {
+			if (IsSpicetifyLoaded()) {
+				resolve()
+			} else {
+				SpicetifyLoaded.Connect(resolve)
+			}
+		}
+	)
+
+	// Start our services
+	StartAutoUpdater()
+	StartSongs()
+	StartCoverArt()
+
 	/*
 		Now watch for DOM changes to determine if we need to update.
 

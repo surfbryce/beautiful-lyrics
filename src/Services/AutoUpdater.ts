@@ -142,15 +142,8 @@ const CheckForUpdate = async () => {
 	.finally(() => GlobalMaid.Give(Timeout((nextTimeoutDuration * 60), CheckForUpdate), "CheckForUpdate"))
 }
 
-if (IsDevelopment === false) {
-	const WaitForSpicetifyNotification = () => {
-		if (Spicetify.showNotification === undefined) {
-			GlobalMaid.Give(Timeout(0, WaitForSpicetifyNotification), "WaitForSpicetifyNotification")
-		} else {
-			// Check for an update immediately
-			CheckForUpdate()
-		}
+export const Start = () => {
+	if (IsDevelopment === false) {
+		CheckForUpdate()
 	}
-	
-	WaitForSpicetifyNotification()
 }
