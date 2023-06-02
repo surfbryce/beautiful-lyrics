@@ -6,6 +6,7 @@ import {GlobalMaid, IsSpicetifyLoaded, SpicetifyLoaded} from './Services/Session
 import {GetCoverArt, CoverArtUpdated, Start as StartCoverArt} from './Services/CoverArt'
 import {Start as StartAutoUpdater} from './Services/AutoUpdater'
 import {Start as StartSongs} from './Services/Songs'
+import { Cache } from './Services/Cache'
 
 // Stylings
 import './Stylings/main.scss'
@@ -423,10 +424,29 @@ async function main() {
 		Spicetify discord - my username is @socalifornian.
 	*/
 	{
-		const tracker = document.createElement('iframe')
-		tracker.src = "https://track.beautiful-lyrics.socalifornian.live/"
-		tracker.style.display = 'none'
-		document.body.appendChild(tracker)
+		// Grab our current-date and when we last visited
+		const cachedAnalytics = Cache.GetItem("Analytics")
+		const lastVisitedAt = cachedAnalytics.LastVisitedAt
+		const lastVisitedAtDate = ((lastVisitedAt !== undefined) ? new Date(lastVisitedAt) : undefined)
+		const currentDate = new Date()
+
+		// Set both dates to the beginning of the day
+		lastVisitedAtDate?.setHours(0, 0, 0, 0)
+		currentDate.setHours(0, 0, 0, 0)
+
+		// Check if we're on a different day or not
+		const dateStartTime = currentDate.getTime()
+		if(lastVisitedAtDate?.getTime() !== dateStartTime) {
+			// Update our cache
+			cachedAnalytics.LastVisitedAt = dateStartTime
+			Cache.SaveItemChanges("Analytics")
+
+			// Now insert our analytics
+			const tracker = GlobalMaid.Give(document.createElement('img'))
+			tracker.src = "https://track.beautiful-lyrics.socalifornian.live/"
+			tracker.style.display = 'none'
+			document.body.appendChild(tracker)
+		}
 	}
 }
 

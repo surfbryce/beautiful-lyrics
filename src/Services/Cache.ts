@@ -2,72 +2,137 @@
 import { SongLyricsData, SpotifyTrackInformation } from "../Types/Backend"
 
 // Cache Types
-type CacheExpiration = {
+type ExpirationSettings = {
 	Duration: number;
 	Unit: ("Weeks" | "Months");
 }
 
-type CacheControl<C> = {
+type ExpireItem<C> = {
 	ExpiresAt: number;
 	Content: C;
 }
 
-type CacheControlRecord<C> = Record<string, CacheControl<C>>
+type ExpireCache<C> = Record<string, ExpireItem<C>>
 
-type CacheStore = {
-	TrackInformation: CacheControlRecord<SpotifyTrackInformation>;
-	ISRCLyrics: CacheControlRecord<SongLyricsData | false>;
+type ExpireCacheStoreContents = {
+    TrackInformation: SpotifyTrackInformation;
+    ISRCLyrics: (SongLyricsData | false);
+}
+type ExpireCacheStore = {[K in keyof ExpireCacheStoreContents]: ExpireCache<ExpireCacheStoreContents[K]>}
+type ExpireCacheStoreName = (keyof ExpireCacheStore)
+type Store = {
+	Analytics: {
+		LastVisitedAt?: number;
+	}
+}
+type StoreItemName = (keyof Store)
+type StoreType = ("General" | "ExpireCache")
+
+// Define our store-templates
+const ExpireCacheStoreTemplates: ExpireCacheStore = {
+	TrackInformation: {},
+	ISRCLyrics: {}
+}
+const StoreTemplates: Store = {
+	Analytics: {}
 }
 
 // Cache-Control Class
 class CacheManager {
 	// Private Properties
-	private readonly Store: CacheStore
+	private readonly ExpireCacheStore: ExpireCacheStore
+	private readonly Store: Store
 
 	// Constructor
 	constructor() {
-		// Attempt to load our cache
-		const cachedStore = localStorage.getItem("BeautifulLyrics")
+		// Load our stores
+		const generalStore = this.LoadStore("General")
+		const expireCacheStore = this.LoadStore("ExpireCache")
 
-		if (cachedStore === null) {
-			this.Store = {
-				TrackInformation: {},
-				ISRCLyrics: {}
-			}
-		} else {
-			this.Store = JSON.parse(cachedStore)
+		// Go through and see if anything expire
+		for(const itemName of ["ISRCLyrics", "TrackInformation"]) {
+			const controlRecord = expireCacheStore[itemName as ExpireCacheStoreName]
+			let changesMade = false
 
-			// Go through our control-records and remove any expired items
-			let changeMade = false
-			for(const controlRecord of [this.Store.ISRCLyrics, this.Store.TrackInformation]) {
-				for(const key in controlRecord) {
-					const cacheControl = controlRecord[key]
+			for(const key in controlRecord) {
+				const cacheControl = controlRecord[key]
 
-					if (cacheControl.ExpiresAt < Date.now()) {
-						changeMade = true
-						delete controlRecord[key]
-					}
+				if (cacheControl.ExpiresAt < Date.now()) {
+					delete controlRecord[key]
+					changesMade = true
 				}
 			}
 
-			// Update ourselves
-			if (changeMade) {
-				this.Save()
+			if (changesMade) {
+				this.SaveChanges("ExpireCache", itemName, JSON.stringify(controlRecord))
 			}
+		}
+
+		// Define our stores
+		this.Store = generalStore
+		this.ExpireCacheStore = expireCacheStore
+
+		// Remove our old store (if it exists)
+		localStorage.removeItem("BeautifulLyrics")
+	}
+
+	// Private methods
+	private LoadStore(storeName: StoreType) {
+		// Grab our templates
+		const templates: Record<string, any> = (
+			(storeName === "General") ? StoreTemplates
+			: ExpireCacheStoreTemplates
+		)
+
+		// Attempt to grab our whole store
+		const temporaryStore: any = {}
+		const missingItems: Record<string, any> = {}
+		for(const key in templates) {
+			const serializedValue = localStorage.getItem(this.GetItemLocation(storeName, (key as StoreItemName)))
+
+			if (serializedValue === null) {
+				missingItems[key] = templates[key]
+			} else {
+				temporaryStore[key] = JSON.parse(serializedValue)
+			}
+		}
+
+		// Return our stores
+		return {
+			...temporaryStore,
+
+			// Deep-clone and ensures we are JSON-serializable
+			...(JSON.parse(JSON.stringify(missingItems)))
 		}
 	}
 
+	private GetItemLocation(storeType: StoreType, itemName: string) {
+		return `BeautifulLyrics:${storeType}_${itemName}`
+	}
+
+	private SaveChanges(storeType: StoreType, itemName: string, item: string) {
+		localStorage.setItem(this.GetItemLocation("General", itemName), item)
+	}
+
+	private GetExpireCache<N extends ExpireCacheStoreName>(expireCacheName: N): ExpireCache<ExpireCacheStoreContents[N]> {
+		return this.ExpireCacheStore[expireCacheName]
+	}
+
 	// Public Methods
-	public Get() {
-		return this.Store
+	public GetItem<K extends StoreItemName>(itemName: K): Store[K] {
+		return this.Store[itemName]
 	}
 
-	public Save() {
-		localStorage.setItem("BeautifulLyrics", JSON.stringify(this.Store))
+	public SaveItemChanges<K extends StoreItemName>(itemName: K) {
+		this.SaveChanges("General", itemName, JSON.stringify(this.Store[itemName]))
 	}
 
-	public GetFromControlRecord<C>(controlRecord: CacheControlRecord<C>, key: string): (C | undefined) {
+	public GetFromExpireCache<N extends ExpireCacheStoreName>(
+		expireCacheName: N,
+		key: string
+	): (ExpireCacheStoreContents[N] | undefined) {
 		// Attempt to get our cache-control
+		const controlRecord = this.GetExpireCache(expireCacheName)
 		const cacheControl = controlRecord[key]
 
 		// Determine if we have a cache-control
@@ -88,11 +153,14 @@ class CacheManager {
 		return cacheControl.Content
 	}
 
-	public SetControlRecord<C>(
-		controlRecord: CacheControlRecord<C>,
-		key: string, content: C,
-		expiration: CacheExpiration
+	public SetExpireCacheItem<N extends ExpireCacheStoreName>(
+		expireCacheName: N,
+		key: string, content: ExpireCacheStoreContents[N],
+		expiration: ExpirationSettings
 	) {
+		// Grab our control-record
+		const controlRecord = this.GetExpireCache(expireCacheName)
+
 		// Determine when we expire
 		const expireAtDate = new Date()
 		expireAtDate.setHours(0, 0, 0, 0)
@@ -111,9 +179,9 @@ class CacheManager {
 		}
 
 		// Update our cache
-		this.Save()
+		this.SaveChanges("ExpireCache", expireCacheName, JSON.stringify(controlRecord))
 	}
 }
 
 export const Cache = new CacheManager()
-export type {CacheExpiration}
+export type {ExpirationSettings}

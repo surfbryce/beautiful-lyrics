@@ -4,17 +4,17 @@ import { Maid } from '../../../Packages/Maid'
 
 // Services
 import { GlobalMaid, SpotifyPlayer, SpotifyFetch } from './Session'
-import { Cache, CacheExpiration } from './Cache'
+import { Cache, ExpirationSettings } from './Cache'
 
 // Types
 import { SpotifyTrackInformation, SongLyricsData } from '../Types/Backend'
 
 // Behavior Constants
-const TrackInformationExpiration: CacheExpiration = {
+const TrackInformationExpiration: ExpirationSettings = {
 	Duration: 2,
 	Unit: "Weeks"
 }
-const SongLyricsExpiration: CacheExpiration = {
+const SongLyricsExpiration: ExpirationSettings = {
 	Duration: 1,
 	Unit: "Months"
 }
@@ -154,8 +154,7 @@ const RegisterSong = (trackId: string, trackData: SpicetifyTrack) => {
 		new Promise(
 			(resolve: (trackInformation: SpotifyTrackInformation) => void) => {
 				// Determine if we already have our track-information
-				const trackInformationControlRecord = Cache.Get().TrackInformation
-				const trackInformation = Cache.GetFromControlRecord(trackInformationControlRecord, trackId)
+				const trackInformation = Cache.GetFromExpireCache("TrackInformation", trackId)
 
 				if (trackInformation === undefined) {
 					SpotifyFetch.request(
@@ -173,8 +172,8 @@ const RegisterSong = (trackId: string, trackData: SpicetifyTrack) => {
 							const trackInformation = (response.body as SpotifyTrackInformation)
 
 							// Save our information
-							Cache.SetControlRecord(
-								trackInformationControlRecord,
+							Cache.SetExpireCacheItem(
+								"TrackInformation",
 								trackId, trackInformation,
 								TrackInformationExpiration
 							)
@@ -192,9 +191,8 @@ const RegisterSong = (trackId: string, trackData: SpicetifyTrack) => {
 			(trackInformation): Promise<[SpotifyTrackInformation, (SongLyricsData | undefined)]> => {
 				// Now determine if we have our lyrics at all
 				const recordCode = trackInformation.external_ids.isrc
-				const lyricsDataControlRecord = Cache.Get().ISRCLyrics
-				const lyricsData = Cache.GetFromControlRecord(
-					lyricsDataControlRecord,
+				const lyricsData = Cache.GetFromExpireCache(
+					"ISRCLyrics",
 					recordCode
 				)
 
@@ -222,8 +220,8 @@ const RegisterSong = (trackId: string, trackData: SpicetifyTrack) => {
 						.then(
 							(lyricsData) => {
 								// Save our information
-								Cache.SetControlRecord(
-									lyricsDataControlRecord,
+								Cache.SetExpireCacheItem(
+									"ISRCLyrics",
 									recordCode, (lyricsData ?? false),
 									SongLyricsExpiration
 								)
