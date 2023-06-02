@@ -200,7 +200,7 @@ const RegisterSong = (trackId: string, trackData: SpicetifyTrack) => {
 
 				if (lyricsData === undefined) {
 					return (
-						fetch(`https://beautiful-lyrics.socials-420.workers.dev/lyrics/${recordCode}`)
+						fetch(`https://beautiful-lyrics.socalifornian.live/lyrics/${recordCode}`)
 						.then(
 							(response) => {
 								if (response.ok === false) {
