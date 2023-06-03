@@ -61,12 +61,26 @@ namespace SpotifyTrackInformationSpace {
 	export type Self = TrackInformation
 }
 
-
-type SongLyricsData = {
-	Source: ("AppleMusic");
-	ReleaseId: number; // This is relative to our Source
-	Text: string;
+type SpotifyLine = {
+	startTimeMs: string,
+	words: string,
+	syllables: any[], // Similarly, I am not sure what the elements of this array look like
+	endTimeMs: string
 }
+type SpotifyLines = SpotifyLine[]
+
+type SongLyricsData = (
+	{
+		Source: "AppleMusic";
+		ReleaseId: number;
+		Content: string;
+	}
+	| {
+		Source: "Spotify";
+		ReleaseId: string;
+		Content: SpotifyLines;
+	}
+)
 
 export type {SongLyricsData}
 export type SpotifyTrackInformation = SpotifyTrackInformationSpace.Self

@@ -19,7 +19,7 @@ type ExpireCacheStoreContents = {
     ISRCLyrics: (SongLyricsData | false);
 }
 type ExpireCacheStore = {[K in keyof ExpireCacheStoreContents]: ExpireCache<ExpireCacheStoreContents[K]>}
-type ExpireCacheStoreName = (keyof ExpireCacheStore)
+type ExpireCacheStoreItemName = (keyof ExpireCacheStore)
 type Store = {
 	Analytics: {
 		LastVisitedAt?: number;
@@ -27,6 +27,7 @@ type Store = {
 }
 type StoreItemName = (keyof Store)
 type StoreType = ("General" | "ExpireCache")
+type AnyStoreItemName = (StoreItemName | ExpireCacheStoreItemName)
 
 // Define our store-templates
 const ExpireCacheStoreTemplates: ExpireCacheStore = {
@@ -36,6 +37,11 @@ const ExpireCacheStoreTemplates: ExpireCacheStore = {
 const StoreTemplates: Store = {
 	Analytics: {}
 }
+
+// Define StoreItem Versions
+const ExpireCacheStoreItemVersions: Map<ExpireCacheStoreItemName, number> = new Map()
+ExpireCacheStoreItemVersions.set("TrackInformation", 1)
+ExpireCacheStoreItemVersions.set("ISRCLyrics", 1)
 
 // Cache-Control Class
 class CacheManager {
@@ -51,7 +57,7 @@ class CacheManager {
 
 		// Go through and see if anything expire
 		for(const itemName of ["ISRCLyrics", "TrackInformation"]) {
-			const controlRecord = expireCacheStore[itemName as ExpireCacheStoreName]
+			const controlRecord = expireCacheStore[itemName as ExpireCacheStoreItemName]
 			let changesMade = false
 
 			for(const key in controlRecord) {
@@ -64,7 +70,10 @@ class CacheManager {
 			}
 
 			if (changesMade) {
-				this.SaveChanges("ExpireCache", itemName, JSON.stringify(controlRecord))
+				this.SaveChanges(
+					"ExpireCache",
+					(itemName as ExpireCacheStoreItemName), JSON.stringify(controlRecord)
+				)
 			}
 		}
 
@@ -74,6 +83,18 @@ class CacheManager {
 
 		// Remove our old store (if it exists)
 		localStorage.removeItem("BeautifulLyrics")
+
+		// Remove our old ExpireCache store items (if it exists)
+		for(const [itemName, version] of ExpireCacheStoreItemVersions) {
+			// Remove our mistake entries from the first release
+			localStorage.removeItem(this.GetItemLocation("General", itemName, false))
+
+			// Now remove our old-entries
+			localStorage.removeItem(this.GetItemLocation("ExpireCache", itemName, false))
+			for(let oldVersion = 1; oldVersion < version; oldVersion += 1) {
+				localStorage.removeItem(this.GetItemLocation("ExpireCache", itemName, oldVersion))
+			}
+		}
 	}
 
 	// Private methods
@@ -106,15 +127,25 @@ class CacheManager {
 		}
 	}
 
-	private GetItemLocation(storeType: StoreType, itemName: string) {
-		return `BeautifulLyrics:${storeType}_${itemName}`
+	private GetItemLocation(storeType: StoreType, itemName: AnyStoreItemName, versionOverride?: (number | false)) {
+		const versionNumber = (
+			(versionOverride === undefined) ? (
+				(storeType === "ExpireCache")
+				? ExpireCacheStoreItemVersions.get(itemName as ExpireCacheStoreItemName)
+				: undefined
+			)
+			: (versionOverride === false) ? undefined
+			: versionOverride
+		)
+
+		return `BeautifulLyrics:${storeType}_${itemName}${versionNumber ? `_V${versionNumber}` : ""}`
 	}
 
-	private SaveChanges(storeType: StoreType, itemName: string, item: string) {
-		localStorage.setItem(this.GetItemLocation("General", itemName), item)
+	private SaveChanges(storeType: StoreType, itemName: AnyStoreItemName, item: string) {
+		localStorage.setItem(this.GetItemLocation(storeType, itemName), item)
 	}
 
-	private GetExpireCache<N extends ExpireCacheStoreName>(expireCacheName: N): ExpireCache<ExpireCacheStoreContents[N]> {
+	private GetExpireCache<N extends ExpireCacheStoreItemName>(expireCacheName: N): ExpireCache<ExpireCacheStoreContents[N]> {
 		return this.ExpireCacheStore[expireCacheName]
 	}
 
@@ -127,7 +158,7 @@ class CacheManager {
 		this.SaveChanges("General", itemName, JSON.stringify(this.Store[itemName]))
 	}
 
-	public GetFromExpireCache<N extends ExpireCacheStoreName>(
+	public GetFromExpireCache<N extends ExpireCacheStoreItemName>(
 		expireCacheName: N,
 		key: string
 	): (ExpireCacheStoreContents[N] | undefined) {
@@ -153,7 +184,7 @@ class CacheManager {
 		return cacheControl.Content
 	}
 
-	public SetExpireCacheItem<N extends ExpireCacheStoreName>(
+	public SetExpireCacheItem<N extends ExpireCacheStoreItemName>(
 		expireCacheName: N,
 		key: string, content: ExpireCacheStoreContents[N],
 		expiration: ExpirationSettings
