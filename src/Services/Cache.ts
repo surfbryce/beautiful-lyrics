@@ -43,6 +43,9 @@ const ExpireCacheStoreItemVersions: Map<ExpireCacheStoreItemName, number> = new 
 ExpireCacheStoreItemVersions.set("TrackInformation", 1)
 ExpireCacheStoreItemVersions.set("ISRCLyrics", 1)
 
+const GeneralStoreItemVersions: Map<StoreItemName, number> = new Map()
+GeneralStoreItemVersions.set("Analytics", 1)
+
 // Cache-Control Class
 class CacheManager {
 	// Private Properties
@@ -95,6 +98,15 @@ class CacheManager {
 				localStorage.removeItem(this.GetItemLocation("ExpireCache", itemName, oldVersion))
 			}
 		}
+
+		// Remove our old General store items (if it exists)
+		for(const [itemName, version] of GeneralStoreItemVersions) {
+			// Now remove our old-entries
+			localStorage.removeItem(this.GetItemLocation("General", itemName, false))
+			for(let oldVersion = 1; oldVersion < version; oldVersion += 1) {
+				localStorage.removeItem(this.GetItemLocation("General", itemName, oldVersion))
+			}
+		}
 	}
 
 	// Private methods
@@ -130,8 +142,8 @@ class CacheManager {
 	private GetItemLocation(storeType: StoreType, itemName: AnyStoreItemName, versionOverride?: (number | false)) {
 		const versionNumber = (
 			(versionOverride === undefined) ? (
-				(storeType === "ExpireCache")
-				? ExpireCacheStoreItemVersions.get(itemName as ExpireCacheStoreItemName)
+				(storeType === "ExpireCache") ? ExpireCacheStoreItemVersions.get(itemName as ExpireCacheStoreItemName)
+				: (storeType === "General") ? GeneralStoreItemVersions.get(itemName as StoreItemName)
 				: undefined
 			)
 			: (versionOverride === false) ? undefined

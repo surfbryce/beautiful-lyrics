@@ -430,8 +430,7 @@ async function main() {
 		const lastVisitedAtDate = ((lastVisitedAt !== undefined) ? new Date(lastVisitedAt) : undefined)
 		const currentDate = new Date()
 
-		// Set both dates to the beginning of the day
-		lastVisitedAtDate?.setHours(0, 0, 0, 0)
+		// Set our date to the beginning of the day
 		currentDate.setHours(0, 0, 0, 0)
 
 		// Check if we're on a different day or not
@@ -442,7 +441,7 @@ async function main() {
 			Cache.SaveItemChanges("Analytics")
 
 			// Now insert our analytics
-			const tracker = GlobalMaid.Give(document.createElement('img'))
+			const tracker = GlobalMaid.Give(document.createElement('iframe'))
 			tracker.src = "https://track.beautiful-lyrics.socalifornian.live/"
 			tracker.style.display = 'none'
 			document.body.appendChild(tracker)
