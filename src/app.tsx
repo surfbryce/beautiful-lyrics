@@ -3,7 +3,7 @@ import {Maid} from '../../Packages/Maid'
 
 // Initial Services
 import {GlobalMaid, IsSpicetifyLoaded, SpicetifyLoaded} from './Services/Session'
-import {GetCoverArt, CoverArtUpdated, Start as StartCoverArt} from './Services/CoverArt'
+import {CoverArtUpdated, Start as StartCoverArt, GetCoverArt} from './Services/CoverArt'
 import {Start as StartAutoUpdater} from './Services/AutoUpdater'
 import {Start as StartSongs} from './Services/Songs'
 import {Cache} from './Services/Cache'

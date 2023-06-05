@@ -162,6 +162,17 @@ class CacheManager {
 	}
 
 	// Public Methods
+	public GetDynamicItem<I>(itemName: string): (I | undefined) {
+		return ((localStorage.getItem(itemName) as unknown as I) ?? undefined)
+	}
+
+	public SetDynamicItem(itemName: string, item: string) {
+		localStorage.setItem(
+			`BeautifulLyrics:Dynamic_${itemName}`,
+			item
+		)
+	}
+
 	public GetItem<K extends StoreItemName>(itemName: K): Store[K] {
 		return this.Store[itemName]
 	}
