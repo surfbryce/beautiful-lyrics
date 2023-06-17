@@ -1,5 +1,5 @@
 // Packages
-import {Signal} from '../../../Packages/Signal'
+import {Signal} from '../../../../Packages/Signal'
 
 // Services
 import {GlobalMaid} from './Session'

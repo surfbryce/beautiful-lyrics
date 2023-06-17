@@ -1,7 +1,7 @@
 // Packages
-import {Maid} from '../../../Packages/Maid'
-import { Signal } from '../../../Packages/Signal'
-import { Timeout } from '../../../Packages/Scheduler'
+import {Maid} from '../../../../Packages/Maid'
+import { Signal } from '../../../../Packages/Signal'
+import { Timeout } from '../../../../Packages/Scheduler'
 
 // Create our Global-Maid (this is used so we can clean-up everything prior to updating)
 const GlobalMaid = new Maid()

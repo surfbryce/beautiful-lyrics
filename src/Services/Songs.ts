@@ -1,6 +1,6 @@
 // Packages
-import { Signal } from '../../../Packages/Signal'
-import { Maid } from '../../../Packages/Maid'
+import { Signal } from '../../../../Packages/Signal'
+import { Maid } from '../../../../Packages/Maid'
 
 // Services
 import { GlobalMaid, SpotifyPlayer, SpotifyFetch } from './Session'

@@ -1,5 +1,5 @@
 // Packages
-import {Maid} from '../../Packages/Maid'
+import {Maid} from '../../../Packages/Maid'
 
 // Initial Services
 import {GlobalMaid, IsSpicetifyLoaded, SpicetifyLoaded} from './Services/Session'
