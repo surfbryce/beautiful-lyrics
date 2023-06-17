@@ -1,5 +1,6 @@
 // Packages
 import {Maid} from '../../../Packages/Maid'
+import { Timeout } from '../../../Packages/Scheduler'
 
 // Initial Services
 import {GlobalMaid, IsSpicetifyLoaded, SpicetifyLoaded} from './Services/Session'
@@ -424,28 +425,38 @@ async function main() {
 		Spicetify discord - my username is @socalifornian.
 	*/
 	{
-		// Grab our current-date and when we last visited
-		const cachedAnalytics = Cache.GetItem("Analytics")
-		const lastVisitedAt = cachedAnalytics.LastVisitedAt
-		const lastVisitedAtDate = ((lastVisitedAt !== undefined) ? new Date(lastVisitedAt) : undefined)
-		const currentDate = new Date()
+		const UpdateAnalytics = () => {
+			// Remove our existing analytics (always called after we register ourselves analytically)
+			GlobalMaid.Clean("Analytics")
 
-		// Set our date to the beginning of the day
-		currentDate.setHours(0, 0, 0, 0)
+			// Grab our current-date and when we last visited
+			const cachedAnalytics = Cache.GetItem("Analytics")
+			const lastVisitedAt = cachedAnalytics.LastVisitedAt
+			const lastVisitedAtDate = ((lastVisitedAt !== undefined) ? new Date(lastVisitedAt) : undefined)
+			const currentDate = new Date()
 
-		// Check if we're on a different day or not
-		const dateStartTime = currentDate.getTime()
-		if(lastVisitedAtDate?.getTime() !== dateStartTime) {
-			// Update our cache
-			cachedAnalytics.LastVisitedAt = dateStartTime
-			Cache.SaveItemChanges("Analytics")
+			// Set our date to the beginning of the day
+			currentDate.setHours(0, 0, 0, 0)
 
-			// Now insert our analytics
-			const tracker = GlobalMaid.Give(document.createElement('iframe'))
-			tracker.src = "https://track.beautiful-lyrics.socalifornian.live/"
-			tracker.style.display = 'none'
-			document.body.appendChild(tracker)
+			// Check if we're on a different day or not
+			const dateStartTime = currentDate.getTime()
+			if(lastVisitedAtDate?.getTime() !== dateStartTime) {
+				// Update our cache
+				cachedAnalytics.LastVisitedAt = dateStartTime
+				Cache.SaveItemChanges("Analytics")
+
+				// Now insert our analytics
+				const tracker = GlobalMaid.Give(document.createElement('iframe'), "Analytics")
+				tracker.src = "https://track.beautiful-lyrics.socalifornian.live/"
+				tracker.style.display = 'none'
+				document.body.appendChild(tracker)
+			}
+
+			// Now check again soon
+			Timeout(60, UpdateAnalytics)
 		}
+
+		UpdateAnalytics()
 	}
 }
 
