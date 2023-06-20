@@ -5,8 +5,8 @@
   "scripts": {
     "build": "spicetify-creator --out=dist --minify",
     "watch": "spicetify-creator --watch",
-	"start": "spicetify-creator & spicetify config extensions beautiful-lyrics.js & spicetify apply enable-devtools",
-	"production": "spicetify-creator & spicetify config extensions beautiful-lyrics.js- & spicetify apply enable-devtools"
+    "start": "spicetify-creator & spicetify config extensions beautiful-lyrics.js & spicetify apply enable-devtools",
+    "production": "spicetify-creator & spicetify config extensions beautiful-lyrics.js- & spicetify apply enable-devtools"
   },
   "license": "MIT",
   "devDependencies": {

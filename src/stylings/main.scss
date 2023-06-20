@@ -158,17 +158,28 @@ aside:has(.main-nowPlayingView-section) {
 
 	// Sharable properties
 	&-color, &-back, &-back-center {
-		width: 200%;
+		/* This is to align our img element */
 		position: absolute;
-		border-radius: 100em;
+		width: 200%;
+		/*aspect-ratio: 1/1;*/
 		animation: rotate 35s linear infinite;
+
+		/* Align our image to the center of our div */
+		/*img, canvas {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			translate: -50% -50%;
+		}*/
+
+		filter: blur(40px);
+		border-radius: 100em;
 	}
 
 	// The primary image which gives the blending effect it's illusional property
 	&-color {
 		right: 0;
 		top: 0;
-		filter: blur(40px);
 		z-index: 10;
 
 		/*
@@ -193,14 +204,12 @@ aside:has(.main-nowPlayingView-section) {
 	&-back {
 		left: 0;
 		bottom: 0;
-		filter: blur(40px);
 		z-index: 1;
 		animation-direction: reverse;
 	}
 
 	// Final image to cover the center
 	&-back-center {
-		filter: blur(40px);
 		z-index: 0;
 
 		width: 300%;

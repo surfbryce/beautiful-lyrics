@@ -1,13 +1,13 @@
 // Packages
-import {Maid} from '../../../Packages/Maid'
+import { Maid } from '../../../Packages/Maid'
 import { Timeout } from '../../../Packages/Scheduler'
 
 // Initial Services
-import {GlobalMaid, IsSpicetifyLoaded, SpicetifyLoaded} from './Services/Session'
-import {CoverArtUpdated, Start as StartCoverArt, GetCoverArt} from './Services/CoverArt'
-import {Start as StartAutoUpdater} from './Services/AutoUpdater'
-import {Start as StartSongs} from './Services/Songs'
-import {Cache} from './Services/Cache'
+import { GlobalMaid, IsSpicetifyLoaded, SpicetifyLoaded } from './Services/Session'
+import { CoverArtUpdated, Start as StartCoverArt, GetCoverArt } from './Services/CoverArt'
+import { Start as StartAutoUpdater } from './Services/AutoUpdater'
+import { Start as StartSongs } from './Services/Songs'
+import { Cache } from './Services/Cache'
 
 // Stylings
 import './Stylings/main.scss'
@@ -28,6 +28,12 @@ let CheckForLiveBackgrounds: (() => void)
 		'#main:has(.os-content .lyrics-lyricsContainer-LyricsContainer) .under-main-view'
 	)
 
+	// Define our images to create
+	// const BackgroundSizeScales = [2, 3]
+	const BackgroundElements = ["lyrics-background-color", "lyrics-background-back", "lyrics-background-back-center"]
+	// const ElementSizeScaleIndices = [0, 0, 1]
+	// const BackgroundContainerResizeStabilizationTime = 0.25
+
 	// Create our maid to manage our background-containers
 	const BackgroundMaids = GlobalMaid.Give(new Maid(), "LiveBackgrounds")
 
@@ -40,50 +46,131 @@ let CheckForLiveBackgrounds: (() => void)
 		const backgroundContainer = backgroundMaid.Give(document.createElement('div'))
 		backgroundContainer.classList.add('lyrics-background-container')
 
-		const [
-			colorImage,
-			backImage,
-			backCenterImage
-		] = backgroundMaid.GiveItems(
-			document.createElement('img'), document.createElement('img'), document.createElement('img')
-		)
-		colorImage.classList.add('lyrics-background-color'),
-		backImage.classList.add('lyrics-background-back'),
-		backCenterImage.classList.add('lyrics-background-back-center')
-		backgroundContainer.appendChild(colorImage),
-		backgroundContainer.appendChild(backImage),
-		backgroundContainer.appendChild(backCenterImage)
+		// Create all our elements
+		const elements: HTMLImageElement[] = []
+		for (const elementClass of BackgroundElements) {
+			// Create our image
+			const image = backgroundMaid.Give(document.createElement('img'))
+			image.classList.add(elementClass)
+			backgroundContainer.appendChild(image)
 
-		// Now handle updating the images themselves
-		const Update = () => {
-			const source = (GetCoverArt()?.Default ?? '')
+			// Now store our element
+			elements.push(image)
+		}
 
-			colorImage.src = source
-			backImage.src = source
-			backCenterImage.src = source
+		// Store our current sizes
+		// let currentSizes: number[] = []
+
+		// Now handle updating our cover-art
+		/*const SetCoverArt = (blurredCoverArt?: Map<number, string>) => {
+			for (const [index, element] of elements.entries()) {
+				element.src = (
+					blurredCoverArt
+						? (blurredCoverArt.get(currentSizes[ElementSizeScaleIndices[index]]) ?? 'MISSING')
+						: ''
+				)
+			}
+		}
+
+		const UpdateCoverArt = () => {
+			// Grab our cover-art
+			const coverArt = GetCoverArt()
+			if (coverArt === undefined) {
+				return SetCoverArt()
+			}
+
+			for(const element of oldElements) {
+				element.src = coverArt.Default
+			}
+
+			// Now determine if we already have this or not
+			const cachedCoverArtSizes = GetBlurredCoverArt(coverArt, containerType, currentSizes)
+
+			// If we have it we can then update immediately, otherwise we need to generate it
+			if (cachedCoverArtSizes === undefined) {
+				GenerateBlurredCoverArt(coverArt, containerType, currentSizes)
+					.then(
+						(coverArtSizes) => {
+							// Make sure we are seeing the same cover-art
+							if (coverArt === GetCoverArt()) {
+								SetCoverArt(coverArtSizes)
+							}
+						}
+					)
+			} else {
+				SetCoverArt(cachedCoverArtSizes)
+			}
+		}
+
+		// Now handle updating our sizes
+		{
+			const UpdateSizes = () => {
+				// Calculate our existing width
+				const backgroundContainerWidth = backgroundContainer.offsetWidth
+				
+				// Calculate our new sizes
+				const newSizes = []
+				for(const scale of BackgroundSizeScales) {
+					newSizes.push(Math.floor(backgroundContainerWidth * scale))
+				}
+
+				// Now set our sizes
+				currentSizes = newSizes
+
+				// Trigger cover-art update
+				UpdateCoverArt()
+			}
+
+			// Watch for size-updates
+			const observer = backgroundMaid.Give(
+				new ResizeObserver(
+					() => {
+						// Set a timeout to update our sizes (once we stabilize it will properly run)
+						backgroundMaid.Give(
+							Timeout(BackgroundContainerResizeStabilizationTime, UpdateSizes),
+							"ContainerResize"
+						)
+					}
+				)
+			)
+			observer.observe(backgroundContainer)
+
+			// Immediately update our sizes
+			UpdateSizes()
+		}*/
+
+		// Handle updating our cover-art
+		const UpdateCoverArt = () => {
+			const coverArt = GetCoverArt()?.Default ?? ''
+
+			for (const element of elements) {
+				element.src = coverArt
+			}
 		}
 
 		// Immediately update ourselves and handle updating automatically
-		backgroundMaid.Give(CoverArtUpdated.Connect(Update))
-		Update()
+		backgroundMaid.Give(CoverArtUpdated.Connect(UpdateCoverArt))
+		UpdateCoverArt()
 
-		// Handle applying our background-class
-		const CheckClass = () => {
-			if (container.classList.contains('lyrics-background')) {
-				return
+		// Handle applying our background-class (sometimes it can be removed so we need to readd it again)
+		{
+			const CheckClass = () => {
+				if (container.classList.contains('lyrics-background')) {
+					return
+				}
+
+				container.classList.add('lyrics-background')
 			}
 
-			container.classList.add('lyrics-background')
+			// Immediately check our class and watch for changes
+			CheckClass()
+
+			const observer = backgroundMaid.Give(new MutationObserver(CheckClass))
+			observer.observe(
+				container,
+				{ attributes: true, attributeFilter: ['class'], childList: false, subtree: false }
+			)
 		}
-
-		// Immediately check our class and watch for changes
-		CheckClass()
-
-		const observer = backgroundMaid.Give(new MutationObserver(CheckClass))
-		observer.observe(
-			container,
-			{attributes: true, attributeFilter: ['class'], childList: false, subtree: false}
-		)
 
 		// Add our container to the background
 		container.prepend(backgroundContainer)
@@ -95,7 +182,7 @@ let CheckForLiveBackgrounds: (() => void)
 	// Handle checking for background existence updates
 	CheckForLiveBackgrounds = () => {
 		// Go through each background-container and check if it exists
-		for(const [containerType, query] of BackgroundQuerys) {
+		for (const [containerType, query] of BackgroundQuerys) {
 			// Grab our container
 			const container = document.body.querySelector(query)
 
@@ -156,8 +243,8 @@ let CheckForLyricContainers: (() => void)
 		*/
 		const style = getComputedStyle(lyric), rootStyle = getComputedStyle(document.documentElement)
 		const lyricFontSizeInPixels = parseFloat(style.fontSize), rootFontSizeInPixels = parseFloat(rootStyle.fontSize)
-	
-		return(lyricFontSizeInPixels / rootFontSizeInPixels)
+
+		return (lyricFontSizeInPixels / rootFontSizeInPixels)
 	}
 
 	// Now manage our lyric-containers
@@ -177,14 +264,14 @@ let CheckForLyricContainers: (() => void)
 		const UpdateFontSize = (lyric: HTMLDivElement, data: LyricsData) => {
 			lyric.style.fontSize = (
 				(data.State == "Active") ? `${fontSizeInRem + ActiveLyricSizeIncrease}rem`
-				: ''
+					: ''
 			)
 		}
 
 		const Update = () => {
 			// Go through our lyrics and update their states (and also gather our active layout-order)
 			let activeLayoutOrder: (number | undefined)
-			for(const [lyric, data] of lyrics) {
+			for (const [lyric, data] of lyrics) {
 				const classes = lyric.classList
 
 				if (classes.contains(ActiveLyricClass)) {
@@ -200,7 +287,7 @@ let CheckForLyricContainers: (() => void)
 			}
 
 			// Go through our lyrics and handle updating their appearance
-			for(const [lyric, data] of lyrics) {
+			for (const [lyric, data] of lyrics) {
 				// Determine if we should be considered active
 				const isActive = (data.State === "Active")
 				const isFocused = (isActive || (data.State === "Unsynced"))
@@ -220,8 +307,8 @@ let CheckForLyricContainers: (() => void)
 				// Determine our text-color
 				let textColor = (
 					isFocused ? "var(--lyrics-color-active)"
-					: (data.State === "Sung") ? "var(--lyrics-color-passed)"
-					: "var(--lyrics-color-inactive)"
+						: (data.State === "Sung") ? "var(--lyrics-color-passed)"
+							: "var(--lyrics-color-inactive)"
 				)
 
 				// Give ourselves the lyric class
@@ -252,7 +339,7 @@ let CheckForLyricContainers: (() => void)
 
 				// Create our observer to watch for class-changes
 				const mutationObserver = lyricMaid.Give(new MutationObserver(Update))
-				mutationObserver.observe(lyric, {attributes: true, attributeFilter: ['class'], childList: false, subtree: false})
+				mutationObserver.observe(lyric, { attributes: true, attributeFilter: ['class'], childList: false, subtree: false })
 
 				// Create our observer to watch for size-changes
 				let isFontSizeObserver = false
@@ -263,8 +350,8 @@ let CheckForLyricContainers: (() => void)
 						new ResizeObserver(
 							_ => {
 								fontSizeInRem = GetLyricFontSizeInRem(lyric)
-								
-								for(const [lyricToUpdate, data] of lyrics) {
+
+								for (const [lyricToUpdate, data] of lyrics) {
 									UpdateFontSize(lyricToUpdate, data)
 								}
 							}
@@ -283,10 +370,10 @@ let CheckForLyricContainers: (() => void)
 				// Store our lyric
 				lyrics.set(
 					lyric, {
-						LayoutOrder: layoutOrder,
-						State: "Unsung",
-						IsFontSizeObserver: isFontSizeObserver
-					}
+					LayoutOrder: layoutOrder,
+					State: "Unsung",
+					IsFontSizeObserver: isFontSizeObserver
+				}
 				)
 
 				// Force-update
@@ -306,29 +393,29 @@ let CheckForLyricContainers: (() => void)
 			observer = containerMaid.Give(
 				new MutationObserver(
 					(mutationRecords) => {
-						for(const mutationRecord of mutationRecords) {
+						for (const mutationRecord of mutationRecords) {
 							if (mutationRecord.type !== 'childList') {
 								continue
 							}
-	
-							for(const node of mutationRecord.removedNodes) {
+
+							for (const node of mutationRecord.removedNodes) {
 								if (node instanceof HTMLDivElement) {
 									lyrics.delete(node)
 									containerMaid.Clean(node)
 								}
 							}
 
-							for(const node of mutationRecord.addedNodes) {
+							for (const node of mutationRecord.addedNodes) {
 								CheckNode(node)
 							}
 						}
 					}
 				)
 			)
-			observer.observe(container, {attributes: false, childList: true, subtree: false})
+			observer.observe(container, { attributes: false, childList: true, subtree: false })
 
 			// Grab our initial lyrics
-			for(const node of container.childNodes) {
+			for (const node of container.childNodes) {
 				CheckNode(node)
 			}
 		}
@@ -337,7 +424,7 @@ let CheckForLyricContainers: (() => void)
 	// Handle checking for existence changes in our lyric-containers
 	CheckForLyricContainers = () => {
 		// Go through each background-container and check if it exists
-		for(const [containerType, query] of ContainerQuerys) {
+		for (const [containerType, query] of ContainerQuerys) {
 			// Grab our container
 			const container = document.body.querySelector(query)
 
@@ -392,10 +479,10 @@ async function main() {
 			}
 		)
 	)
-	
+
 	observer.observe(
 		document.body,
-		{attributes: false, childList: true, subtree: true}
+		{ attributes: false, childList: true, subtree: true }
 	)
 
 	// Check for any initial elements
@@ -440,7 +527,7 @@ async function main() {
 
 			// Check if we're on a different day or not
 			const dateStartTime = currentDate.getTime()
-			if(lastVisitedAtDate?.getTime() !== dateStartTime) {
+			if (lastVisitedAtDate?.getTime() !== dateStartTime) {
 				// Update our cache
 				cachedAnalytics.LastVisitedAt = dateStartTime
 				Cache.SaveItemChanges("Analytics")
