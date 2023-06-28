@@ -2,7 +2,7 @@
 import { easeSinOut } from 'd3-ease';
 
 // Packages
-import { Maid } from '../../../../../../Packages/Maid'
+import { Maid, Giveable } from '../../../../../../Packages/Maid'
 import { Signal } from '../../../../../../Packages/Signal'
 import Spring from '../../../../../../Packages/Spring'
 
@@ -119,7 +119,7 @@ const IsEmphasized = (metadata: LyricMetadata) => {
 }
 
 // Class
-export default class SyllableVocals implements SyncedVocals {
+export default class SyllableVocals implements SyncedVocals, Giveable {
 	// Private Properties
 	private readonly Maid: Maid = new Maid()
 

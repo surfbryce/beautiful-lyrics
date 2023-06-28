@@ -1,11 +1,11 @@
 // Packages
-import { Maid } from '../../../../../../Packages/Maid'
+import { Maid, Giveable } from '../../../../../../Packages/Maid'
 
 // Imported Types
 import { BaseVocals } from '../Types'
 
 // Class
-export default class StaticVocals implements BaseVocals {
+export default class StaticVocals implements BaseVocals, Giveable {
 	// Private Properties
 	private readonly Maid: Maid;
 

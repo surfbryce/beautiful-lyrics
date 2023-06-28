@@ -1,9 +1,10 @@
 // NPM
+import "simplebar"
+import "../../../node_modules/simplebar-core/dist/simplebar.css"
 import SimpleBar from "simplebar"
-import "simplebar/dist/simplebar.css"
 
 // Packages
-import { Maid } from "../../../../../Packages/Maid"
+import { Maid, Giveable } from "../../../../../Packages/Maid"
 import { Timeout } from "../../../../../Packages/Scheduler"
 
 // Imported Types
@@ -33,7 +34,7 @@ const GetTotalElementHeight = (element: HTMLElement): number => {
 }
 
 // Class
-export class LyricsScroller<V extends (BaseVocals | SyncedVocals)> {
+export class LyricsScroller<V extends (BaseVocals | SyncedVocals)> implements Giveable {
 	// Private Properties
 	private readonly Maid: Maid
 
@@ -62,7 +63,7 @@ export class LyricsScroller<V extends (BaseVocals | SyncedVocals)> {
 		// Create our scroller
 		this.Scroller = new SimpleBar(scrollContainer)
 		this.ScrollerObject	= this.Scroller.getScrollElement()!
-		this.Maid.Give(this.Scroller.removeListeners)
+		this.Maid.Give(this.Scroller.unMount.bind(this.Scroller))
 
 		// Store our arguments
 		this.ScrollContainer = scrollContainer, this.LyricsContainer = lyricsContainer
@@ -285,7 +286,7 @@ export class LyricsScroller<V extends (BaseVocals | SyncedVocals)> {
 				// Set our scroll to the distance from the minimum
 				scrollY = ((center - minimumDistanceToAutoScroll) + lyricsContainerMarginTop)
 			}
-		} else if (currentScrollTop > center) {
+		} else if (currentScrollTop > 0) {
 			scrollY = 0
 		}
 
@@ -302,7 +303,8 @@ export class LyricsScroller<V extends (BaseVocals | SyncedVocals)> {
 	}
 
 	// Public Methods
-	public ForceUpdate() {
+	public ForceToActive() {
+		this.ToggleAutoScrollBlock(false)
 		this.MoveToActiveLyrics()
 	}
 

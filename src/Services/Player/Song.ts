@@ -146,6 +146,9 @@ const SongLyricsExpiration: ExpirationSettings = {
 	Unit: "Months"
 }
 
+// Dynamic Flags
+let LastSpotifyTimestamp: number
+
 // Class
 class Song implements Giveable {
 	// Private Properties
@@ -224,6 +227,20 @@ class Song implements Giveable {
 				if (event === undefined) {
 					return
 				}
+
+				/*
+					So now we need to make sure we're not using the timestamp from a previous song.
+
+					This should be impossible but how Spotify works is that it keeps yelling out the
+					timestamp no matter what and only changes the timestamp once the song has loaded.
+
+					So by determining whether or not our timestamp is the same as the previous we can
+					avoid running any updates whilst also avoiding any issues with the timestamp.
+				*/
+				if (event.data === LastSpotifyTimestamp) {
+					return
+				}
+				LastSpotifyTimestamp = event.data
 	
 				// Grab our timestamp from Spotify
 				const spotifyTimestamp = (event.data / 1000)
@@ -231,7 +248,7 @@ class Song implements Giveable {
 				// Now determine if we skipped
 				const deltaTime = Math.abs(spotifyTimestamp - this.Timestamp)
 				if (deltaTime >= MinimumTimeSkipDifference) {
-					this.SetTimestamp(spotifyTimestamp, deltaTime, true)
+					this.UpdateTimestamp(spotifyTimestamp, (1 / 60), true)
 				}
 			}
 	
@@ -385,7 +402,7 @@ class Song implements Giveable {
 				const deltaTime = ((timeNow - lastTime) / 1000)
 
 				// Now update our timestamp
-				this.SetTimestamp(Math.min((this.Timestamp + deltaTime), this.Duration), deltaTime)
+				this.UpdateTimestamp(Math.min((this.Timestamp + deltaTime), this.Duration), deltaTime)
 			}
 
 			// Update our last time
@@ -400,7 +417,7 @@ class Song implements Giveable {
 	}
 
 	// Private State Methods
-	private SetTimestamp(timestamp: number, deltaTime: number, skipped?: true) {
+	private UpdateTimestamp(timestamp: number, deltaTime: number, skipped?: true) {
 		// Update our timestamp
 		this.Timestamp = timestamp
 
@@ -443,6 +460,10 @@ class Song implements Giveable {
 
 	public GetTimestamp(): number {
 		return this.Timestamp
+	}
+
+	public SetTimestamp(timestamp: number) {
+		SpotifyPlayer.seek(timestamp * 1000)
 	}
 
 	// Deconstructor

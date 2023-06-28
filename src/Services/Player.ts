@@ -43,9 +43,12 @@ class Player {
 			// Handle when our song changes
 			{
 				const callback = (event?: Event & { data: Spicetify.PlayerState }) => {
+					// Remove our previous song
+					this.Maid.Clean("Song")
+
+					// Determine if we even have a song
 					if ((event === undefined) || (event.data.track === undefined)) {
 						// Make sure we don't have our information any longer
-						this.Maid.Clean("Song")
 						this.Song = undefined
 						this.SongJustChanged = undefined
 

@@ -1,5 +1,5 @@
 // Packages
-import { Maid } from "../../../../../../Packages/Maid"
+import { Maid, Giveable } from "../../../../../../Packages/Maid"
 import { Signal } from "../../../../../../Packages/Signal"
 import Spring from "../../../../../../Packages/Spring"
 
@@ -35,7 +35,7 @@ const GlowDamping = 0.5
 const GlowFrequency = 1
 
 // Class
-export default class LineVocals implements SyncedVocals {
+export default class LineVocals implements SyncedVocals, Giveable {
 	// Private Properties
 	private readonly Maid: Maid = new Maid()
 

@@ -8,9 +8,43 @@ import { CoverArtUpdated, Start as StartCoverArt, GetCoverArt } from './Services
 import { Start as StartAutoUpdater } from './Services/AutoUpdater'
 import { Cache } from './Services/Cache'
 import Player from './Services/Player'
+import LyricsRenderer from './Modules/LyricsRenderer'
 
 // Stylings
 import './Stylings/main.scss'
+
+// Testing
+const testContainer = document.createElement('div')
+testContainer.classList.add('test-container')
+document.body.appendChild(testContainer)
+
+Player.SongChanged.Connect(
+	(song) => {
+		GlobalMaid.Clean("TEST")
+
+		if (song === undefined) {
+			return
+		}
+
+		song.GetDetails()
+			.then(
+				details => {
+					if (details === undefined) {
+						return
+					}
+
+					if (details.Lyrics === undefined) {
+						return
+					}
+
+					GlobalMaid.Give(
+						new LyricsRenderer(testContainer, song, details.Lyrics),
+						"TEST"
+					)
+				}
+			)
+	}
+)
 
 // Live Background Management
 let CheckForLiveBackgrounds: (() => void)

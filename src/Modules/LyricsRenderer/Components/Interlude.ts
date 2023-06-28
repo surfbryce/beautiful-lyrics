@@ -3,7 +3,7 @@ import { CurveInterpolator } from "curve-interpolator"
 import { easeSinOut } from "d3-ease"
 
 // Packages
-import { Maid } from "../../../../../../Packages/Maid"
+import { Maid, Giveable } from "../../../../../../Packages/Maid"
 import { Signal } from "../../../../../../Packages/Signal"
 import Spring from "../../../../../../Packages/Spring"
 
@@ -199,7 +199,7 @@ const CreateMainSprings = () => {
 }
 
 // Class
-export default class InterludeVisual implements SyncedVocals {
+export default class InterludeVisual implements SyncedVocals, Giveable {
 	// Private Properties
 	private readonly Maid: Maid = new Maid()
 
