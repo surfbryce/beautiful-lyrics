@@ -6,8 +6,8 @@ import { Timeout } from '../../../Packages/Scheduler'
 import { GlobalMaid, IsSpicetifyLoaded, SpicetifyLoaded } from './Services/Session'
 import { CoverArtUpdated, Start as StartCoverArt, GetCoverArt } from './Services/CoverArt'
 import { Start as StartAutoUpdater } from './Services/AutoUpdater'
-import { Start as StartSongs } from './Services/Songs'
 import { Cache } from './Services/Cache'
+import Player from './Services/Player'
 
 // Stylings
 import './Stylings/main.scss'
@@ -459,8 +459,8 @@ async function main() {
 
 	// Start our services
 	StartAutoUpdater()
-	StartSongs()
 	StartCoverArt()
+	Player.Start()
 
 	/*
 		Now watch for DOM changes to determine if we need to update.

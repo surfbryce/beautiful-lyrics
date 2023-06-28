@@ -3,7 +3,8 @@ import { Signal } from '../../../../Packages/Signal'
 
 // Services
 import { GlobalMaid } from './Session'
-import { SongChanged, CoverArt, Song, GetSong } from './Songs'
+import Player from './Player'
+import { CoverArt, Song } from './Player/Song'
 
 // Types
 type CoverArtContainer = ("VanillaFullScreen" | "VanillaSideCard" | "LyricsPlusFullScreen")
@@ -179,9 +180,9 @@ const GetBlurredCoverArt = (
 // Handle update requests
 const Update = (song?: Song) => {
 	// Now determine if there was an update or not
-	if (song?.CoverArt.Default !== CoverArt?.Default) {
+	if (song?.GetCoverArt().Default !== CoverArt?.Default) {
 		// Update our cover-art
-		CoverArt = song?.CoverArt
+		CoverArt = song?.GetCoverArt()
 
 		// Update our cover-art image
 		CoverArtUpdatedSignal.Fire(CoverArt)
@@ -193,7 +194,7 @@ export const CoverArtUpdated = CoverArtUpdatedSignal.GetEvent()
 export const GetCoverArt = () => CoverArt
 export const Start = () => {
 	// Handle manual/automatic updates
-	GlobalMaid.Give(SongChanged.Connect(Update))
-	Update(GetSong())
+	GlobalMaid.Give(Player.SongChanged.Connect(Update))
+	Update(Player.GetSong())
 }
 //export { GetBlurredCoverArt, GenerateBlurredCoverArt }
