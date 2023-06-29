@@ -33,6 +33,13 @@ type LyricMetadata = (
 	}
 )
 
+type SyllableLyricMetadata = (
+	LyricMetadata
+	& {
+		IsPartOfWord: boolean;
+	}
+)
+
 type Interlude = (
 	TimeMetadata
 	& {
@@ -72,8 +79,8 @@ type SyllableVocal = (
 
 		OppositeAligned: boolean;
 	
-		Lead: LyricMetadata[];
-		Background?: LyricMetadata[];
+		Lead: SyllableLyricMetadata[];
+		Background?: SyllableLyricMetadata[];
 	}
 )
 type SyllableSynced = (
@@ -99,7 +106,7 @@ const FeatureAgentAttribute = "ttm:agent"
 const FeatureRoleAttribute = "ttm:role"
 const AgentVersion = /^v(\d+)$/
 
-const TimeFormat = /^(?:(\d+):(\d+)\.(\d+))|(?:(\d+)\.(\d+))$/
+const TimeFormat = /(?:(\d+):(\d+)\.(\d+))|(?:(\d+)\.(\d+))$/
 
 // Regular expression to test for Arabic, Persian, Urdu, and Hebrew characters
 const RightAlignedCharacterRange = '\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDCF\uFDF0-\uFDFF\uFE70-\uFEFF'
@@ -143,6 +150,10 @@ const GetTimeInSeconds = (time: string) => {
 
 		return (seconds + milliseconds)
 	}
+}
+
+const IsNodeASpan = (node: Node): node is HTMLSpanElement => {
+	return (node.nodeName === "span")
 }
 
 // Parse Methods
@@ -259,23 +270,27 @@ const ParseAppleMusicLyrics = (text: string) => {
 						)
 
 						// Store our lyrics now
-						const leadLyrics: LyricMetadata[] = []
-						const backgroundLyrics: LyricMetadata[] = []
-						for (const syllable of line.children) {
-							if (syllable.tagName === "span") {
+						const leadLyrics: SyllableLyricMetadata[] = []
+						const backgroundLyrics: SyllableLyricMetadata[] = []
+						const lineNodes = line.childNodes
+						for (const [index, syllable] of lineNodes.entries()) {
+							if (IsNodeASpan(syllable)) {
 								// We have to first determine if we're a background lyric - since we have inner spans if we are
 								const isBackground = (syllable.getAttribute(FeatureRoleAttribute) === "x-bg")
 
 								if (isBackground) {
 									// Gather our background-lyrics
-									for (const backgroundSyllable of syllable.children) {
-										if (backgroundSyllable.tagName === "span") {
+									const backgroundNodes = syllable.childNodes
+									for (const [backgroundIndex, backgroundSyllable] of backgroundNodes.entries()) {
+										if (IsNodeASpan(backgroundSyllable)) {
 											const start = GetTimeInSeconds(backgroundSyllable.getAttribute("begin")!)
 											const end = GetTimeInSeconds(backgroundSyllable.getAttribute("end")!)
 
 											backgroundLyrics.push(
 												{
 													Text: backgroundSyllable.textContent!,
+
+													IsPartOfWord: !(backgroundNodes[backgroundIndex + 1]?.nodeType === Node.TEXT_NODE),
 
 													StartTime: start,
 													EndTime: end
@@ -287,7 +302,7 @@ const ParseAppleMusicLyrics = (text: string) => {
 									// Now determine whether or not we are surrounded by parentheses
 									{
 										const firstBackgroundSyllable = backgroundLyrics[0]
-										const lastBackgroundSyllable = backgroundLyrics[syllable.children.length - 1]
+										const lastBackgroundSyllable = backgroundLyrics[backgroundLyrics.length - 1]
 
 										if (
 											firstBackgroundSyllable.Text.startsWith("(")
@@ -305,6 +320,8 @@ const ParseAppleMusicLyrics = (text: string) => {
 									leadLyrics.push(
 										{
 											Text: syllable.textContent!,
+
+											IsPartOfWord: !(lineNodes.item(index + 1)?.nodeType === Node.TEXT_NODE),
 
 											StartTime: start,
 											EndTime: end
@@ -473,4 +490,4 @@ const ParseLyrics = (content: LyricsResult): ParsedLyrics => {
 
 // Exports
 export { ParseLyrics }
-export type { LyricsResult, LyricMetadata, Interlude, ParsedLyrics }
+export type { LyricsResult, SyllableLyricMetadata, LyricMetadata, Interlude, ParsedLyrics }

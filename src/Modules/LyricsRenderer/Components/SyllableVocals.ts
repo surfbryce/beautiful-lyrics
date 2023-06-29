@@ -11,7 +11,7 @@ import { GetSpline, Clamp } from '../SharedMethods';
 
 // Imported Types
 import { LiveText, LyricState, SyncedVocals } from '../Types'
-import { LyricMetadata } from '../../../Services/Player/LyricsParser';
+import { SyllableLyricMetadata } from '../../../Services/Player/LyricsParser';
 
 // Types
 type AnimatedLetter = { // Time is relative to the Syllable
@@ -111,7 +111,7 @@ const CreateSprings = () => {
 // Emphasis Evaluation Constants
 const MinimumEmphasizedDuration = 1
 const MaximumEmphasizedCharacters = 12
-const IsEmphasized = (metadata: LyricMetadata) => {
+const IsEmphasized = (metadata: SyllableLyricMetadata) => {
 	return (
 		((metadata.EndTime - metadata.StartTime) >= MinimumEmphasizedDuration)
 		&& (metadata.Text.length <= MaximumEmphasizedCharacters)
@@ -124,7 +124,6 @@ export default class SyllableVocals implements SyncedVocals, Giveable {
 	private readonly Maid: Maid = new Maid()
 
 	private readonly Container: HTMLDivElement
-	private readonly IsBackground: boolean
 
 	private readonly StartTime: number
 	private readonly Duration: number
@@ -143,11 +142,8 @@ export default class SyllableVocals implements SyncedVocals, Giveable {
 	// Constructor
 	public constructor(
 		lineContainer: HTMLElement,
-		syllablesMetadata: LyricMetadata[], isBackground: boolean
+		syllablesMetadata: SyllableLyricMetadata[], isBackground: boolean
 	) {
-		// Define whether or not we are background vocals
-		this.IsBackground = isBackground
-
 		// First create our container
 		const container = this.Maid.Give(document.createElement('div'))
 		container.classList.add('Vocals')
@@ -182,6 +178,9 @@ export default class SyllableVocals implements SyncedVocals, Giveable {
 					syllableSpan.classList.add('Emphasis')
 				} else {
 					syllableSpan.classList.add('Synced')
+				}
+				if (syllableMetadata.IsPartOfWord) {
+					syllableSpan.classList.add('PartOfWord')
 				}
 			}
 

@@ -352,7 +352,7 @@
 	white-space: pre;
 }
 
-.Syllable::after {
+.Syllable:not(:is(.PartOfWord))::after {
 	content: "";
 	margin-right: 0.3ch;
 }
