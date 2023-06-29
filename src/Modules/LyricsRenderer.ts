@@ -164,7 +164,7 @@ export default class LyricsRenderer implements Giveable {
 			// Immediately update ourselves
 			this.Update(
 				scroller, vocalGroups,
-				song.GetTimestamp(), (1 / 60)
+				song.GetTimestamp(), (1 / 60), true
 			)
 
 			// Handle time-skipping

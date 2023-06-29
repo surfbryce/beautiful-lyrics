@@ -257,10 +257,18 @@ export class LyricsScroller<V extends (BaseVocals | SyncedVocals)> implements Gi
 		// Grab the margin that the lyrics-container adds at the top (this affects our scroll-position)
 		const lyricsContainerStyle = window.getComputedStyle(this.LyricsContainer)
 		const lyricsContainerMarginTop = parseInt(lyricsContainerStyle.marginTop!)
+		
+		// Check if we have an offset defined
+		const offset = (
+			(lyricsContainerStyle.getPropertyValue("--use-offset") === "1")
+			? parseInt(lyricsContainerStyle.lineHeight!)
+			: 0
+		)
 
 		// Determine our minimum distance away from the top
 		const scrollViewportHeight = this.ScrollContainer.offsetHeight
-		const minimumDistanceToAutoScroll = ((scrollViewportHeight / 2) - lyricsContainerMarginTop)
+		const viewportCenter = ((scrollViewportHeight / 2) - offset)
+		const minimumDistanceToAutoScroll = (viewportCenter - lyricsContainerMarginTop)
 		const currentScrollTop = this.ScrollerObject.scrollTop
 
 		// First determine if we're even past our minimum distance yet
@@ -284,7 +292,7 @@ export class LyricsScroller<V extends (BaseVocals | SyncedVocals)> implements Gi
 			// Now if we are not blocked we can proceed
 			if (this.AutoScrollBlocked === false) {
 				// Set our scroll to the distance from the minimum
-				scrollY = ((center - minimumDistanceToAutoScroll) + lyricsContainerMarginTop)
+				scrollY = ((center - viewportCenter) + lyricsContainerMarginTop + offset)
 			}
 		} else if (currentScrollTop > 0) {
 			scrollY = 0

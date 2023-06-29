@@ -1,18 +1,15 @@
-.test-container {
+/* Root Container */
+.RootContainer {
 	display: block;
 
-	position: absolute;
-	top: 0;
-	left: 60vw;
-
-	width: 40vw;
-	height: 100vh;
+	width: 100cqw;
 
 	z-index: 100;
 
 	container-type: size;
 }
 
+/* Scroll Container */
 .LyricsScrollContainer {
 	display: inline-block;
 	position: relative;
@@ -25,6 +22,7 @@
 	container-type: size;
 }
 
+/* Scrollbar */
 .simplebar-scrollbar::before {
 	background: white !important;
 	opacity: 0 !important;
@@ -38,15 +36,13 @@
 	opacity: 0.5 !important;
 }
 
+/* Lyrics Container */
 .Lyrics {
 	display: flex;
 	flex-direction: column;
 
 	width: 100cqw;
 	height: 0;
-
-	margin-top: 2.5cqh;
-	margin-bottom: 2.5cqh;
 
 	container-type: size;
 
@@ -58,8 +54,8 @@
 	--background-sung-opacity: calc(var(--vocal-sung-opacity) * 0.6690140845);
 
 	--vocal-lyrics-scale: 7;
-	--maximum-lyrics-size: 3rem;
-	--minimum-lyrics-size: 1.5rem;
+	--maximum-lyrics-size: 3.5rem;
+	--minimum-lyrics-size: 1.85rem;
 }
 
 /* Group */
@@ -146,12 +142,16 @@
 	transition: opacity 0.25s cubic-bezier(0.61, 1, 0.88, 1);
 
 	flex-wrap: wrap;
+
+	--lyrics-size: clamp(var(--minimum-lyrics-size),
+			calc(1cqw * var(--vocal-lyrics-scale)),
+			var(--maximum-lyrics-size));
 }
 
 .Lyrics .Vocals {
-	/* Make it so there's a nice cutoff for aligned and non-aligned */
-	width: 95cqw;
+	width: 100cqw;
 }
+
 .Lyrics:has(.AlignedOpposite) .Vocals {
 	/* Make it so there's a nice cutoff for aligned and non-aligned */
 	width: 75cqw;
@@ -177,11 +177,6 @@
 .Vocals.Lead {
 	opacity: var(--vocal-idle-opacity);
 
-	--lyrics-size: clamp(
-		var(--minimum-lyrics-size),
-		calc(1cqw * var(--vocal-lyrics-scale)),
-		var(--maximum-lyrics-size)
-	);
 	font-size: var(--lyrics-size);
 	font-weight: 700;
 }
@@ -195,6 +190,7 @@
 }
 
 .VocalsGroup:is(button):hover .Vocals.Lead {
+	--text-blur: 0 !important;
 	opacity: var(--vocal-active-opacity);
 }
 
@@ -202,14 +198,10 @@
 .Vocals.Background {
 	opacity: var(--background-idle-opacity);
 
-	--lyrics-size: clamp(
-		var(--minimum-lyrics-size),
-		calc(0.75cqw * var(--vocal-lyrics-scale)),
-		var(--maximum-lyrics-size)
-	);
-	font-size: var(--lyrics-size);
+	--font-size: calc(var(--lyrics-size) * 0.75);
+	font-size: var(--font-size);
 	font-weight: 500;
-	margin-top: calc(var(--lyrics-size) * -0.05);
+	margin-top: calc(var(--font-size) * -0.05);
 }
 
 .Vocals.Background.Sung {
@@ -241,8 +233,8 @@
 
 	margin: -0.5px -0.75px -0.5px -0.75px;
 	padding: 0.5px 0.75px 0.5px 0.75px;
-	-webkit-clip-path: inset(0.5px 0.75px 0.5px 0.75px);
-	clip-path: inset(0.5px 0.75px 0.5px 0.75px);
+	/*-webkit-clip-path: inset(0.5px 0.75px 0.5px 0.75px);
+	clip-path: inset(0.5px 0.75px 0.5px 0.75px);*/
 
 	background-color: rgb(255, 255, 255);
 	background-clip: text;
@@ -265,13 +257,11 @@
 	/* Now create our effects */
 	margin: -0.5px -0.75px -0.5px -0.75px;
 	padding: 0.5px 0.75px 0.5px 0.75px;
-	-webkit-clip-path: inset(0.5px 0.75px 0.5px 0.75px);
-	clip-path: inset(0.5px 0.75px 0.5px 0.75px);
+	/*-webkit-clip-path: inset(0.5px 0.75px 0.5px 0.75px);
+	clip-path: inset(0.5px 0.75px 0.5px 0.75px);*/
 
-	text-shadow: 0 0 var(--text-blur, 0) rgba(
-		var(--gradient-color), var(--gradient-color), var(--gradient-color), var(--gradient-color-alpha)
-	);
-	
+	text-shadow: 0 0 var(--text-blur, 0) rgba(var(--gradient-color), var(--gradient-color), var(--gradient-color), var(--gradient-color-alpha));
+
 	background-clip: text;
 	-webkit-text-fill-color: transparent;
 	-webkit-background-clip: text;
@@ -280,21 +270,19 @@
 /* We only need the gradient when we've active */
 .Vocals.Active .Synced {
 	background-image: linear-gradient(var(--gradient-angle),
-	rgba(var(--gradient-color),
-		var(--gradient-color),
-		var(--gradient-color),
-		var(--gradient-color-alpha-active)) var(--gradient-progress),
-	rgba(var(--gradient-color),
-		var(--gradient-color),
-		var(--gradient-color),
-		var(--gradient-color-alpha)) calc(var(--gradient-progress) + 20% + var(--gradient-offset)));
+			rgba(var(--gradient-color),
+				var(--gradient-color),
+				var(--gradient-color),
+				var(--gradient-color-alpha-active)) var(--gradient-progress),
+			rgba(var(--gradient-color),
+				var(--gradient-color),
+				var(--gradient-color),
+				var(--gradient-color-alpha)) calc(var(--gradient-progress) + 20% + var(--gradient-offset)));
 	text-shadow: 0 0 var(--text-shadow-blur-radius) rgba(255, 255, 255, var(--text-shadow-opacity));
 }
 
 .Vocals.Sung .Synced {
-	text-shadow: 0 0 var(--text-blur, 0) rgba(
-		var(--gradient-color), var(--gradient-color), var(--gradient-color), var(--gradient-color-alpha-active)
-	);
+	text-shadow: 0 0 var(--text-blur, 0) rgba(var(--gradient-color), var(--gradient-color), var(--gradient-color), var(--gradient-color-alpha-active));
 }
 
 .LyricsScrollContainer.UserScrolling .Vocals:not(:is(.Active)) .Synced {
@@ -360,4 +348,92 @@
 .Letter {
 	/* Allows each letter to be side-by-side */
 	display: inline-block;
+}
+
+/* Spotify */
+.main-nowPlayingView-lyricsContent {
+	// Make the lyrics containers their own container
+	container-type: inline-size;
+	overflow-y: hidden;
+	overflow-x: visible;
+
+	padding-left: 0 !important;
+	padding-right: 0 !important;
+
+	&:hover {
+		overflow-y: hidden !important;
+	}
+
+	.RootContainer {
+		height: 25cqh;
+	}
+
+	.Lyrics {
+		margin-top: 2.5cqh;
+		margin-bottom: 40cqh;
+
+		padding-left: 16px;
+		padding-right: 16px;
+
+		line-height: 7.5cqh;
+		--use-offset: 1;
+	}
+}
+
+.lyrics-lyrics-contentContainer {
+	container-type: inline-size;
+}
+
+.os-content:has(.lyrics-lyrics-contentWrapper) {
+	overflow: hidden;
+}
+
+.os-host:has(.lyrics-lyrics-contentWrapper) {
+	.os-scrollbar {
+		display: none;
+	}
+}
+
+@property --FullscreenExtraPadding {
+	syntax: "<length>";
+	initial-value: 0px;
+	inherits: true;
+}
+
+.lyrics-lyrics-contentWrapper {
+	// Make the lyrics containers their own container
+	overflow: visible;
+
+	&:hover {
+		overflow: hidden !important;
+		margin: 0 !important;
+	}
+
+	.RootContainer {
+		-webkit-mask-image: linear-gradient(
+			180deg,
+			transparent 0,
+			transparent 16px,
+			var(--spice-sidebar) 24px,
+			var(--spice-sidebar) calc(100% - 64px),
+			transparent calc(100% - 16px),
+			transparent
+		);
+
+		--FullscreenExtraPadding: 5cqw;
+
+		width: calc(40cqw + (var(--FullscreenExtraPadding) * 2));
+		height: 84cqh;
+	}
+
+	.Lyrics {
+		margin-top: 25cqh;
+		margin-bottom: 45cqh;
+
+		padding-left: var(--FullscreenExtraPadding);
+		padding-right: var(--FullscreenExtraPadding);
+
+		line-height: 2.5cqh;
+		--use-offset: 1;
+	}
 }

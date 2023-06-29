@@ -8,43 +8,11 @@ import { CoverArtUpdated, Start as StartCoverArt, GetCoverArt } from './Services
 import { Start as StartAutoUpdater } from './Services/AutoUpdater'
 import { Cache } from './Services/Cache'
 import Player from './Services/Player'
+import { Song } from './Services/Player/Song'
 import LyricsRenderer from './Modules/LyricsRenderer'
 
 // Stylings
 import './Stylings/main.scss'
-
-// Testing
-const testContainer = document.createElement('div')
-testContainer.classList.add('test-container')
-document.body.appendChild(testContainer)
-
-Player.SongChanged.Connect(
-	(song) => {
-		GlobalMaid.Clean("TEST")
-
-		if (song === undefined) {
-			return
-		}
-
-		song.GetDetails()
-			.then(
-				details => {
-					if (details === undefined) {
-						return
-					}
-
-					if (details.Lyrics === undefined) {
-						return
-					}
-
-					GlobalMaid.Give(
-						new LyricsRenderer(testContainer, song, details.Lyrics),
-						"TEST"
-					)
-				}
-			)
-	}
-)
 
 // Live Background Management
 let CheckForLiveBackgrounds: (() => void)
@@ -236,21 +204,11 @@ let CheckForLiveBackgrounds: (() => void)
 	}
 }
 
-// Lyrics Management (Soon to be phased out for custom lyric system)
+// Lyrics Management
 let CheckForLyricContainers: (() => void)
 {
 	// Types
-	type LyricState = ("Unsynced" | "Unsung" | "Active" | "Sung")
 	type LyricContainer = ("VanillaFullScreen" | "VanillaSideCard")
-	type LyricsData = {
-		LayoutOrder: number,
-		State: LyricState,
-		IsFontSizeObserver: boolean
-	}
-
-	// Behavior Constants
-	const DistanceToMaximumBlur = 4 // Any lyrics beyond this unit of distance away will be at full-blur
-	const ActiveLyricSizeIncrease = 0.5 // This is measured in rem Units as all Spotify fonts are rendered with them
 
 	// Create our maid
 	const LyricMaids = GlobalMaid.Give(new Maid(), "Lyrics")
@@ -260,199 +218,77 @@ let CheckForLyricContainers: (() => void)
 	ContainerQuerys.set('VanillaFullScreen', '.lyrics-lyrics-contentWrapper')
 	ContainerQuerys.set('VanillaSideCard', '.main-nowPlayingView-lyricsContent')
 
-	// Lyric-State Classes
-	const LyricClass = 'lyrics-lyricsContent-lyric'
-	const UnsyncedLyricClass = 'lyrics-lyricsContent-unsynced'
-	const HighlightedLyricClass = 'lyrics-lyricsContent-highlight'
-	const ActiveLyricClass = 'lyrics-lyricsContent-active'
-
-	// Font Method
-	const GetLyricFontSizeInRem = (lyric: HTMLDivElement): number => {
-		/*
-			The idea here is that we can get the font-size of our text in pixels.
-	
-			We know that the font-size in CSS is in rem-units. We also know that the documents
-			font-size is equievelant to 1rem. So what we can then do is get the computed styles
-			for both elements and divide their font-sizes to get the font-size in rem-units.
-		*/
-		const style = getComputedStyle(lyric), rootStyle = getComputedStyle(document.documentElement)
-		const lyricFontSizeInPixels = parseFloat(style.fontSize), rootFontSizeInPixels = parseFloat(rootStyle.fontSize)
-
-		return (lyricFontSizeInPixels / rootFontSizeInPixels)
-	}
-
 	// Now manage our lyric-containers
 	const ManageLyricContainer = (containerType: LyricContainer, container: HTMLDivElement) => {
 		// Create our maid
 		const containerMaid = LyricMaids.Give(new Maid(), containerType)
 
-		// Create our storage for each lyric
-		const lyrics: Map<
-			HTMLDivElement,
-			LyricsData
-		> = new Map()
+		// Create our root-container
+		const rootContainer = containerMaid.Give(document.createElement('div'))
+		rootContainer.classList.add('RootContainer')
+		container.appendChild(rootContainer)
 
-		// Handle updating our lyrics
-		let fontSizeInRem: number = 0
-
-		const UpdateFontSize = (lyric: HTMLDivElement, data: LyricsData) => {
-			lyric.style.fontSize = (
-				(data.State == "Active") ? `${fontSizeInRem + ActiveLyricSizeIncrease}rem`
-					: ''
-			)
-		}
-
-		const Update = () => {
-			// Go through our lyrics and update their states (and also gather our active layout-order)
-			let activeLayoutOrder: (number | undefined)
-			for (const [lyric, data] of lyrics) {
-				const classes = lyric.classList
-
-				if (classes.contains(ActiveLyricClass)) {
-					data.State = "Active"
-					activeLayoutOrder = data.LayoutOrder
-				} else if (classes.contains(UnsyncedLyricClass)) {
-					data.State = "Unsynced"
-				} else if (classes.contains(HighlightedLyricClass)) {
-					data.State = "Sung"
-				} else {
-					data.State = "Unsung"
-				}
-			}
-
-			// Go through our lyrics and handle updating their appearance
-			for (const [lyric, data] of lyrics) {
-				// Determine if we should be considered active
-				const isActive = (data.State === "Active")
-				const isFocused = (isActive || (data.State === "Unsynced"))
-
-				// Determine our blur
-				let blur: number
-				if (isFocused) {
-					blur = 0
-				} else if (activeLayoutOrder === undefined) { // Means that all lyrics have been passed
-					blur = DistanceToMaximumBlur
-				} else {
-					const distance = Math.min(Math.abs(data.LayoutOrder - activeLayoutOrder), DistanceToMaximumBlur)
-
-					blur = distance
-				}
-
-				// Determine our text-color
-				let textColor = (
-					isFocused ? "var(--lyrics-color-active)"
-						: (data.State === "Sung") ? "var(--lyrics-color-passed)"
-							: "var(--lyrics-color-inactive)"
-				)
-
-				// Give ourselves the lyric class
-				if (lyric.classList.contains('lyric') === false) {
-					lyric.classList.add('lyric')
-				}
-
-				// Update our font-size
-				UpdateFontSize(lyric, data)
-
-				// Update our lyric appearance according to our blur
-				lyric.style.color = "transparent"
-				lyric.style.textShadow = `0 0 ${blur}px ${textColor}`
-			}
-		}
-
-		// Handle finding our lyrics
-		let observer: MutationObserver
-
+		// Handle hiding existing lyrics
 		{
-			// Helper-Method to store Lyrics
-			const StoreLyric = (lyric: HTMLDivElement) => {
-				// Create our maid
-				const lyricMaid = containerMaid.Give(new Maid(), lyric)
-
-				// Find our layout-order
-				const layoutOrder = Array.from(container.children).indexOf(lyric)
-
-				// Create our observer to watch for class-changes
-				const mutationObserver = lyricMaid.Give(new MutationObserver(Update))
-				mutationObserver.observe(lyric, { attributes: true, attributeFilter: ['class'], childList: false, subtree: false })
-
-				// Create our observer to watch for size-changes
-				let isFontSizeObserver = false
-
-				if ((containerMaid.Has("FontResizeObserver") === false) && (lyric.innerText.length === 0)) {
-					// Create our resize-observer
-					const resizeObserver = containerMaid.Give(
-						new ResizeObserver(
-							_ => {
-								fontSizeInRem = GetLyricFontSizeInRem(lyric)
-
-								for (const [lyricToUpdate, data] of lyrics) {
-									UpdateFontSize(lyricToUpdate, data)
-								}
-							}
-						),
-						"FontResizeObserver"
-					)
-					resizeObserver.observe(lyric)
-
-					// When we are destroyed handle disconnecting our observer (so we can make a new one)
-					lyricMaid.Give(() => containerMaid.Clean("FontResizeObserver"))
-
-					// Mark that we are a font-size observer
-					isFontSizeObserver = true
-				}
-
-				// Store our lyric
-				lyrics.set(
-					lyric, {
-					LayoutOrder: layoutOrder,
-					State: "Unsung",
-					IsFontSizeObserver: isFontSizeObserver
-				}
-				)
-
-				// Force-update
-				Update()
-			}
-
-			const CheckNode = (node: Node) => {
-				if (
-					(node instanceof HTMLDivElement)
-					&& node.classList.contains(LyricClass)
-				) {
-					StoreLyric(node)
-				}
-			}
-
-			// Handle lyric-child changes
-			observer = containerMaid.Give(
+			// Watch for new elements
+			const observer = containerMaid.Give(
 				new MutationObserver(
-					(mutationRecords) => {
-						for (const mutationRecord of mutationRecords) {
-							if (mutationRecord.type !== 'childList') {
-								continue
-							}
-
-							for (const node of mutationRecord.removedNodes) {
-								if (node instanceof HTMLDivElement) {
-									lyrics.delete(node)
-									containerMaid.Clean(node)
+					(mutations) => {
+						for (const mutation of mutations) {
+							for (const node of mutation.addedNodes) {
+								if (node instanceof HTMLElement && (node !== rootContainer)) {
+									node.style.display = 'none'
 								}
-							}
-
-							for (const node of mutationRecord.addedNodes) {
-								CheckNode(node)
 							}
 						}
 					}
 				)
 			)
-			observer.observe(container, { attributes: false, childList: true, subtree: false })
+			observer.observe(container, { childList: true })
 
-			// Grab our initial lyrics
-			for (const node of container.childNodes) {
-				CheckNode(node)
+			// Initial hiding
+			for (const element of container.children) {
+				if (element instanceof HTMLElement && (element !== rootContainer)) {
+					element.style.display = 'none'
+				}
 			}
 		}
+
+		// Now handle our song
+		const HandleSong = (song?: Song) => {
+			// Remove our stuff from before
+			containerMaid.Clean("Lyrics")
+
+			// If we don't have a song then don't bother with the details
+			if (song === undefined) {
+				return
+			}
+
+			// Now grab our details
+			song.GetDetails()
+				.then(
+					details => {
+						// No details means no lyrics
+						if (details === undefined) {
+							return
+						}
+
+						// No lyrics means no lyrics! (DUH!)
+						if (details.Lyrics === undefined) {
+							return
+						}
+
+						// Render our lyrics
+						containerMaid.Give(
+							new LyricsRenderer(rootContainer, song, details.Lyrics),
+							"Lyrics"
+						)
+					}
+				)
+		}
+
+		containerMaid.Give(Player.SongChanged.Connect(HandleSong))
+		HandleSong(Player.GetSong())
 	}
 
 	// Handle checking for existence changes in our lyric-containers
