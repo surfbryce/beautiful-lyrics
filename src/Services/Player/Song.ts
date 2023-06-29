@@ -135,7 +135,7 @@ type Details = {
 }
 
 // Behavior Constants
-const MinimumTimeSkipDifference = 0.1 // Minimum amount of seconds to be considered a time-skip/readjustment
+const MinimumTimeSkipDifferenceOffset = (3 / 240) // Difference extender (based off DeltaTime)
 
 const TrackInformationExpiration: ExpirationSettings = {
 	Duration: 2,
@@ -165,6 +165,7 @@ class Song implements Giveable {
 	// Private Song State
 	private Playing: boolean
 	private Timestamp: number = 0
+	private DeltaTime: number = (1 / 60)
 
 	private LoadedDetails?: true
 
@@ -247,7 +248,8 @@ class Song implements Giveable {
 	
 				// Now determine if we skipped
 				const deltaTime = Math.abs(spotifyTimestamp - this.Timestamp)
-				if (deltaTime >= MinimumTimeSkipDifference) {
+
+				if (deltaTime >= (this.DeltaTime + MinimumTimeSkipDifferenceOffset)) {
 					this.UpdateTimestamp(spotifyTimestamp, (1 / 60), true)
 				}
 			}
@@ -395,17 +397,16 @@ class Song implements Giveable {
 		const update = () => {
 			// Grab our time-now
 			const timeNow = Date.now()
+			const deltaTime = ((timeNow - lastTime) / 1000)
 
 			// Determine if we can even step
 			if (this.Playing) {
-				// Grab our delta-time
-				const deltaTime = ((timeNow - lastTime) / 1000)
-
 				// Now update our timestamp
 				this.UpdateTimestamp(Math.min((this.Timestamp + deltaTime), this.Duration), deltaTime)
 			}
 
-			// Update our last time
+			// Update our last time/delta-time
+			this.DeltaTime = deltaTime
 			lastTime = timeNow
 
 			// Schedule us for another update
