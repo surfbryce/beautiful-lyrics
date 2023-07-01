@@ -19,6 +19,7 @@ export type VocalGroups<V extends (BaseVocals | SyncedVocals)> = VocalGroup<V>[]
 
 // Visual Constants
 const DistanceToMaximumBlur = 4 // Any vocals beyond this unit of distance away will be at full-blur
+const BlurScale = 1.25 // How much we scale the blur by
 
 // Behavior Constants
 const UserScrollingStopsAfter = 0.75 // Determines how long after the user stops scrolling that we allow auto-scrolling
@@ -214,7 +215,7 @@ export class LyricsScroller<V extends (BaseVocals | SyncedVocals)> implements Gi
 			)
 
 			// Update our blur now
-			vocal.SetBlur(distance)
+			vocal.SetBlur(distance * BlurScale)
 		}
 	}
 
