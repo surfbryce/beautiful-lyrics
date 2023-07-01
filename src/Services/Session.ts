@@ -10,24 +10,45 @@ const GlobalMaid = new Maid()
 const Script = (document.currentScript as HTMLScriptElement)
 const IsDevelopment = (Script.src.includes("https://xpui.app.spotify.com/"))
 
+// Spotify Types
+type HistoryLocation = {
+	pathname: string;
+	search: string;
+	hash: string;
+	state: Record<string, any>;
+}
+
 // Store our Spicetify-Classes
 const SpicetifyLoadedSignal = new Signal<() => void>()
 let AllSpicetifyLoaded = false
 let SpotifyPlayer = Spicetify.Player
 let SpotifyFetch = Spicetify.CosmosAsync
 let SpotifyShowNotification = Spicetify.showNotification
+let SpotifyPlatform = Spicetify.Platform
+let SpotifyHistory: {
+	push: ((path: HistoryLocation | string) => void);
+    replace: ((path: HistoryLocation | string) => void);
+    goBack: (() => void);
+    goForward: (() => void);
+    listen: ((listener: (location: HistoryLocation) => void) => () => void);
+    location: HistoryLocation;
+} = SpotifyPlatform?.History
 {
 	const WaitForSpicetify = () => {
 		// Update our variables
 		SpotifyPlayer = Spicetify.Player
 		SpotifyFetch = Spicetify.CosmosAsync
 		SpotifyShowNotification = Spicetify.showNotification
+		SpotifyPlatform = Spicetify.Platform
+		SpotifyHistory = SpotifyPlatform?.History
 
 		// Check if we have them all yet
 		if (
 			(SpotifyPlayer === undefined)
 			|| (SpotifyFetch === undefined)
 			|| (SpotifyShowNotification === undefined)
+			|| (SpotifyPlatform === undefined)
+			|| (SpotifyHistory === undefined)
 		) {
 			GlobalMaid.Give(Timeout(0, WaitForSpicetify), "WaitForSpicetify")
 		} else {
@@ -42,5 +63,5 @@ let SpotifyShowNotification = Spicetify.showNotification
 
 // Exports
 export const SpicetifyLoaded = SpicetifyLoadedSignal.GetEvent()
-export const IsSpicetifyLoaded = () => IsSpicetifyLoaded
-export {GlobalMaid, SpotifyPlayer, SpotifyFetch, Script, IsDevelopment}
+export const IsSpicetifyLoaded = () => AllSpicetifyLoaded
+export {GlobalMaid, SpotifyPlayer, SpotifyFetch, SpotifyPlatform, SpotifyHistory, Script, IsDevelopment}
