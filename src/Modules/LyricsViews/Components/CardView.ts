@@ -73,6 +73,27 @@ export default class CardView implements Giveable {
 			this.LyricsRootContainer = this.LyricsContainer.querySelector<HTMLDivElement>(".RootContainer")!
 		}
 
+		// Create our tool-tips
+		{
+			const closeTooltip = Spicetify.Tippy(
+				this.ExpandedControls.CloseButton,
+				{
+					...Spicetify.TippyProps,
+					content: `Close Lyrics`
+				}
+			)
+			this.Maid.Give(() => closeTooltip.destroy())
+			
+			const pageTooltip = Spicetify.Tippy(
+				this.ExpandedControls.OpenPageButton,
+				{
+					...Spicetify.TippyProps,
+					content: "Open Lyrics Page"
+				}
+			)
+			this.Maid.Give(() => pageTooltip.destroy())
+		}
+
 		// Handle our button-presses
 		{
 			// Handle our show lyrics button

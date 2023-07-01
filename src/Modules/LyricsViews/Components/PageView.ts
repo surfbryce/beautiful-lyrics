@@ -75,23 +75,29 @@ export default class PageView implements Giveable {
 
 		// Handle our controls
 		{
+			// Create tippy-tips for our buttons
+			const closeTooltip = Spicetify.Tippy(
+				this.Controls.Close,
+				{
+					...Spicetify.TippyProps,
+					content: `Close ${isCinema ? "Cinema" : "Page"}`
+				}
+			)
+			this.Maid.Give(() => closeTooltip.destroy())
+			
+			const changeTooltip = Spicetify.Tippy(
+				this.Controls.Change,
+				{
+					...Spicetify.TippyProps,
+					content: (isCinema ? "Leave Cinema" : "Enter Cinema")
+				}
+			)
+			this.Maid.Give(() => changeTooltip.destroy())
+
 			// Handle our close button
 			this.Controls.Close.addEventListener(
 				"click",
-				() => {
-					// Find a page that isn't related to us
-					for (let index = (SpotifyHistory.entries.length - 1); index >= 0; index -= 1) {
-						const path = SpotifyHistory.entries[index].pathname
-
-						if (path.startsWith("/BeautifulLyrics") === false) {
-							SpotifyHistory.push(path)
-							break
-						}
-					}
-
-					// Otherwise, send us home
-					SpotifyHistory.push("/")
-				}
+				() => this.Close()
 			)
 
 			// Handle our change button
@@ -151,6 +157,21 @@ export default class PageView implements Giveable {
 			// Handle setting our lyrics
 			this.ReactToSongChange()
 		}
+	}
+
+	public Close() {
+		// Find a page that isn't related to us
+		for (let index = (SpotifyHistory.entries.length - 1); index >= 0; index -= 1) {
+			const path = SpotifyHistory.entries[index].pathname
+
+			if (path.startsWith("/BeautifulLyrics") === false) {
+				SpotifyHistory.push(path)
+				break
+			}
+		}
+
+		// Otherwise, send us home
+		SpotifyHistory.push("/")
 	}
 
 	// Deconstructor
