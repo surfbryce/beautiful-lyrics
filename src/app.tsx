@@ -10,6 +10,7 @@ import { Cache } from './Services/Cache'
 import Player from './Services/Player'
 import { Song } from './Services/Player/Song'
 import LyricsRenderer from './Modules/LyricsRenderer'
+import StartLyricsView from "./Modules/LyricsViews"
 
 // Stylings
 import './Stylings/main.scss'
@@ -19,16 +20,12 @@ let CheckForLiveBackgrounds: (() => void)
 
 {
 	// Types
-	type BackgroundContainer = ("VanillaFullScreen" | "VanillaSideCard" | "LyricsPlusFullScreen")
+	type BackgroundContainer = ("VanillaSideCard" | "Page")
 
 	// Define our queries for each background-container
 	const BackgroundQuerys: Map<BackgroundContainer, string> = new Map()
-	BackgroundQuerys.set('VanillaFullScreen', '#main:has(.os-content .lyrics-lyrics-container) .under-main-view')
+	BackgroundQuerys.set('Page', '.BeautifulLyricsPage')
 	BackgroundQuerys.set('VanillaSideCard', 'aside:has(.main-nowPlayingView-section) .os-padding')
-	BackgroundQuerys.set(
-		'LyricsPlusFullScreen',
-		'#main:has(.os-content .lyrics-lyricsContainer-LyricsContainer) .under-main-view'
-	)
 
 	// Define our images to create
 	// const BackgroundSizeScales = [2, 3]
@@ -182,6 +179,7 @@ let CheckForLiveBackgrounds: (() => void)
 	}
 
 	// Handle checking for background existence updates
+	const ExistingContainers: Map<BackgroundContainer, Element> = new Map()
 	CheckForLiveBackgrounds = () => {
 		// Go through each background-container and check if it exists
 		for (const [containerType, query] of BackgroundQuerys) {
@@ -189,126 +187,17 @@ let CheckForLiveBackgrounds: (() => void)
 			const container = document.body.querySelector(query)
 
 			// Make sure our container has changed existence state
-			const exists = BackgroundMaids.Has(containerType)
-			if (exists ? (container !== null) : (container === null)) {
+			if (ExistingContainers.get(containerType) === container) {
 				continue
 			}
 
 			// If it exists then manage it - otherwise - just clean out our Maid item
 			if (container === null) {
+				ExistingContainers.delete(containerType)
 				BackgroundMaids.Clean(containerType)
 			} else {
+				ExistingContainers.set(containerType, container)
 				ManageLiveBackground(containerType, (container as HTMLDivElement))
-			}
-		}
-	}
-}
-
-// Lyrics Management
-let CheckForLyricContainers: (() => void)
-{
-	// Types
-	type LyricContainer = ("VanillaFullScreen" | "VanillaSideCard")
-
-	// Create our maid
-	const LyricMaids = GlobalMaid.Give(new Maid(), "Lyrics")
-
-	// Define our queries for container
-	const ContainerQuerys: Map<LyricContainer, string> = new Map()
-	ContainerQuerys.set('VanillaFullScreen', '.lyrics-lyrics-contentWrapper')
-	ContainerQuerys.set('VanillaSideCard', '.main-nowPlayingView-lyricsContent')
-
-	// Now manage our lyric-containers
-	const ManageLyricContainer = (containerType: LyricContainer, container: HTMLDivElement) => {
-		// Create our maid
-		const containerMaid = LyricMaids.Give(new Maid(), containerType)
-
-		// Create our root-container
-		const rootContainer = containerMaid.Give(document.createElement('div'))
-		rootContainer.classList.add('RootContainer')
-		container.appendChild(rootContainer)
-
-		// Handle hiding existing lyrics
-		{
-			// Watch for new elements
-			const observer = containerMaid.Give(
-				new MutationObserver(
-					(mutations) => {
-						for (const mutation of mutations) {
-							for (const node of mutation.addedNodes) {
-								if (node instanceof HTMLElement && (node !== rootContainer)) {
-									node.style.display = 'none'
-								}
-							}
-						}
-					}
-				)
-			)
-			observer.observe(container, { childList: true })
-
-			// Initial hiding
-			for (const element of container.children) {
-				if (element instanceof HTMLElement && (element !== rootContainer)) {
-					element.style.display = 'none'
-				}
-			}
-		}
-
-		// Now handle our song
-		const HandleSong = (song?: Song) => {
-			// Remove our stuff from before
-			containerMaid.Clean("Lyrics")
-
-			// If we don't have a song then don't bother with the details
-			if (song === undefined) {
-				return
-			}
-
-			// Now grab our details
-			song.GetDetails()
-				.then(
-					details => {
-						// No details means no lyrics
-						if (details === undefined) {
-							return
-						}
-
-						// No lyrics means no lyrics! (DUH!)
-						if (details.Lyrics === undefined) {
-							return
-						}
-
-						// Render our lyrics
-						containerMaid.Give(
-							new LyricsRenderer(rootContainer, song, details.Lyrics),
-							"Lyrics"
-						)
-					}
-				)
-		}
-
-		containerMaid.Give(Player.SongChanged.Connect(HandleSong))
-		HandleSong(Player.GetSong())
-	}
-
-	// Handle checking for existence changes in our lyric-containers
-	CheckForLyricContainers = () => {
-		// Go through each background-container and check if it exists
-		for (const [containerType, query] of ContainerQuerys) {
-			// Grab our container
-			const container = document.body.querySelector(query)
-
-			// Make sure our container has changed existence state
-			const exists = LyricMaids.Has(containerType)
-			if (exists ? (container !== null) : (container === null)) {
-				continue
-			}
-
-			// If it exists then manage it - otherwise - just clean out our Maid item
-			if (container === null) {
-				LyricMaids.Clean(containerType)
-			} else {
-				ManageLyricContainer(containerType, (container as HTMLDivElement))
 			}
 		}
 	}
@@ -331,6 +220,7 @@ async function main() {
 	StartAutoUpdater()
 	StartCoverArt()
 	Player.Start()
+	StartLyricsView()
 
 	/*
 		Now watch for DOM changes to determine if we need to update.
@@ -345,7 +235,7 @@ async function main() {
 		new MutationObserver(
 			() => {
 				CheckForLiveBackgrounds()
-				CheckForLyricContainers()
+				//CheckForLyricContainers()
 			}
 		)
 	)
@@ -357,7 +247,7 @@ async function main() {
 
 	// Check for any initial elements
 	CheckForLiveBackgrounds()
-	CheckForLyricContainers()
+	//CheckForLyricContainers()
 
 	/*
 		For anybody coming across this - I will always be clear and incredibly transparent about what I do

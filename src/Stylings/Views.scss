@@ -1,0 +1,115 @@
+/* Page View */
+.BeautifulLyricsPage {
+	width: 100cqw;
+	height: 100cqh;
+
+	top: 0;
+	left: 0;
+
+	position: absolute !important;
+
+	&.Cinema {
+		top: -1cqh;
+		height: 101cqh;
+	}
+
+	.NoLyrics {
+		display: flex;
+
+		position: absolute;
+		left: 50cqw;
+		top: 50cqh;
+
+		transform: translate(-50%, -50%);
+
+		font-size: 3cqw;
+		color: white;
+
+		opacity: 0.5;
+	}
+}
+
+/* Spotify Support */
+.Root__main-view-overlay:has(.BeautifulLyricsPage) {
+	pointer-events: auto;
+}
+
+.os-content:has(.BeautifulLyricsPage) {
+	container-type: size;
+
+	.main-view-container__scroll-node-child-spacer {
+		display: flex;
+		z-index: 200000;
+
+		width: 12cqh;
+
+		position: relative;
+		left: calc(50cqw - 6cqw);
+
+		.main-nowPlayingView-lyricsControls {
+			display: flex;
+
+			gap: 8px;
+
+			margin: auto;
+			padding-top: 3cqh;
+
+			button {
+				width: 4.25cqh;
+				height: 4.25cqh;
+			}
+
+			opacity: 0;
+			transition: opacity .2s;
+		}
+
+		&:hover {
+			.main-nowPlayingView-lyricsControls {
+				opacity: 1;
+			}
+		}
+	}
+}
+
+.os-content:has(.BeautifulLyricsPage:hover) {
+	.main-nowPlayingView-lyricsControls {
+		opacity: 0.1;
+	}
+}
+
+.BeautifulLyricsPage {
+	container-type: size;
+
+	.main-nowPlayingView-lyricsControls {
+		display: flex;
+		z-index: 1000000;
+
+		width: 12cqh;
+
+		position: relative;
+
+		gap: 8px;
+		justify-content: center;
+
+		margin: auto;
+		padding-top: 3cqh;
+
+		button {
+			width: 4.25cqh;
+			height: 4.25cqh;
+		}
+
+		opacity: 0;
+		transition: opacity .2s;
+
+		&:hover {
+			opacity: 1 !important;
+		}
+	}
+
+	&:hover {
+		.main-nowPlayingView-lyricsControls {
+			opacity: 0.1;
+		}
+	}
+}

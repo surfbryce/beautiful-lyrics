@@ -135,7 +135,7 @@ type Details = {
 }
 
 // Behavior Constants
-const MinimumTimeSkipDifferenceOffset = (3 / 240) // Difference extender (based off DeltaTime)
+const MinimumTimeSkipDifferenceOffset = (1 / 120) // Difference extender (based off DeltaTime)
 
 const TrackInformationExpiration: ExpirationSettings = {
 	Duration: 2,
@@ -214,9 +214,6 @@ class Song implements Giveable {
 
 		// Now load our details
 		this.LoadDetails()
-
-		// Handle naturaly timestepping
-		this.StartNaturalTimestepping()
 	}
 
 	// Private Setup Methods
@@ -431,6 +428,11 @@ class Song implements Giveable {
 
 		// Now fire our event
 		this.TimeSteppedSignal.Fire(timestamp, deltaTime, skipped)
+
+		// Start natural-timestepping if this is our first timestamp
+		if (fireChangedSignal !== undefined) {
+			this.StartNaturalTimestepping()
+		}
 	}
 
 	// Public Metadata Methods

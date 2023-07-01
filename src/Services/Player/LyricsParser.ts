@@ -106,7 +106,7 @@ const FeatureAgentAttribute = "ttm:agent"
 const FeatureRoleAttribute = "ttm:role"
 const AgentVersion = /^v(\d+)$/
 
-const TimeFormat = /(?:(\d+):(\d+)\.(\d+))|(?:(\d+)\.(\d+))$/
+const TimeFormat = /(?:(\d+):)?(\d+)(?:\.(\d+))?$/
 
 // Regular expression to test for Arabic, Persian, Urdu, and Hebrew characters
 const RightAlignedCharacterRange = '\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDCF\uFDF0-\uFDFF\uFE70-\uFEFF'
@@ -137,19 +137,12 @@ const GetTimeInSeconds = (time: string) => {
 		return -1
 	}
 
-	// Determine if we're in minutes or seconds
-	if (matches[1] !== undefined) {
-		const minutes = parseInt(matches[1], 10)
-		const seconds = parseInt(matches[2], 10)
-		const milliseconds = (parseInt(matches[3], 10) / 1000)
+	// Grab all our matches
+	const minutes = (matches[1] ? parseInt(matches[1], 10) : 0)
+	const seconds = parseInt(matches[2], 10)
+	const milliseconds = (matches[3] ? parseInt(matches[3], 10) : 0)
 
-		return ((minutes * 60) + seconds + milliseconds)
-	} else {
-		const seconds = parseInt(matches[4], 10)
-		const milliseconds = (parseInt(matches[5], 10) / 1000)
-
-		return (seconds + milliseconds)
-	}
+	return ((minutes * 60) + seconds + (milliseconds / 1000))
 }
 
 const IsNodeASpan = (node: Node): node is HTMLSpanElement => {

@@ -94,6 +94,16 @@ aside:has(.main-nowPlayingView-section) {
 		transform-origin: left top;
 	}
 
+	.BeautifulLyricsPage &-container {
+		max-width: 35%;
+		max-height: 55%;
+
+		scale: 290% 185%;
+		transform-origin: left top;
+
+		filter: saturate(2.5) brightness(0.65);
+	}
+
 	#main:has(#lyrics-cinema .lyrics-lyrics-background) &.under-main-view &-container {
 		z-index: 1;
 	}

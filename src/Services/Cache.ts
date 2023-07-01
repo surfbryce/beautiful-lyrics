@@ -24,7 +24,11 @@ type ExpireCacheStoreItemName = (keyof ExpireCacheStore)
 type Store = {
 	Analytics: {
 		LastVisitedAt?: number;
-	}
+	},
+
+	LyricViews: {
+		CardLyricsVisible: boolean;
+	};
 }
 type StoreItemName = (keyof Store)
 type StoreType = ("General" | "ExpireCache")
@@ -36,16 +40,21 @@ const ExpireCacheStoreTemplates: ExpireCacheStore = {
 	ISRCLyrics: {}
 }
 const StoreTemplates: Store = {
-	Analytics: {}
+	Analytics: {},
+
+	LyricViews: {
+		CardLyricsVisible: false
+	}
 }
 
 // Define StoreItem Versions
 const ExpireCacheStoreItemVersions: Map<ExpireCacheStoreItemName, number> = new Map()
 ExpireCacheStoreItemVersions.set("TrackInformation", 1)
-ExpireCacheStoreItemVersions.set("ISRCLyrics", 2)
+ExpireCacheStoreItemVersions.set("ISRCLyrics", 1)
 
 const GeneralStoreItemVersions: Map<StoreItemName, number> = new Map()
 GeneralStoreItemVersions.set("Analytics", 1)
+GeneralStoreItemVersions.set("LyricViews", 1)
 
 // Cache-Control Class
 class CacheManager {
@@ -213,6 +222,9 @@ class CacheManager {
 		key: string, content: ExpireCacheStoreContents[N],
 		expiration: ExpirationSettings
 	) {
+		if (true) {
+			return
+		}
 		// Grab our control-record
 		const controlRecord = this.GetExpireCache(expireCacheName)
 

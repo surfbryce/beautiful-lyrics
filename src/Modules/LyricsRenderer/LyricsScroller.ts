@@ -5,7 +5,7 @@ import SimpleBar from "simplebar"
 
 // Packages
 import { Maid, Giveable } from "../../../../../Packages/Maid"
-import { Timeout } from "../../../../../Packages/Scheduler"
+import { Timeout, OnNextFrame } from "../../../../../Packages/Scheduler"
 
 // Imported Types
 import { BaseVocals, SyncedVocals } from "./Types"
@@ -51,6 +51,7 @@ export class LyricsScroller<V extends (BaseVocals | SyncedVocals)> implements Gi
 	private AutoScrollBlocked: boolean = false
 	private AutoScrolling: boolean = false
 	private LastActiveVocalIndex: number = 0
+	private LyricsEnded: boolean = false
 
 	// Constructor
 	public constructor(
@@ -228,32 +229,6 @@ export class LyricsScroller<V extends (BaseVocals | SyncedVocals)> implements Gi
 			return
 		}
 
-		// Grab our active vocal-groups
-		const activeVocalGroups = []
-		for (const [index, vocalGroup] of (this.VocalGroups as VocalGroups<SyncedVocals>).entries()) {
-			if (vocalGroup.Vocals.some(vocal => vocal.IsActive())) {
-				activeVocalGroups.push(
-					{
-						Dimensions: this.GroupDimensions[index],
-						Group: vocalGroup
-					}
-				)
-			}
-		}
-
-		// If we have no active vocal-groups don't even bother
-		if (activeVocalGroups.length === 0) {
-			return
-		}
-
-		// Now determine our center
-		let center = 0, totalHalfHeight = 0
-		for(const activeVocalGroup of activeVocalGroups) {
-			totalHalfHeight += activeVocalGroup.Dimensions.Height
-			center += activeVocalGroup.Dimensions.Center
-		}
-		center /= activeVocalGroups.length
-
 		// Grab the margin that the lyrics-container adds at the top (this affects our scroll-position)
 		const lyricsContainerStyle = window.getComputedStyle(this.LyricsContainer)
 		const lyricsContainerMarginTop = parseInt(lyricsContainerStyle.marginTop!)
@@ -270,6 +245,39 @@ export class LyricsScroller<V extends (BaseVocals | SyncedVocals)> implements Gi
 		const viewportCenter = ((scrollViewportHeight / 2) - offset)
 		const minimumDistanceToAutoScroll = (viewportCenter - lyricsContainerMarginTop)
 		const currentScrollTop = this.ScrollerObject.scrollTop
+		const maximumScrollTop = (this.ScrollerObject.scrollHeight - scrollViewportHeight)
+
+		// Grab our active vocal-groups
+		const activeVocalGroups = []
+		for (const [index, vocalGroup] of (this.VocalGroups as VocalGroups<SyncedVocals>).entries()) {
+			if (vocalGroup.Vocals.some(vocal => vocal.IsActive())) {
+				activeVocalGroups.push(
+					{
+						Dimensions: this.GroupDimensions[index],
+						Group: vocalGroup
+					}
+				)
+			}
+		}
+
+		// If we have no active vocal-groups don't even bother
+		if (activeVocalGroups.length === 0) {
+			if ((this.AutoScrollBlocked === false) && this.LyricsEnded) {
+				if (currentScrollTop < maximumScrollTop) {
+					this.ScrollTo(maximumScrollTop)
+				}
+			}
+
+			return
+		}
+
+		// Now determine our center
+		let center = 0, totalHalfHeight = 0
+		for(const activeVocalGroup of activeVocalGroups) {
+			totalHalfHeight += activeVocalGroup.Dimensions.Height
+			center += activeVocalGroup.Dimensions.Center
+		}
+		center /= activeVocalGroups.length
 
 		// First determine if we're even past our minimum distance yet
 		let scrollY: (number | undefined)
@@ -311,12 +319,27 @@ export class LyricsScroller<V extends (BaseVocals | SyncedVocals)> implements Gi
 	}
 
 	// Public Methods
-	public ForceToActive() {
+	public SetLyricsEnded(ended: boolean) {
+		this.LyricsEnded = ended
+	}
+
+	public ForceToActive(skippedByVocal?: true) {
 		this.ToggleAutoScrollBlock(false)
+
+		if (skippedByVocal) {
+			this.Maid.Clean("ForceToActiveCSS")
+		} else {
+			this.ScrollContainer.classList.add("InstantScroll")
+			this.Maid.Give(
+				OnNextFrame(() => this.ScrollContainer.classList.remove("InstantScroll")),
+				"ForceToActiveCSS"
+			)
+		}
+
 		this.MoveToActiveLyrics()
 	}
 
-	public ResetToTop() {
+	public ForceToTop() {
 		this.ToggleAutoScrollBlock(false)
 		this.ScrollTo(0)
 	}

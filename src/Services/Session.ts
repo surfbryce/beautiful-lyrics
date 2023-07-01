@@ -32,6 +32,7 @@ let SpotifyHistory: {
     goForward: (() => void);
     listen: ((listener: (location: HistoryLocation) => void) => () => void);
     location: HistoryLocation;
+	entries: HistoryLocation[];
 } = SpotifyPlatform?.History
 {
 	const WaitForSpicetify = () => {
@@ -64,4 +65,4 @@ let SpotifyHistory: {
 // Exports
 export const SpicetifyLoaded = SpicetifyLoadedSignal.GetEvent()
 export const IsSpicetifyLoaded = () => AllSpicetifyLoaded
-export {GlobalMaid, SpotifyPlayer, SpotifyFetch, SpotifyPlatform, SpotifyHistory, Script, IsDevelopment}
+export {GlobalMaid, SpotifyPlayer, SpotifyFetch, SpotifyHistory, Script, IsDevelopment, HistoryLocation}

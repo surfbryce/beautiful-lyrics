@@ -1,5 +1,6 @@
 // Packages
 import { Maid, Giveable } from "../../../../Packages/Maid"
+import { OnNextFrame } from "../../../../Packages/Scheduler"
 
 // Modules
 import { LyricsScroller, VocalGroups } from "./LyricsRenderer/LyricsScroller"
@@ -150,21 +151,32 @@ export default class LyricsRenderer implements Giveable {
 			)
 			
 			// Handle our time-update
+			let justSkippedByVocal = false
 			this.Maid.Give(
 				song.TimeStepped.Connect(
 					(timestamp, deltaTime, skipped) => {
 						this.Update(
 							scroller, vocalGroups,
-							timestamp, deltaTime, skipped
+							parsedLyrics.EndTime,
+							timestamp, deltaTime, skipped, (justSkippedByVocal || undefined)
 						)
+
+						if (skipped && justSkippedByVocal) {
+							justSkippedByVocal = false
+						}
 					}
 				)
 			)
 
 			// Immediately update ourselves
-			this.Update(
-				scroller, vocalGroups,
-				song.GetTimestamp(), (1 / 60), true
+			this.Maid.Give(
+				OnNextFrame(
+					() => this.Update(
+						scroller, vocalGroups,
+						parsedLyrics.EndTime,
+						song.GetTimestamp(), (1 / 60), true
+					)
+				)
 			)
 
 			// Handle time-skipping
@@ -174,6 +186,7 @@ export default class LyricsRenderer implements Giveable {
 				for (const vocal of vocalGroup.Vocals) {
 					vocal.RequestedTimeSkip.Connect(
 						() => {
+							justSkippedByVocal = true
 							song.SetTimestamp(startTime)
 						}
 					)
@@ -188,7 +201,8 @@ export default class LyricsRenderer implements Giveable {
 	// Private Methods
 	private Update(
 		scroller: LyricsScroller<SyncedVocals>, vocalGroups: VocalGroups<SyncedVocals>,
-		timestamp: number, deltaTime: number, skipped?: true
+		lyricsEndTime: number,
+		timestamp: number, deltaTime: number, skipped?: true, skippedByVocal?: true
 	) {
 		// Go through and animate everything that we can
 		for (const vocalGroup of vocalGroups) {
@@ -196,10 +210,13 @@ export default class LyricsRenderer implements Giveable {
 				vocal.Animate(timestamp, deltaTime, skipped)
 			}
 		}
+		
+		// Define whether or not our lyrics ended
+		scroller.SetLyricsEnded(timestamp >= lyricsEndTime)
 
 		// If we did skip then we need to tell the scroller that
 		if (skipped) {
-			scroller.ForceToActive()
+			scroller.ForceToActive(skippedByVocal)
 		}
 	}
 
