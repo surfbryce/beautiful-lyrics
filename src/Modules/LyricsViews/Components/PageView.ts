@@ -2,7 +2,6 @@
 import { Maid, Giveable } from "../../../../../../Packages/Maid"
 
 // Modules
-import { ParsedLyrics } from "../../../Services/Player/LyricsParser"
 import { Song } from "../../../Services/Player/Song"
 import LyricsRenderer from "../../LyricsRenderer"
 import { CreateElement } from "../SharedMethods"

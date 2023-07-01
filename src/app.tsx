@@ -8,8 +8,6 @@ import { CoverArtUpdated, Start as StartCoverArt, GetCoverArt } from './Services
 import { Start as StartAutoUpdater } from './Services/AutoUpdater'
 import { Cache } from './Services/Cache'
 import Player from './Services/Player'
-import { Song } from './Services/Player/Song'
-import LyricsRenderer from './Modules/LyricsRenderer'
 import StartLyricsView from "./Modules/LyricsViews"
 
 // Stylings
