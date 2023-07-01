@@ -1,9 +1,3 @@
-// This makes the controls inherit some of the color from the background making them fit in better
-.main-nowPlayingView-lyricsControls,
-.main-lyricsCinema-controls {
-	mix-blend-mode: overlay;
-}
-
 aside:has(.main-nowPlayingView-section) {
 	.main-nowPlayingView-content {
 		background: transparent;
@@ -39,29 +33,6 @@ aside:has(.main-nowPlayingView-section) {
 	}
 }
 
-// Full-screen CSS
-.os-viewport {
-	.lyrics-lyrics-background {
-		background: transparent;
-	}
-
-	.lyrics-lyrics-container {
-		&.lyrics-lyrics-coverTopBar {
-			margin-top: 7.5vh;
-		}
-	}
-}
-
-// Lyric-Plus CSS
-.lyrics-lyricsContainer-LyricsBackground {
-	background-color: transparent !important;
-	background-image: none !important;
-}
-
-#main:has(.under-main-view.lyrics-background) .Root__top-bar {
-	mix-blend-mode: screen;
-}
-
 // This is the entire lyrics configuration used to create the gradient backgrounds
 .lyrics-background {
 	// This is the overarching container, the parent of the container class
@@ -74,26 +45,6 @@ aside:has(.main-nowPlayingView-section) {
 	}
 
 	// These are full-screen background specific classes to make the gradient-background work/show properly
-	&.os-viewport:not(:has(.main-nowPlayingView-content)) {
-		overflow: initial;
-	}
-
-	#main:not(:has(.lyrics-lyricsContainer-LyricsBackground)) &.under-main-view>&-container {
-		max-width: 35%;
-		max-height: 30%;
-
-		scale: 290% 340%;
-		transform-origin: left top;
-	}
-
-	#main:has(.lyrics-lyricsContainer-LyricsBackground) &.under-main-view>&-container {
-		max-width: 25%;
-		max-height: 40%;
-
-		scale: 400% 250%;
-		transform-origin: left top;
-	}
-
 	.BeautifulLyricsPage &-container {
 		max-width: 35%;
 		max-height: 55%;
@@ -102,10 +53,6 @@ aside:has(.main-nowPlayingView-section) {
 		transform-origin: left top;
 
 		filter: saturate(2.5) brightness(0.65);
-	}
-
-	#main:has(#lyrics-cinema .lyrics-lyrics-background) &.under-main-view &-container {
-		z-index: 1;
 	}
 
 	// These are right-side card background specific classes to adjust for contrast issues
