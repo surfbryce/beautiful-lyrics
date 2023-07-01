@@ -17,6 +17,9 @@ const NoLyrics = `<span class="NoLyrics">This song doesn't have any Lyrics!</spa
 const HeaderQuery = ".main-view-container__scroll-node-child-spacer"
 const CinemaContainerQuery = ".Root__main-view-overlay"
 
+// Store where we last were before a Page opened
+let LastPageLocation: (string | undefined)
+
 // Class
 export default class PageView implements Giveable {
 	// Private Properties
@@ -36,6 +39,12 @@ export default class PageView implements Giveable {
 
 	// Constructor
 	constructor(page: HTMLDivElement, isCinema?: true) {
+		// Determine our last-page
+		const lastPage = SpotifyHistory.entries[SpotifyHistory.entries.length - 2]
+		if ((lastPage !== undefined) && (lastPage.pathname.startsWith("/BeautifulLyrics") === false)) {
+			LastPageLocation = lastPage.pathname
+		}
+
 		// Handle creating our elements
 		{
 			// Create our container first
@@ -160,14 +169,9 @@ export default class PageView implements Giveable {
 	}
 
 	public Close() {
-		// Find a page that isn't related to us
-		for (let index = (SpotifyHistory.entries.length - 1); index >= 0; index -= 1) {
-			const path = SpotifyHistory.entries[index].pathname
-
-			if (path.startsWith("/BeautifulLyrics") === false) {
-				SpotifyHistory.push(path)
-				break
-			}
+		// If we have a last-page then go there
+		if (LastPageLocation !== undefined) {
+			return SpotifyHistory.push(LastPageLocation)
 		}
 
 		// Otherwise, send us home
