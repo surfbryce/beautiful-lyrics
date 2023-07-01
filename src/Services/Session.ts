@@ -34,6 +34,7 @@ let SpotifyHistory: {
     location: HistoryLocation;
 	entries: HistoryLocation[];
 } = SpotifyPlatform?.History
+let SpotifyPlaybar = Spicetify.Playbar
 {
 	const WaitForSpicetify = () => {
 		// Update our variables
@@ -42,6 +43,7 @@ let SpotifyHistory: {
 		SpotifyShowNotification = Spicetify.showNotification
 		SpotifyPlatform = Spicetify.Platform
 		SpotifyHistory = SpotifyPlatform?.History
+		SpotifyPlaybar = Spicetify.Playbar
 
 		// Check if we have them all yet
 		if (
@@ -50,6 +52,7 @@ let SpotifyHistory: {
 			|| (SpotifyShowNotification === undefined)
 			|| (SpotifyPlatform === undefined)
 			|| (SpotifyHistory === undefined)
+			|| (SpotifyPlaybar === undefined)
 		) {
 			GlobalMaid.Give(Timeout(0, WaitForSpicetify), "WaitForSpicetify")
 		} else {
@@ -65,4 +68,4 @@ let SpotifyHistory: {
 // Exports
 export const SpicetifyLoaded = SpicetifyLoadedSignal.GetEvent()
 export const IsSpicetifyLoaded = () => AllSpicetifyLoaded
-export {GlobalMaid, SpotifyPlayer, SpotifyFetch, SpotifyHistory, Script, IsDevelopment, HistoryLocation}
+export {GlobalMaid, SpotifyPlayer, SpotifyFetch, SpotifyHistory, SpotifyPlaybar, Script, IsDevelopment, HistoryLocation}
