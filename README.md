@@ -6,26 +6,11 @@
 ![Thumbnail](./previews/thumbnail.gif)
 ### Takes the built-in Spotify lyrics and gives them a complete uplift!
 
-The background has been given a *Dynamic* Color Background that blends through the colors of the Cover-Art beautifully. Lyrics have also been given a more cleaner and satisfying appearance inspired by Apple Music.
+The background has been given a *Dynamic* Color Background that blends through the colors of the Cover-Art beautifully.
 
-Both the **Full-Screen** AND **Side-Card** Lyrics are affected with these beautiful upgrades.
+Lyrics have also been completely revamped to provide an entirely new a better Lyrics experience!
 
-## Previews
-Collapsed/Card/Fullscreen
-
-![All Components Preview](./previews/all-components-preview.gif)
-
-Fullscreen
-
-![Fullscreen Preview](./previews/fullscreen-preview.gif)
-
-Card
-
-![Small Preview](./previews/card-preview.gif)
-
-Collapsed
-
-![Collapsed Preview](./previews/collapsed-preview.gif)
+New Cinema and Page Lyric Views have been added to replace Spotifys own versions! Page view replaces the main-page and Cinema view gives you an immersive Lyrics experience!
 
 ## FAQ
 - **The background isn't showing up! How come?**
@@ -38,10 +23,11 @@ Collapsed
 		- Click the checkmark for:
 			- "Enable the view on the right sidebar"
 			- "Extract background color based on artwork images"
-			- "Show lyrics in the right sidebar"
 			- "Enable Panel Size Coordination"
 - **I just installed the extension, but I don't have any of the new stuff!**
 	- If you are on Version 2.4.0 or greater the extension should automatically update itself to the latest version **as soon as the newest version comes out** - you don't have to wait for Spicetify to detect a new version - which could take up to *24 hours*!
+- **The extension isn't doing anything at all!**
+	- Make sure that your country doesn't have any internet-restrictions on JSDelivr (the website Spicetify uses to load the extensions). You'll find that other extensions won't work when installed through the Marketplace this way. If you are having this issue consider downloading the source of this extension and installing it locally (not through Marketplace).
 
 ## Have an issue/idea? Go ahead and send them!
 
