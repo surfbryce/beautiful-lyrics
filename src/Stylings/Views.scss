@@ -73,7 +73,7 @@
 
 .os-content:has(.BeautifulLyricsPage:hover) {
 	.main-nowPlayingView-lyricsControls {
-		opacity: 0.1;
+		opacity: 0.3;
 	}
 }
 
@@ -109,7 +109,16 @@
 
 	&:hover {
 		.main-nowPlayingView-lyricsControls {
-			opacity: 0.1;
+			opacity: 0.3;
 		}
 	}
+}
+
+/* Playbar Icon */
+button:has(.LyricsPageIcon) {
+	margin-right: 6px;
+}
+
+.LyricsPageIcon {
+	transform: translateY(-2px);
 }
