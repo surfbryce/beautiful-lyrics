@@ -222,9 +222,6 @@ class CacheManager {
 		key: string, content: ExpireCacheStoreContents[N],
 		expiration: ExpirationSettings
 	) {
-		if (true) {
-			return
-		}
 		// Grab our control-record
 		const controlRecord = this.GetExpireCache(expireCacheName)
 
