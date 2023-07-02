@@ -108,9 +108,8 @@ const AgentVersion = /^v(\d+)$/
 
 const TimeFormat = /(?:(\d+):)?(\d+)(?:\.(\d+))?$/
 
-// Regular expression to test for Arabic, Persian, Urdu, and Hebrew characters
-const RightAlignedCharacterRange = '\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDCF\uFDF0-\uFDFF\uFE70-\uFEFF'
-const RightAlignmentCheck = new RegExp(`[${RightAlignedCharacterRange}]`)
+// Check for Arabic, Persian, Urdu, and Hebrew
+const RightAlignmentCheck = /[־׀׃א-״؛-ي٭-ە‏ײַ-ﳝﶈ-ﷺﺂ-ﻼ]/
 
 // Helper Methods
 const GetNaturalAlignment = (text: string): NaturalAlignment => {
@@ -382,7 +381,7 @@ const ParseSpotifyLyrics = (content: SpotifyContent) => {
 
 	for (const [index, line] of content.entries()) {
 		// Ignore this line if we're an "interlude"
-		if (line.words.startsWith("♪")) {
+		if (line.words.includes("♪")) {
 			continue
 		} else if ((line.words.length === 0) && (line.endTimeMs === "0")) { // Or if we're a filler-vocal
 			continue

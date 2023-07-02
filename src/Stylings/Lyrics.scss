@@ -161,15 +161,7 @@
 	width: 75cqw;
 }
 
-.NaturallyAlignedLeft .Vocals {
-	justify-content: flex-start;
-}
-
 .NaturallyAlignedLeft .VocalsGroup.AlignedOpposite .Vocals {
-	justify-content: flex-end;
-}
-
-.NaturallyAlignedRight .Vocals {
 	justify-content: flex-end;
 }
 
