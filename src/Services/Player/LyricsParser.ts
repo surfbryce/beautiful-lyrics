@@ -278,11 +278,16 @@ const ParseAppleMusicLyrics = (text: string) => {
 											const start = GetTimeInSeconds(backgroundSyllable.getAttribute("begin")!)
 											const end = GetTimeInSeconds(backgroundSyllable.getAttribute("end")!)
 
+											const nextNode = backgroundNodes[backgroundIndex + 1]
+
 											backgroundLyrics.push(
 												{
 													Text: backgroundSyllable.textContent!,
 
-													IsPartOfWord: !(backgroundNodes[backgroundIndex + 1]?.nodeType === Node.TEXT_NODE),
+													IsPartOfWord: (
+														(nextNode === undefined) ? false
+														: (nextNode.nodeType !== Node.TEXT_NODE)
+													),
 
 													StartTime: start,
 													EndTime: end
@@ -309,11 +314,16 @@ const ParseAppleMusicLyrics = (text: string) => {
 									const start = GetTimeInSeconds(syllable.getAttribute("begin")!)
 									const end = GetTimeInSeconds(syllable.getAttribute("end")!)
 
+									const nextNode = lineNodes[index + 1]
+
 									leadLyrics.push(
 										{
 											Text: syllable.textContent!,
 
-											IsPartOfWord: !(lineNodes.item(index + 1)?.nodeType === Node.TEXT_NODE),
+											IsPartOfWord: (
+												(nextNode === undefined) ? false
+												: (nextNode.nodeType !== Node.TEXT_NODE)
+											),
 
 											StartTime: start,
 											EndTime: end
