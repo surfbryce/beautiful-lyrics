@@ -336,6 +336,14 @@
 	white-space: pre;
 }
 
+.Syllable.PartOfWord.StartOfWord {
+	transform-origin: right center;
+}
+
+.Syllable.EndOfWord {
+	transform-origin: left center;
+}
+
 .Syllable:not(:is(.PartOfWord))::after {
 	content: "";
 	margin-right: 0.3ch;

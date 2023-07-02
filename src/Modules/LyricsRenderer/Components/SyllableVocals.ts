@@ -188,7 +188,9 @@ export default class SyllableVocals implements SyncedVocals, Giveable {
 		for (const syllableGroup of syllableGroups) {
 			// Determine what we are parenting to
 			let parentElement: HTMLElement = container
-			if (syllableGroup.length > 1) {
+			const syllableCount = syllableGroup.length
+			const isInWordGroup = (syllableCount > 1)
+			if (isInWordGroup) {
 				// Create our parent element
 				const parent = this.Maid.Give(document.createElement('span'))
 				parent.classList.add('Word')
@@ -199,7 +201,7 @@ export default class SyllableVocals implements SyncedVocals, Giveable {
 			}
 
 			// Now handle all our syllables
-			for (const syllableMetadata of syllableGroup) {
+			for (const [index, syllableMetadata] of syllableGroup.entries()) {
 				// Determine if we are emphasised
 				const isEmphasized = IsEmphasized(syllableMetadata)
 
@@ -214,8 +216,18 @@ export default class SyllableVocals implements SyncedVocals, Giveable {
 					} else {
 						syllableSpan.classList.add('Synced')
 					}
+
+					const isEndOfWord = (isInWordGroup && (index === (syllableCount - 1)))
 					if (syllableMetadata.IsPartOfWord) {
 						syllableSpan.classList.add('PartOfWord')
+
+						if (index === 0) {
+							syllableSpan.classList.add('StartOfWord')
+						} else if(isEndOfWord) {
+							syllableSpan.classList.add('EndOfWord')
+						}
+					} else if (isEndOfWord) {
+						syllableSpan.classList.add('EndOfWord')
 					}
 				}
 
