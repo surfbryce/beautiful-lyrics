@@ -333,7 +333,7 @@
 }
 
 /* Syllable-Synced Lyric */
-.Syllable {
+.Syllable, .Word {
 	/* Our letters should not wrap - only the Syllable span itself should */
 	display: flex;
 	white-space: nowrap;

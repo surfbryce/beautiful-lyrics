@@ -163,121 +163,157 @@ export default class SyllableVocals implements SyncedVocals, Giveable {
 			- this.StartTime
 		)
 
-		// Go through our syllables and start building our visuals
-		for (const syllableMetadata of syllablesMetadata) {
-			// Determine if we are emphasised
-			const isEmphasized = IsEmphasized(syllableMetadata)
+		// Go through and create our syllable-groups
+		const syllableGroups: SyllableLyricMetadata[][] = []
+		{
+			let currentSyllableGroup: SyllableLyricMetadata[] = []
 
-			// Create our main span element
-			const syllableSpan = this.Maid.Give(document.createElement('span'))
-			{
-				// Add our classes
-				syllableSpan.classList.add('Lyric')
-				syllableSpan.classList.add('Syllable')
-				if (isEmphasized) {
-					syllableSpan.classList.add('Emphasis')
-				} else {
-					syllableSpan.classList.add('Synced')
-				}
-				if (syllableMetadata.IsPartOfWord) {
-					syllableSpan.classList.add('PartOfWord')
+			for (const syllableMetadata of syllablesMetadata) {
+				// Store ourselves
+				currentSyllableGroup.push(syllableMetadata)
+
+				// If we aren't part of a word than this means this is either the end of the group or isolated
+				if (syllableMetadata.IsPartOfWord === false) {
+					syllableGroups.push(currentSyllableGroup)
+					currentSyllableGroup = []
 				}
 			}
 
-			// Determine whether or not our content is a set of letters or a single text
-			let letters: (AnimatedLetter[] | undefined)
-			if (isEmphasized) {
-				// Store all our "letters"
-				const letterTexts: string[] = []
-				for (const letter of syllableMetadata.Text) {
-					letterTexts.push(letter)
+			if (currentSyllableGroup.length > 0) {
+				syllableGroups.push(currentSyllableGroup)
+			}
+		}
+
+		// Go through our groups and start building our visuals
+		for (const syllableGroup of syllableGroups) {
+			// Determine what we are parenting to
+			let parentElement: HTMLElement = container
+			if (syllableGroup.length > 1) {
+				// Create our parent element
+				const parent = this.Maid.Give(document.createElement('span'))
+				parent.classList.add('Word')
+				parentElement = parent
+
+				// Add our parent to our container
+				container.appendChild(parent)
+			}
+
+			// Now handle all our syllables
+			for (const syllableMetadata of syllableGroup) {
+				// Determine if we are emphasised
+				const isEmphasized = IsEmphasized(syllableMetadata)
+
+				// Create our main span element
+				const syllableSpan = this.Maid.Give(document.createElement('span'))
+				{
+					// Add our classes
+					syllableSpan.classList.add('Lyric')
+					syllableSpan.classList.add('Syllable')
+					if (isEmphasized) {
+						syllableSpan.classList.add('Emphasis')
+					} else {
+						syllableSpan.classList.add('Synced')
+					}
+					if (syllableMetadata.IsPartOfWord) {
+						syllableSpan.classList.add('PartOfWord')
+					}
 				}
 
-				// Now determine our relative timestep
-				const relativeTimestep = (1 / letterTexts.length)
+				// Determine whether or not our content is a set of letters or a single text
+				let letters: (AnimatedLetter[] | undefined)
+				if (isEmphasized) {
+					// Store all our "letters"
+					const letterTexts: string[] = []
+					for (const letter of syllableMetadata.Text) {
+						letterTexts.push(letter)
+					}
 
-				// Now generate our letters
-				letters = []
-				let relativeTimestamp = 0
-				for (const letter of syllableMetadata.Text) {
-					// Create our letter-span
-					const letterSpan = this.Maid.Give(document.createElement('span'))
-					letterSpan.classList.add('Letter')
-					letterSpan.classList.add('Synced')
-					letterSpan.innerText = letter
-					syllableSpan.appendChild(letterSpan)
+					// Now determine our relative timestep
+					const relativeTimestep = (1 / letterTexts.length)
 
-					// Now store our letter
-					letters.push(
-						{
-							Start: relativeTimestamp,
-							Duration: relativeTimestep,
-							GlowDuration: (1 - relativeTimestamp),
+					// Now generate our letters
+					letters = []
+					let relativeTimestamp = 0
+					for (const letter of syllableMetadata.Text) {
+						// Create our letter-span
+						const letterSpan = this.Maid.Give(document.createElement('span'))
+						letterSpan.classList.add('Letter')
+						letterSpan.classList.add('Synced')
+						letterSpan.innerText = letter
+						syllableSpan.appendChild(letterSpan)
 
-							LiveText: {
-								Object: letterSpan,
-								Springs: CreateSprings()
+						// Now store our letter
+						letters.push(
+							{
+								Start: relativeTimestamp,
+								Duration: relativeTimestep,
+								GlowDuration: (1 - relativeTimestamp),
+
+								LiveText: {
+									Object: letterSpan,
+									Springs: CreateSprings()
+								}
 							}
+						)
+
+						// Now update our relative-timestamp for the next letter
+						relativeTimestamp += relativeTimestep
+					}
+				} else {
+					// Update our text
+					syllableSpan.innerText = syllableMetadata.Text
+				}
+
+				// Determine our time information
+				const relativeStart = (syllableMetadata.StartTime - this.StartTime)
+				const relativeEnd = (syllableMetadata.EndTime - this.StartTime)
+
+				const relativeStartScale = (relativeStart / this.Duration)
+				const relativeEndScale = (relativeEnd / this.Duration)
+
+				const duration = (relativeEnd - relativeStart)
+				const durationScale = (relativeEndScale - relativeStartScale)
+
+				// Now determine how we store our information
+				const syllableLiveText = {
+					Object: syllableSpan,
+					Springs: CreateSprings()
+				}
+				if (isEmphasized) {
+					this.Syllables.push(
+						{
+							Type: "Letters",
+
+							Start: relativeStart,
+							Duration: duration,
+
+							StartScale: relativeStartScale,
+							DurationScale: durationScale,
+
+							LiveText: syllableLiveText,
+
+							Letters: letters!
 						}
 					)
+				} else {
+					this.Syllables.push(
+						{
+							Type: "Syllable",
 
-					// Now update our relative-timestamp for the next letter
-					relativeTimestamp += relativeTimestep
+							Start: relativeStart,
+							Duration: duration,
+
+							StartScale: relativeStartScale,
+							DurationScale: durationScale,
+
+							LiveText: syllableLiveText
+						}
+					)
 				}
-			} else {
-				// Update our text
-				syllableSpan.innerText = syllableMetadata.Text
+
+				// Now parent our syllable-span
+				parentElement.appendChild(syllableSpan)
 			}
-
-			// Determine our time information
-			const relativeStart = (syllableMetadata.StartTime - this.StartTime)
-			const relativeEnd = (syllableMetadata.EndTime - this.StartTime)
-
-			const relativeStartScale = (relativeStart / this.Duration)
-			const relativeEndScale = (relativeEnd / this.Duration)
-
-			const duration = (relativeEnd - relativeStart)
-			const durationScale = (relativeEndScale - relativeStartScale)
-
-			// Now determine how we store our information
-			const syllableLiveText = {
-				Object: syllableSpan,
-				Springs: CreateSprings()
-			}
-			if (isEmphasized) {
-				this.Syllables.push(
-					{
-						Type: "Letters",
-
-						Start: relativeStart,
-						Duration: duration,
-
-						StartScale: relativeStartScale,
-						DurationScale: durationScale,
-
-						LiveText: syllableLiveText,
-
-						Letters: letters!
-					}
-				)
-			} else {
-				this.Syllables.push(
-					{
-						Type: "Syllable",
-
-						Start: relativeStart,
-						Duration: duration,
-
-						StartScale: relativeStartScale,
-						DurationScale: durationScale,
-
-						LiveText: syllableLiveText
-					}
-				)
-			}
-
-			// Now parent our syllable-span
-			container.appendChild(syllableSpan)
 		}
 
 		// Now set our state
