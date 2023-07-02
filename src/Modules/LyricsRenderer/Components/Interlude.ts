@@ -413,8 +413,14 @@ export default class InterludeVisual implements SyncedVocals, Giveable {
 		// Find our scale/opacity points
 		const scaleIntersections = (this.ScaleSpline.getIntersects(timeScale) as number[][])
 		const opacityIntersections = (this.OpacitySpline.getIntersects(timeScale) as number[][])
-		const scale = scaleIntersections[scaleIntersections.length - 1][1]
-		const opacity = opacityIntersections[opacityIntersections.length - 1][1]
+		const scale = (
+			(scaleIntersections.length === 0) ? 1
+			: scaleIntersections[scaleIntersections.length - 1][1]
+		)
+		const opacity = (
+			(opacityIntersections.length === 0) ? 1
+			: opacityIntersections[opacityIntersections.length - 1][1]
+		)
 
 		// Apply them
 		if (forceTo) {
