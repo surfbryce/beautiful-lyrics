@@ -339,7 +339,6 @@ class Song implements Giveable {
 								"GET",
 								`https://spclient.wg.spotify.com/color-lyrics/v2/track/${releaseId}?format=json&vocalRemoval=false`
 							)
-							.catch(error => {console.warn(error); throw error})
 							.then(
 								response => {
 									if ((response.status < 200) || (response.status > 299)) { // This means no lyrics
