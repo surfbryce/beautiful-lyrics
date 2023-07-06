@@ -43,6 +43,8 @@ export class LyricsScroller<V extends (BaseVocals | SyncedVocals)> implements Gi
 	private readonly LyricsContainer: HTMLDivElement
 	private readonly VocalGroups: VocalGroups<V>
 
+	private readonly LyricsAreSynced: boolean
+
 	private readonly Scroller: SimpleBar
 	private readonly ScrollerObject: HTMLElement
 	private GroupDimensions: {
@@ -59,6 +61,9 @@ export class LyricsScroller<V extends (BaseVocals | SyncedVocals)> implements Gi
 		scrollContainer: HTMLDivElement, lyricsContainer: HTMLDivElement,
 		vocalGroups: VocalGroups<V>, lyricsAreSynced: boolean
 	) {
+		// Mark our synced-state
+		this.LyricsAreSynced = lyricsAreSynced
+
 		// Create our maid
 		this.Maid = new Maid()
 
@@ -220,6 +225,11 @@ export class LyricsScroller<V extends (BaseVocals | SyncedVocals)> implements Gi
 	}
 
 	private MoveToActiveLyrics(redetermineBlur?: true) {
+		// We can't move to any active-lyrics if we aren't synced
+		if (this.LyricsAreSynced === false) {
+			return
+		}
+
 		// We need to redetermine our blur
 		if (redetermineBlur) {
 			this.DetermineLyricBlur()
@@ -325,6 +335,10 @@ export class LyricsScroller<V extends (BaseVocals | SyncedVocals)> implements Gi
 	}
 
 	public ForceToActive(skippedByVocal?: true) {
+		if (this.LyricsAreSynced === false) {
+			return
+		}
+
 		this.ToggleAutoScrollBlock(false)
 
 		if (skippedByVocal) {
