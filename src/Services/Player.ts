@@ -77,6 +77,10 @@ class Player {
 
 				SpotifyPlayer.addEventListener("songchange", callback)
 				this.Maid.Give(() => SpotifyPlayer.removeEventListener("songchange", callback as any))
+
+				if (SpotifyPlayer.data !== undefined) {
+					callback({data: SpotifyPlayer.data} as any)
+				}
 			}
 		}
 	}
