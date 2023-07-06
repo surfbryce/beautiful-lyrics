@@ -339,8 +339,13 @@ class Song implements Giveable {
 								"GET",
 								`https://spclient.wg.spotify.com/color-lyrics/v2/track/${releaseId}?format=json&vocalRemoval=false`
 							)
+							.catch(error => {console.warn(error); return undefined})
 							.then(
-								response => {
+								(response?: Spicetify.CosmosAsync.Response) => {
+									if (response === undefined) {
+										return // Also means no lyrics
+									}
+
 									if ((response.status < 200) || (response.status > 299)) { // This means no lyrics
 										return
 									}
