@@ -7,6 +7,7 @@ import { OnNextFrame } from "../../../../../Packages/Scheduler"
 import { SpotifyPlayer, SpotifyFetch } from "../Session"
 import { Cache, ExpirationSettings } from '../Cache'
 import { ParseLyrics, ParsedLyrics, LyricsResult } from "./LyricsParser"
+import Spotify from "./Spotify"
 
 // Types
 namespace SpotifyTrackInformationSpace {
@@ -133,6 +134,20 @@ type Details = {
 	// Dynamic
 	Lyrics?: ParsedLyrics;
 }
+
+type SpotifyLyric = {
+	Type: Spotify.LyricSyncType;
+	Content: Spotify.LyricLines;
+}
+type SpotifyLyrics = Map<string, SpotifyLyric>
+
+type BackendLyric = (
+	{
+		Source: "AppleMusis";
+		IsSynced: boolean;
+		Content: string;
+	}
+)
 
 // Behavior Constants
 const MinimumTimeSkipDifferenceOffset = (1 / 120) // Difference extender (based off DeltaTime)
@@ -276,6 +291,122 @@ class Song implements Giveable {
 		}
 	}
 
+	// Private Detail methods
+	private GetLyricsFromSpotify(recordCode: string) {
+		return (
+			SpotifyFetch.request(
+				"GET",
+				`https://api.spotify.com/v1/search?q=isrc:${recordCode}&type=track`
+			)
+			.catch(error => {console.warn(error); throw error})
+			.then(
+				(response) => {
+					if ((response.status < 200) || (response.status > 299)) {
+						throw `Failed to get Requests for RecordCode (${recordCode})`
+					}
+	
+					return response.body as Spotify.RecordReleases
+				}
+			)
+			.then(
+				async (releases) => {
+					// Store our ids/attributes for sorting later
+					const releaseIds: string[] = []
+					const releaseAttributeScores: Record<string, number> = {}
+	
+					for(const release of releases.tracks.items) {
+						// Now store ourselves
+						releaseIds.push(release.id)
+						releaseAttributeScores[release.id] = (
+							release.popularity
+						)
+					}
+	
+					// Now sort our releases
+					releaseIds.sort(
+						(a, b) => {
+							return (releaseAttributeScores[b] - releaseAttributeScores[a])
+						}
+					)
+	
+					// Now grab our releases for all the songs
+					const lyrics: SpotifyLyrics = new Map()
+					const lyricsPromises: Promise<void>[] = []
+	
+					for(const releaseId of releaseIds) {
+						lyricsPromises.push(
+							SpotifyFetch.request(
+								"GET",
+								`https://spclient.wg.spotify.com/color-lyrics/v2/track/${releaseId}?format=json&vocalRemoval=false`
+							)
+							.catch(error => {console.warn(error); throw error})
+							.then(
+								response => {
+									if ((response.status < 200) || (response.status > 299)) { // This means no lyrics
+										return
+									}
+
+									const retrievedLyrics = response.body as Spotify.RetrievedLyrics
+	
+									lyrics.set(
+										releaseId,
+										{
+											Type: retrievedLyrics.lyrics.syncType,
+											Content: retrievedLyrics.lyrics.lines
+										}
+									)
+								}
+							)
+						)
+					}
+	
+					return (
+						Promise.all(lyricsPromises)
+						.then(() => lyrics)
+					)
+				}
+			)
+			.then(
+				(lyrics) => {
+					// Find our best-lyric (only line-synced no static since static lyrics are often wrong)
+					for(const lyric of lyrics.values()) {
+						if (lyric.Type === "LINE_SYNCED") {
+							return lyric
+						}
+					}
+
+					return undefined
+				}
+			)
+		)
+	}
+	
+	private GetLyricsFromBackendProvider(recordCode: string) {
+		return (
+			fetch(`https://beautiful-lyrics.socalifornian.live/lyrics/${recordCode}`)
+			.then(
+				(response) => {
+					if (response.ok === false) {
+						throw `Failed to load Lyrics for Track (${
+							this.Id
+						}), Error: ${response.status} ${response.statusText}`
+					}
+
+					return response.text()
+				}
+			)
+			.then(
+				text => {
+					if (text.length === 0) {
+						return undefined
+					} else {
+						return (JSON.parse(text) as BackendLyric)
+					}
+				}
+			)
+		)
+	}
+
 	private LoadDetails() {
 		new Promise(
 			(resolve: (trackInformation: SpotifyTrackInformation) => void) => {
@@ -324,30 +455,48 @@ class Song implements Giveable {
 
 				if (storedParsedLyrics === undefined) {
 					return (
-						fetch(`https://beautiful-lyrics.socalifornian.live/lyrics/${recordCode}`)
-						.then(
-							(response) => {
-								if (response.ok === false) {
-									throw `Failed to load Lyrics for Track (${
-										this.Id
-									}), Error: ${response.status} ${response.statusText}`
-								}
-
-								return response.text()
-							}
+						Promise.all(
+							[
+								this.GetLyricsFromBackendProvider(recordCode),
+								this.GetLyricsFromSpotify(recordCode)
+							]
 						)
 						.then(
-							text => {
-								if (text.length === 0) {
+							([backendLyric, spotifyLyric]) => {
+								// If we don't have either lyric then we clearly dont have any
+								if ((backendLyric === undefined) && (spotifyLyric === undefined)) {
+									return undefined
+								}
+
+								// Determine what our target-lyric is
+								let lyricTarget = (
+									(backendLyric === undefined) ? "Spotify"
+									: (spotifyLyric === undefined) ? "Backend"
+									: (backendLyric.IsSynced === false) ? "Spotify"
+									: "Backend"
+								)
+
+								// If we don't have a lyric-target then just return nothing
+								if (lyricTarget === undefined) {
 									return undefined
 								} else {
-									return (JSON.parse(text) as LyricsResult)
+									return (
+										(lyricTarget === "Spotify")
+										? {
+											Source: "Spotify",
+											Content: spotifyLyric!.Content
+										}
+										: {
+											Source: "AppleMusic",
+											Content: backendLyric!.Content
+										}
+									) as LyricsResult
 								}
 							}
 						)
 						.then(
 							(lyricsResult) => {
-								// Determine what our parsed lyrics are
+								// Determine what our parsed-lyrics are
 								const parsedLyrics = (
 									(lyricsResult === undefined) ? undefined
 									: ParseLyrics(lyricsResult)
@@ -360,7 +509,7 @@ class Song implements Giveable {
 									SongLyricsExpiration
 								)
 
-								// Return our data
+								// Now return our parsed-lyrics
 								return [trackInformation, parsedLyrics]
 							}
 						)

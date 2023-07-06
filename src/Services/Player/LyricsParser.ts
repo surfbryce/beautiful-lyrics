@@ -1,11 +1,10 @@
-// Types
-type SpotifyContent = {
-	startTimeMs: string,
-	words: string,
-	syllables: any[], // Similarly, I am not sure what the elements of this array look like
-	endTimeMs: string
-}[]
+// Modules
+import { franc } from "franc-all"
 
+// Type Modules
+import Spotify from "./Spotify"
+
+// Types
 type LyricsResult = (
 	{
 		Source: "AppleMusic";
@@ -13,7 +12,7 @@ type LyricsResult = (
 	}
 	| {
 		Source: "Spotify";
-		Content: SpotifyContent;
+		Content: Spotify.LyricLines;
 	}
 )
 
@@ -108,12 +107,11 @@ const AgentVersion = /^v(\d+)$/
 
 const TimeFormat = /(?:(\d+):)?(\d+)(?:\.(\d+))?$/
 
-// Check for Arabic, Persian, Urdu, and Hebrew
-const RightAlignmentCheck = /[־׀׃א-״؛-ي٭-ە‏ײַ-ﳝﶈ-ﷺﺂ-ﻼ]/
+const RightToLeftLanguages = ['ara', 'heb', 'urd', 'fas', 'yid']
 
 // Helper Methods
 const GetNaturalAlignment = (text: string): NaturalAlignment => {
-	return (RightAlignmentCheck.test(text) ? "Right" : "Left")
+	return (RightToLeftLanguages.includes(franc(text)) ? "Right" : "Left")
 }
 
 const GetFeatureAgentVersion = (element: Element) => {
@@ -377,7 +375,7 @@ const ParseAppleMusicLyrics = (text: string) => {
 	}
 }
 
-const ParseSpotifyLyrics = (content: SpotifyContent) => {
+const ParseSpotifyLyrics = (content: Spotify.LyricLines) => {
 	// We're just going to assume it's line-synced since that's all Spotify supports atm
 	const result: LineSynced = {
 		NaturalAlignment: "Left",

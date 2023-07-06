@@ -19,6 +19,7 @@
     "cubic-spline": "^3.0.3",
     "curve-interpolator": "^3.1.1",
     "d3-ease": "^3.0.1",
+    "franc-all": "^7.1.0",
     "simplebar": "latest"
   }
 }
