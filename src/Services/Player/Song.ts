@@ -467,43 +467,45 @@ class Song implements Giveable {
 	
 					if (storedParsedLyrics === undefined) {
 						return (
-							Promise.all(
-								[
-									this.GetLyricsFromBackendProvider(recordCode),
-									this.GetLyricsFromSpotify(recordCode)
-								]
-							)
+							this.GetLyricsFromBackendProvider(recordCode)
 							.then(
-								([backendLyric, spotifyLyric]) => {
-									// If we don't have either lyric then we clearly dont have any
-									if ((backendLyric === undefined) && (spotifyLyric === undefined)) {
-										return undefined
-									}
-	
-									// Determine what our target-lyric is
-									let lyricTarget = (
-										(backendLyric === undefined) ? "Spotify"
-										: (spotifyLyric === undefined) ? "Backend"
-										: (backendLyric.IsSynced === false) ? "Spotify"
-										: "Backend"
-									)
-	
-									// If we don't have a lyric-target then just return nothing
-									if (lyricTarget === undefined) {
-										return undefined
-									} else {
+								(backendLyric): Promise<[(BackendLyric | SpotifyLyric | undefined), boolean]> => {
+									if ((backendLyric === undefined) || (backendLyric.IsSynced === false)) {
 										return (
-											(lyricTarget === "Spotify")
-											? {
-												Source: "Spotify",
-												Content: spotifyLyric!.Content
-											}
-											: {
-												Source: "AppleMusic",
-												Content: backendLyric!.Content
-											}
-										) as LyricsResult
+											this.GetLyricsFromSpotify(recordCode)
+											.then(
+												(spotifyLyric) => {
+													if (spotifyLyric === undefined) {
+														return [backendLyric, false]
+													} else {
+														return [spotifyLyric, true]
+													}
+												}
+											)
+										)
+									} else {
+										return Promise.resolve([backendLyric, false])
 									}
+								}
+							).then(
+								([lyric, isSpotifyLyric]) => {
+									// If we don't have either lyric then we clearly dont have any
+									if ((lyric === undefined)) {
+										return undefined
+									}
+
+									// Determine our format
+									return (
+										(isSpotifyLyric)
+										? {
+											Source: "Spotify",
+											Content: (lyric as SpotifyLyric).Content
+										}
+										: {
+											Source: "AppleMusic",
+											Content: (lyric as BackendLyric).Content
+										}
+									) as LyricsResult
 								}
 							)
 							.then(
