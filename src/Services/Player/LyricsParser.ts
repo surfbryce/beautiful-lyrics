@@ -107,7 +107,19 @@ const AgentVersion = /^v(\d+)$/
 
 const TimeFormat = /(?:(\d+):)?(\d+)(?:\.(\d+))?$/
 
-const RightToLeftLanguages = ['ara', 'heb', 'urd', 'fas', 'yid']
+const RightToLeftLanguages = [
+	// Persian
+	'pes', 'urd',
+	
+	// Arabic Languages
+	'ara', 'zlm', 'uig',
+
+	// Hebrew Languages
+	'heb', 'ydd',
+
+	// Mende Languages
+	'men'
+]
 
 // Helper Methods
 const GetNaturalAlignment = (text: string): NaturalAlignment => {
