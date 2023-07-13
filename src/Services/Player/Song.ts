@@ -292,7 +292,7 @@ class Song implements Giveable {
 	}
 
 	// Private Detail methods
-	private GetLyricsFromSpotify(recordCode: string) {
+	private GetLyricsFromSpotify(recordCode: string, ourPopularity: number) {
 		return (
 			SpotifyFetch.request(
 				"GET",
@@ -320,6 +320,12 @@ class Song implements Giveable {
 						releaseAttributeScores[release.id] = (
 							release.popularity
 						)
+					}
+
+					// Add ourselves to the release-ids
+					if (releaseIds.includes(this.Id) === false) {
+						releaseIds.push(this.Id)
+						releaseAttributeScores[this.Id] = ourPopularity
 					}
 	
 					// Now sort our releases
@@ -472,7 +478,7 @@ class Song implements Giveable {
 								(backendLyric): Promise<[(BackendLyric | SpotifyLyric | undefined), boolean]> => {
 									if ((backendLyric === undefined) || (backendLyric.IsSynced === false)) {
 										return (
-											this.GetLyricsFromSpotify(recordCode)
+											this.GetLyricsFromSpotify(recordCode, trackInformation.popularity)
 											.then(
 												(spotifyLyric) => {
 													if (spotifyLyric === undefined) {
