@@ -122,3 +122,50 @@ button:has(.LyricsPageIcon) {
 .LyricsPageIcon {
 	transform: translateY(-2px);
 }
+
+/* Cinema Playbar Adjustments*/
+body:has(.Root__main-view-overlay .BeautifulLyricsPage:not(:is(.PlaybarDetailsHidden))) {
+	.main-nowPlayingBar-left, .main-nowPlayingBar-right {
+		opacity: 0.4;
+
+		transition: opacity 0.125s ease-out;
+	
+		&:hover {
+			opacity: 1;
+		}
+	}
+}
+
+body:has(.Root__main-view-overlay .BeautifulLyricsPage) {
+	.Root__now-playing-bar {
+		.main-nowPlayingBar-center {
+			opacity: 0.8;
+		
+			transition: opacity 0.125s ease-out;
+		
+			.player-controls__buttons {
+				opacity: 0.15;
+		
+				transition: opacity 0.125s ease-out;
+			}
+		}
+
+		&:hover {
+			.main-nowPlayingBar-center {
+				opacity: 1;
+
+				.player-controls__buttons {
+					opacity: 1;
+				}
+			}
+		}
+	}
+
+	.main-genericButton-button.main-genericButton-buttonActive {
+		color: white;
+
+		&:after {
+			background-color: white;
+		}
+	}
+}
