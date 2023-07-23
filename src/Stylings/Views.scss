@@ -57,6 +57,10 @@
 			button {
 				width: 4.25cqh;
 				height: 4.25cqh;
+
+				aspect-ratio: 1;
+
+				border-radius: 100rem;
 			}
 
 			opacity: 0;
@@ -97,6 +101,10 @@
 		button {
 			width: 4.25cqh;
 			height: 4.25cqh;
+
+			aspect-ratio: 1;
+
+			border-radius: 100rem;
 		}
 
 		opacity: 0;
@@ -124,7 +132,17 @@ button:has(.LyricsPageIcon) {
 }
 
 /* Cinema Playbar Adjustments*/
-body:has(.Root__main-view-overlay .BeautifulLyricsPage:not(:is(.PlaybarDetailsHidden))) {
+body:has(.Root__main-view-overlay .BeautifulLyricsPage) {
+	.main-genericButton-button.main-genericButton-buttonActive {
+		color: white;
+
+		&:after {
+			background-color: white;
+		}
+	}
+}
+
+body:has(.Root__main-view-overlay .BeautifulLyricsPage:not(:is(.PlaybarDetailsHidden), :is(.Fullscreen))) {
 	.main-nowPlayingBar-left, .main-nowPlayingBar-right {
 		opacity: 0.4;
 
@@ -136,7 +154,23 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:not(:is(.PlaybarDetailsHi
 	}
 }
 
-body:has(.Root__main-view-overlay .BeautifulLyricsPage) {
+body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.PlaybarDetailsHidden)) {
+	.main-nowPlayingBar-left, .main-nowPlayingBar-right {
+		opacity: 0;
+
+		transition: opacity 0.125s ease-out;
+	}
+
+	.Root__now-playing-bar {
+		&:hover {
+			.main-nowPlayingBar-left, .main-nowPlayingBar-right {
+				opacity: 1;
+			}
+		}
+	}
+}
+
+body:has(.Root__main-view-overlay .BeautifulLyricsPage:not(:is(.Fullscreen))) {
 	.Root__now-playing-bar {
 		.main-nowPlayingBar-center {
 			opacity: 0.8;
@@ -160,12 +194,159 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage) {
 			}
 		}
 	}
+}
 
-	.main-genericButton-button.main-genericButton-buttonActive {
-		color: white;
+body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
+	.Root__now-playing-bar {
+		.main-nowPlayingBar-container {
+			left: -25vw;
+			position: relative;
+			scale: 0.9;
+			bottom: calc(22.5vh + 36px);
 
-		&:after {
-			background-color: white;
+			height: 0;
+
+			container-type: inline-size;
+		}
+
+		.main-nowPlayingBar-nowPlayingBar {
+			height: 0;
+		}
+
+		.main-nowPlayingWidget-nowPlaying {
+			width: 40vh;
+
+			left: calc(49.75vw - 20vh);
+			bottom: calc(25.5vh + 36px);
+
+			flex-direction: column;
+
+			.cover-art {
+				width: 40vh !important;
+				height: 40vh !important;
+			}
+
+			&>div:has(.cover-art) {
+				opacity: 0.85;
+				box-shadow: rgba(0, 0, 0, 0.26) 0 9px 20px 0px;
+
+				border-radius: 8px;
+			}
+		}
+
+		.main-nowPlayingWidget-trackInfo {
+			width: 40vw;
+
+			position: relative;
+			left: -0.5vh;
+			top: 1vh;
+
+			justify-items: center;
+			align-items: center;
+			text-align: center;
+
+			.main-trackInfo-artists {
+				justify-items: center;
+				align-items: center;
+				display: flex;
+				width: auto;
+
+				.TypeElement-finale-textSubdued-type {
+					font-size: 1.6vh;
+				}
+			}
+
+			.main-trackInfo-name {
+				display: flex;
+
+				.TypeElement-mesto-type {
+					font-size: 3vh;
+				}
+
+				.main-trackInfo-overlay {
+					margin: auto;
+				}
+			}
+		}
+
+		.control-button-heart {
+			--radius: 10vh;
+
+			display: block;
+
+			width: 40vh;
+			height: 40vh;
+			
+			position: absolute;
+			left: -0.75vh;
+
+			padding-top: 2vh;
+
+			color: white;
+
+			z-index: 5;
+
+			opacity: 0;
+			transition: opacity 0.125s ease-out;
+
+			cursor: pointer;
+			&:hover {
+				opacity: 0.75;
+			}
+
+			svg {
+				width: var(--radius) !important;
+				height: var(--radius) !important;
+
+				&:not(:is(.Svg-img-16-icon)) {
+					scale: 2.5;
+				}
+			}
+		}
+
+		.main-nowPlayingBar-right {
+			position: relative;
+
+			left: -19vw;
+			top: 7vh;
+
+			transform-origin: center;
+			translate: -50% -50%;
+
+			opacity: 0.25;
+			transition: opacity 0.125s ease-out;
+
+			&:hover {
+				opacity: 1;
+			}
+
+			.main-nowPlayingBar-extraControls {
+				justify-content: center;
+				justify-items: center;
+			}
+		}
+
+		.main-connectBar-connectBar {
+			width: 27vh;
+
+			left: 49.25vw;
+			top: 7vh;
+			transform-origin: center;
+			translate: -50% -50%;
+
+			opacity: 0.25;
+			transition: opacity 0.125s ease-out;
+
+			justify-items: center;
+			align-items: center;
+			justify-content: center;
+			padding-right: unset;
+		}
+
+		&:has(.main-nowPlayingBar-right:hover) {
+			.main-connectBar-connectBar {
+				opacity: 1;
+			}
 		}
 	}
 }

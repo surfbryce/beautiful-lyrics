@@ -27,6 +27,7 @@ type Store = {
 
 	LyricViews: {
 		CardLyricsVisible: boolean;
+		PlaybarDetailsHidden: boolean;
 	};
 }
 type StoreItemName = (keyof Store)
@@ -36,14 +37,15 @@ const StoreTemplates: Store = {
 	Analytics: {},
 
 	LyricViews: {
-		CardLyricsVisible: false
+		CardLyricsVisible: false,
+		PlaybarDetailsHidden: false
 	}
 }
 
 // Define StoreItem Versions
 const ExpireCacheStoreItemVersions: Map<ExpireCacheName, number> = new Map()
-ExpireCacheStoreItemVersions.set("TrackInformation", 1)
-ExpireCacheStoreItemVersions.set("ISRCLyrics", 2)
+ExpireCacheStoreItemVersions.set("TrackInformation", 2)
+ExpireCacheStoreItemVersions.set("ISRCLyrics", 3)
 
 const StoreItemVersions: Map<StoreItemName, number> = new Map()
 StoreItemVersions.set("Analytics", 1)
