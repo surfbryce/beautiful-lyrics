@@ -8,7 +8,7 @@
 
 	position: absolute !important;
 
-	&.Cinema {
+	&.Cinema, &.Fullscreen {
 		top: -1cqh;
 		height: 101cqh;
 	}
@@ -79,6 +79,10 @@
 	.main-nowPlayingView-lyricsControls {
 		opacity: 0.3;
 	}
+}
+
+body:has(.Root__main-view-overlay .BeautifulLyricsPage) {
+	overflow: hidden;
 }
 
 .BeautifulLyricsPage {
@@ -196,13 +200,38 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:not(:is(.Fullscreen))) {
 	}
 }
 
+body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen, .Cinema)) {
+	.Root__top-container {
+		/* Prevent themes from screwing up our stuff */
+		padding-top: calc(24px + var(--panel-gap)*2) !important; // Restore original
+		position: unset !important;
+	}
+}
+
 body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 	.Root__now-playing-bar {
+		/* Prevent themes from screwing up our stuff */
+		background: unset !important;
+		margin: unset !important;
+		width: unset !important;
+		box-shadow: unset !important;
+		border-radius: unset !important;
+		border: unset !important;
+		backdrop-filter: unset !important;
+		position: unset !important;
+		bottom: unset !important;
+		left: unset !important;
+
+		&::before {
+			content: none;
+		}
+
+		/* Descendants */
 		.main-nowPlayingBar-container {
 			left: -25vw;
 			position: relative;
 			scale: 0.9;
-			bottom: calc(22.5vh + 36px);
+			bottom: calc(24vh + 36px);
 
 			height: 0;
 
@@ -211,12 +240,14 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 
 		.main-nowPlayingBar-nowPlayingBar {
 			height: 0;
+
+			container-type: size; // Make everything relative to the container
 		}
 
 		.main-nowPlayingWidget-nowPlaying {
 			width: 40vh;
 
-			left: calc(49.75vw - 20vh);
+			left: calc(50cqw - 20vh);
 			bottom: calc(26vh + 36px);
 
 			flex-direction: column;
@@ -228,9 +259,18 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 
 			&>div:has(.cover-art) {
 				opacity: 0.85;
-				box-shadow: rgba(0, 0, 0, 0.26) 0 9px 20px 0px;
+				box-shadow: rgba(0, 0, 0, 0.26) 0 9px 20px 0px !important;
 
-				border-radius: 8px;
+				border-radius: 8px !important; // !important prevents themes from screwing with us
+			}
+
+			/* Stop themes from screwing with us */
+			.main-coverSlotCollapsed-container {
+				position: relative;
+				left: unset;
+				top: unset;
+				width: unset;
+				height: unset;
 			}
 		}
 
@@ -238,7 +278,8 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 			width: 40vw;
 
 			position: relative;
-			left: -0.5vh;
+			margin: unset;
+			left: -0.25vh;
 			top: 1.5vh;
 
 			justify-items: center;
@@ -288,7 +329,7 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 
 			color: white;
 
-			z-index: 5;
+			z-index: 100000; // Some themes screw with our order here
 
 			opacity: 0;
 			transition: opacity 0.125s ease-out;
