@@ -55,6 +55,13 @@ aside:has(.main-nowPlayingView-section) {
 		filter: saturate(2.5) brightness(0.65);
 	}
 
+	.BeautifulLyricsPage.Fullscreen &-container {
+		max-width: 20%;
+		max-height: 60%;
+
+		scale: 500% 165%
+	}
+
 	// These are right-side card background specific classes to adjust for contrast issues
 	&.os-padding:has(.main-nowPlayingView-content) &-container {
 		border-radius: 8px;
@@ -115,22 +122,7 @@ aside:has(.main-nowPlayingView-section) {
 		top: 0;
 		z-index: 10;
 
-		/*
-			This was previously Luminosity.
-
-			The issue with pretty much every blend mode is that random-clipping will happen
-			on the smaller lyric components (minified and small). This clipping usually would show up
-			as rounded rectangles that showed the background color and not the blurred colors; kind of
-			like a random mask was applied to it.
-
-			Revert is the only blend mode that doesn't have this issue. There is no visual trade-off and
-			arguably looks better than Luminosity.
-
-			Color-dodge is also another cool option - unlike the other two it's not like blob-merging
-			and is more like a trippy but satisfying effect - unfortuantely; it suffers from the same issue
-			as Luminosity.
-		*/
-		mix-blend-mode: revert;
+		/*mix-blend-mode: soft-light;*/
 	}
 
 	// Additional image to cover space that the primary image doesn't cover (and to develop blob-blending)
