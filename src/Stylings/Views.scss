@@ -217,7 +217,7 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 			width: 40vh;
 
 			left: calc(49.75vw - 20vh);
-			bottom: calc(25.5vh + 36px);
+			bottom: calc(26vh + 36px);
 
 			flex-direction: column;
 
@@ -239,7 +239,7 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 
 			position: relative;
 			left: -0.5vh;
-			top: 1vh;
+			top: 1.5vh;
 
 			justify-items: center;
 			align-items: center;
@@ -253,6 +253,10 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 
 				.TypeElement-finale-textSubdued-type {
 					font-size: 1.6vh;
+				}
+
+				a:link, a:visited {
+					color: rgba(255, 255, 255, 0.5);
 				}
 			}
 
@@ -348,5 +352,17 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 				opacity: 1;
 			}
 		}
+	}
+}
+
+body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen) .NoLyrics) {
+	.Root__now-playing-bar {
+		.main-nowPlayingBar-container {
+			left: -1vw;
+		}
+	}
+
+	.RootContainer {
+		visibility: hidden;
 	}
 }
