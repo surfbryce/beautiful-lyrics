@@ -1,6 +1,6 @@
 {
   "name": "beautiful-lyrics",
-  "version": "3.0.9",
+  "version": "3.1.0",
   "private": true,
   "scripts": {
     "build": "spicetify-creator --out=dist --minify",
@@ -11,6 +11,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/d3-ease": "^3.0.0",
+    "@types/dat.gui": "^0.7.10",
     "@types/react": "^18.2.6",
     "@types/react-dom": "^18.2.4",
     "spicetify-creator": "^1.0.13"
@@ -19,7 +20,10 @@
     "cubic-spline": "^3.0.3",
     "curve-interpolator": "^3.1.1",
     "d3-ease": "^3.0.1",
+    "dat.gui": "^0.7.9",
     "franc-all": "^7.1.0",
-    "simplebar": "latest"
+    "glslCanvas": "^0.2.6",
+    "simplebar": "latest",
+    "stackblur-canvas": "^2.6.0"
   }
 }
