@@ -245,11 +245,12 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 		}
 
 		.main-nowPlayingWidget-nowPlaying {
-			width: 40vh;
+			width: 40vh !important;
 
 			left: calc(50cqw - 20vh);
 			bottom: calc(26vh + 36px);
 
+			display: flex !important; // Prevent themes from screwing our direction
 			flex-direction: column;
 
 			.cover-art {
@@ -260,6 +261,9 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 			&>div:has(.cover-art) {
 				opacity: 0.85;
 				box-shadow: rgba(0, 0, 0, 0.26) 0 9px 20px 0px !important;
+
+				transform: unset !important; // Prevent themes from screwing our visuals
+				margin: 0;
 
 				border-radius: 8px !important; // !important prevents themes from screwing with us
 			}
@@ -323,7 +327,6 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 			height: 40vh;
 			
 			position: absolute;
-			left: -0.75vh;
 
 			padding-top: 2vh;
 
@@ -342,6 +345,8 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 			svg {
 				width: var(--radius) !important;
 				height: var(--radius) !important;
+
+				left: -0.75vh;
 
 				&:not(:is(.Svg-img-16-icon)) {
 					scale: 2.5;
