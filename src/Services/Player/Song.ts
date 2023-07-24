@@ -172,12 +172,20 @@ const RetryGetRequest = (url: string, retryCount: number, retryCooldown: number)
 				// Attempt to load our request
 				for (let index = 0; index < retryCount; index += 1) {
 					try {
-						resolve(await SpotifyFetch.request("GET", url))
+						const result = await SpotifyFetch.request("GET", url)
+
+						if (index > 0) {
+							console.warn(`Successfully loaded Request (${url}) on Retry (${index + 1})`)
+						}
+
+						return resolve(result)
 					} catch (error) {
 						console.warn(`Failed to load Request (${url}) on Retry (${index + 1}), Error Below:`)
 						console.warn(error)
 
-						await new Promise(resolve => setTimeout(resolve, (retryCooldown * 1000)))
+						if (index < (retryCount - 1)) {
+							await new Promise(resolve => setTimeout(resolve, (retryCooldown * 1000)))
+						}
 					}
 				}
 
