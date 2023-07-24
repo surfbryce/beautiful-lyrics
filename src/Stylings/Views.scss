@@ -34,6 +34,12 @@
 	pointer-events: auto;
 }
 
+body:has(.BeautifulLyricsPage) {
+	.main-topBar-background {
+		opacity: 0 !important;
+	}
+}
+
 .os-content:has(.BeautifulLyricsPage) {
 	container-type: size;
 
@@ -201,10 +207,6 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:not(:is(.Fullscreen))) {
 }
 
 body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen, .Cinema)) {
-	.main-topBar-background {
-		opacity: 0 !important;
-	}
-
 	.Root__top-container {
 		/* Prevent themes from screwing up our stuff */
 		padding-top: calc(24px + var(--panel-gap)*2) !important; // Restore original
