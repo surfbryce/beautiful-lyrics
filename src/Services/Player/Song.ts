@@ -164,6 +164,30 @@ const SongLyricsExpiration: ExpirationSettings = {
 // Dynamic Flags
 let LastSpotifyTimestamp: number
 
+// Helper Methods
+const RetryGetRequest = (url: string, retryCount: number, retryCooldown: number): Promise<Spicetify.CosmosAsync.Response> => {
+	return (
+		new Promise(
+			async (resolve, reject) => {
+				// Attempt to load our request
+				for (let index = 0; index < retryCount; index += 1) {
+					try {
+						resolve(await SpotifyFetch.request("GET", url))
+					} catch (error) {
+						console.warn(`Failed to load Request (${url}) on Retry (${index + 1}), Error Below:`)
+						console.warn(error)
+
+						await new Promise(resolve => setTimeout(resolve, (retryCooldown * 1000)))
+					}
+				}
+
+				// Failed completely
+				reject(`Failed to load Request (${url}) after ${retryCount} retries`)
+			}
+		)
+	)
+}
+
 // Class
 class Song implements Giveable {
 	// Private Properties
@@ -424,11 +448,10 @@ class Song implements Giveable {
 				trackInformation => {
 					if (trackInformation === undefined) {
 						return (
-							SpotifyFetch.request(
-								"GET",
-								`https://api.spotify.com/v1/tracks/${this.Id}`
-							) // Uncaught on purpose - it should rarely ever fail
-							.catch(error => {console.warn(error); throw error})
+							RetryGetRequest(
+								`https://api.spotify.com/v1/tracks/${this.Id}`,
+								10, 0.25
+							)
 							.then(
 								(response) => {
 									if ((response.status < 200) || (response.status > 299)) {
