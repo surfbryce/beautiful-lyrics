@@ -1,6 +1,6 @@
 {
   "name": "beautiful-lyrics",
-  "version": "3.1.4",
+  "version": "3.1.5",
   "private": true,
   "scripts": {
     "build": "spicetify-creator --out=dist --minify",
@@ -21,6 +21,7 @@
     "curve-interpolator": "^3.1.1",
     "d3-ease": "^3.0.1",
     "dat.gui": "^0.7.9",
+    "extract-colors": "^3.0.0",
     "franc-all": "^7.1.0",
     "glslCanvas": "^0.2.6",
     "simplebar": "latest",
