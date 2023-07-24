@@ -201,6 +201,10 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:not(:is(.Fullscreen))) {
 }
 
 body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen, .Cinema)) {
+	.main-topBar-background {
+		opacity: 0 !important;
+	}
+
 	.Root__top-container {
 		/* Prevent themes from screwing up our stuff */
 		padding-top: calc(24px + var(--panel-gap)*2) !important; // Restore original
@@ -244,6 +248,26 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 			container-type: size; // Make everything relative to the container
 		}
 
+		// Prevent themes from screwing with us
+		.playback-bar__progress-time-elapsed, .main-playbackBarRemainingTime-container {
+			position: relative !important;
+			margin-bottom: unset !important;
+			right: unset !important;
+		}
+
+		.main-nowPlayingBar-center {
+			.playback-progressbar {
+				position: relative !important;
+				left: unset !important;
+				bottom: unset !important;
+			}
+
+			.player-controls__buttons {
+				margin-bottom: 12px;
+			}
+		}
+
+		// Regular stuff
 		.main-nowPlayingWidget-nowPlaying {
 			width: 40vh !important;
 
