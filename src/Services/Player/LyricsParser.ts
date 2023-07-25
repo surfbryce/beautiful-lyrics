@@ -1,5 +1,5 @@
 // Modules
-import { franc } from "franc-all"
+import { franc } from "franc"
 
 // Type Modules
 import Spotify from "./Spotify"
@@ -112,7 +112,7 @@ const RightToLeftLanguages = [
 	'pes', 'urd',
 	
 	// Arabic Languages
-	'ara', 'zlm', 'uig',
+	'arb', 'zlm', 'uig',
 
 	// Hebrew Languages
 	'heb', 'ydd',
@@ -165,9 +165,6 @@ const ParseAppleMusicLyrics = (text: string) => {
 	const parsedDocument = parser.parseFromString(text, "text/xml")
 	const body = parsedDocument.querySelector("body")!
 
-	// Grab our natural-alignment
-	const naturalAlignment = GetNaturalAlignment(body.innerHTML)
-
 	// Determine if we're syllable synced, line synced, or statically synced
 	const syncType = (
 		SyllableSyncCheck.test(text) ? "Syllable"
@@ -178,7 +175,7 @@ const ParseAppleMusicLyrics = (text: string) => {
 	// For static-sync we just have to extract each line of text
 	if (syncType === "Static") {
 		const result: StaticSynced = {
-			NaturalAlignment: naturalAlignment,
+			NaturalAlignment: "Left",
 
 			Type: "Static",
 			Lyrics: []
@@ -194,10 +191,20 @@ const ParseAppleMusicLyrics = (text: string) => {
 			}
 		}
 
+		// Determine our natural-alignment
+		{
+			let textToProcess = result.Lyrics[0]
+			for (let index = 1; index < result.Lyrics.length; index += 1) {
+				textToProcess += `\n${result.Lyrics[index]}`
+			}
+
+			result.NaturalAlignment = GetNaturalAlignment(textToProcess)
+		}
+
 		return result
 	} else if (syncType == "Line") {
 		const result: LineSynced = {
-			NaturalAlignment: naturalAlignment,
+			NaturalAlignment: "Left",
 
 			StartTime: 0,
 			EndTime: 0,
@@ -248,10 +255,22 @@ const ParseAppleMusicLyrics = (text: string) => {
 			result.EndTime = lastLine.EndTime
 		}
 
+		// Determine our natural-alignment
+		{
+			let lines = []
+			for (const vocalGroup of result.VocalGroups) {
+				if (vocalGroup.Type === "Vocal") {
+					lines.push(vocalGroup.Text)
+				}
+			}
+
+			result.NaturalAlignment = GetNaturalAlignment(lines.join("\n"))
+		}
+
 		return result
 	} else {
 		const result: SyllableSynced = {
-			NaturalAlignment: naturalAlignment,
+			NaturalAlignment: "Left",
 
 			StartTime: 0,
 			EndTime: 0,
@@ -383,6 +402,24 @@ const ParseAppleMusicLyrics = (text: string) => {
 			result.EndTime = lastLine.EndTime
 		}
 
+		// Determine our natural-alignment
+		{
+			let lines = []
+			for (const vocalGroup of result.VocalGroups) {
+				if (vocalGroup.Type === "Vocal") {
+					let text = vocalGroup.Lead[0].Text
+					for (let index = 1; index < vocalGroup.Lead.length; index += 1) {
+						const syllable = vocalGroup.Lead[index]
+						text += `${syllable.IsPartOfWord ? "" : " "}${syllable.Text}`
+					}
+
+					lines.push(text)
+				}
+			}
+
+			result.NaturalAlignment = GetNaturalAlignment(lines.join("\n"))
+		}
+
 		return result
 	}
 }
@@ -399,6 +436,19 @@ const ParseSpotifyLyrics = (content: Spotify.LyricLines) => {
 		VocalGroups: []
 	}
 
+	// Determine our alignment
+	{
+		let textToProcess = content[0].words
+		for(let index = 2; index < content.length; index += 1) {
+			textToProcess += `\n${content[index].words}`
+		}
+
+		if (GetNaturalAlignment(textToProcess) === "Right") {
+			result.NaturalAlignment = "Right"
+		}
+	}
+
+	// Go through every entry and start populating
 	for (const [index, line] of content.entries()) {
 		// Ignore this line if we're an "interlude"
 		if (line.words.includes("♪")) {
@@ -414,13 +464,6 @@ const ParseSpotifyLyrics = (content: Spotify.LyricLines) => {
 			? (parseInt(content[index + 1].startTimeMs, 10) / 1000)
 			: (parseInt(line.endTimeMs, 10) / 1000)
 		)
-
-		// Update our natural alignment
-		if (result.NaturalAlignment === "Left") {
-			if (GetNaturalAlignment(line.words) === "Right") {
-				result.NaturalAlignment = "Right"
-			}
-		}
 
 		// Now store our lyrics
 		result.VocalGroups.push(
