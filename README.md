@@ -6,28 +6,33 @@
 ![Thumbnail](./previews/thumbnail.gif)
 ### Takes the built-in Spotify lyrics and gives them a complete uplift!
 
-The background has been given a *Dynamic* Color Background that blends through the colors of the Cover-Art beautifully.
+The background has been given a ***Dynamic* Color Background** that blends through the colors of the Cover-Art beautifully.
 
-Lyrics have also been completely revamped to provide an entirely new a better Lyrics experience!
+Lyrics have also been completely revamped to provide an entirely new and better Lyrics experience!
 
-New Cinema and Page Lyric Views have been added to replace Spotifys own versions! Page view replaces the main-page and Cinema view gives you an immersive Lyrics experience!
+New **Cinema and Page Lyric Views** have been added to replace Spotifys own versions! **Page view** replaces the main-page and **Cinema view** gives you an **immersive Lyrics experience**!
+
+Never worry about Updating ever! **Beautiful Lyrics is ALWAYS Up-to-Date because it Auto-Updates as _SOON_ as an update is available!** This means that if you make an issue/suggestion - it could be added and working for you (and everyone else) minutes later!
 
 ## FAQ
-- **The background isn't showing up! How come?**
-	- Make sure that your Spicetify AND Spotify are updated to the most recent versions. Update Spicetify using these [instructions](https://spicetify.app/docs/getting-started/#updating) - to update Spotify click your PFP and if there is an option to update click it.
-	- If you are on the latest versions then it must be an issue with the extension - so leave a report!
+- **None of the Lyrics are Showing Up/The visuals are off - what do I do?**
+	- If you aren't using a theme follow these steps:
+		- Make sure that your Spicetify AND Spotify are updated to the most recent versions. Update Spicetify using these [instructions](https://spicetify.app/docs/getting-started/#updating). You can update Spotify IF - when you click your Profile Picture - there is an option to do so: usually there is a little blue circle on your profile-picture indicating that you can update.
+		- If this still doesn't work - try reinstalling Spotify. *MAKE SURE* that you are **NOT** using the Windows Store version as this version is __known to cause issues__. Download Spotify from the Spotify website directly and run the installation from there.
+		- If you are on the latest version of the extension and none of this fixes it than it must be an issue with Beautiful-Lyrics: so make an issue on GitHub! You can find a button to do that at the **bottom**.
+	- If you are using a theme: then make an issue on GitHub that has a title similar to this "Theme THEME_NAME Issues". Make sure to **include a screenshot of what is specifically wrong** and also - again - **leave the name of the theme you are using**. *Usually* these will be fixed very quickly.
 - **I have the extension but not the Right Side-Card! How do I get it?**
 	- The right side-card is not a part of the extension - it's actually a built-in Spotify feature they haven't released! This is how you enable it:
 		- Click your Profile Picture and click the "Expiremental Features" tab
-		- Type into the search bar "side"
+		- Type into the search bar "**side**"
 		- Click the checkmark for:
-			- "Enable the view on the right sidebar"
-			- "Extract background color based on artwork images"
-			- "Enable Panel Size Coordination"
-- **I just installed the extension, but I don't have any of the new stuff!**
-	- If you are on Version 2.4.0 or greater the extension should automatically update itself to the latest version **as soon as the newest version comes out** - you don't have to wait for Spicetify to detect a new version - which could take up to *24 hours*!
-- **The extension isn't doing anything at all!**
-	- Make sure that your country doesn't have any internet-restrictions on JSDelivr (the website Spicetify uses to load the extensions). You'll find that other extensions won't work when installed through the Marketplace this way. If you are having this issue consider downloading the source of this extension and installing it locally (not through Marketplace).
+			- "**Enable the view on the right sidebar**"
+			- "**Extract background color based on artwork images**"
+			- "**Enable Panel Size Coordination**"
+	- If you don't see any of the items listed above when you search "side" **reinstall Spotify using the instructions above**.
+- **The extension isn't working at all!**
+	- If you are in the country of Egypt (or any country that puts restrictions on popular sites) and you are not using a VPN it's possible that Spicetify is being blocked from getting the extensions and running them. You'll notice this for other extensions as well. Your best bet in this scenario is to simply download the extension and install it locally.
+		- If you want to install it locally - all you need to do is go to the dist directory on the website and to the javascript file located in it. Copy the code there and create a new file somewhere on your computer and paste the code in it. Then follow these steps on how to actually use/install it ([instructions](https://spicetify.app/docs/advanced-usage/extensions))
 
 ## Have an issue/idea? Go ahead and send them!
 
