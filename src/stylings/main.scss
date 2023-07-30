@@ -16,6 +16,16 @@ aside:has(.main-nowPlayingView-section) {
 	.main-nowPlayingView-section {
 		background-color: var(--background-tinted-base) !important;
 	}
+
+	button[type="button"] {
+		background-color: var(--background-tinted-base) !important;
+		color: rgba(255, 255, 255, 0.8);
+
+		.Button-sm-buttonSecondary-useBrowserDefaultFocusStyle,
+		.Button-sm-buttonSecondary-isUsingKeyboard-useBrowserDefaultFocusStyle {
+			border: 1px solid rgba(255, 255, 255, 0.5);
+		}
+	}
 }
 
 
