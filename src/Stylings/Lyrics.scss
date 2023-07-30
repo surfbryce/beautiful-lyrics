@@ -1,3 +1,37 @@
+// Handle importing the MacOS Blink font so that every platform has the same font no matter what
+@font-face {
+	font-family: "BeautifulLyrics";
+	font-weight: 400;
+	src:
+		url("https://fonts.socalifornian.live/LyricsRegular.woff2")
+		format("woff2");
+	
+}
+
+@font-face {
+	font-family: "BeautifulLyrics";
+	font-weight: 500;
+	src:
+		url("https://fonts.socalifornian.live/LyricsMedium.woff2")
+		format("woff2");
+}
+
+@font-face {
+	font-family: "BeautifulLyrics";
+	font-weight: 600;
+	src:
+		url("https://fonts.socalifornian.live/LyricsSemibold.woff2")
+		format("woff2");
+}
+
+@font-face {
+	font-family: "BeautifulLyrics";
+	font-weight: 700;
+	src:
+		url("https://fonts.socalifornian.live/LyricsBold.woff2")
+		format("woff2");
+}
+
 /* Root Container */
 .RootContainer {
 	display: block;
@@ -77,8 +111,7 @@
 	letter-spacing: 0em;
 	transition: color 0.1s, transform 0.1s ease-in-out, padding 0.1s ease-in-out;
 
-	font-family: -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "SF Pro",
-		"SF Pro Icons", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+	font-family: "BeautifulLyrics";
 
 	unicode-bidi: isolate;
 
