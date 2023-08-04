@@ -347,7 +347,7 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 		.control-button-heart {
 			--radius: 10vh;
 
-			display: block;
+			display: flex;
 
 			width: 40vh;
 			height: 40vh;
