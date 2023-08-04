@@ -583,7 +583,7 @@ class Song implements Giveable {
 
 				lastUpdatedPlaybackTimestamp = lastPlaybackTimestamp
 
-				this.UpdateTimestamp(Math.min((timestamp + deltaTime), this.Duration), deltaTime)
+				this.UpdateTimestamp(Math.min(timestamp, this.Duration), deltaTime)
 			} else if (lastUpdatedPlaybackTimestamp !== lastPlaybackTimestamp) {
 				lastUpdatedPlaybackTimestamp = lastPlaybackTimestamp
 				this.UpdateTimestamp((lastPlaybackTimestamp / 1000), 0)
