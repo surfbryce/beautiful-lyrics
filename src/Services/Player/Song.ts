@@ -162,7 +162,7 @@ const SongLyricsExpiration: ExpirationSettings = {
 }
 
 // Dynamic Flags
-let LastSpotifyTimestamp: number
+let FirstSongLoaded = false
 
 // Class
 class Song implements Giveable {
@@ -233,41 +233,35 @@ class Song implements Giveable {
 
 	// Private Setup Methods
 	private HandleEvents() {
-		// Handle when our progress changes (used for skip detection)
+		// Watch for when we complete a full song-change (progress resets)
 		{
+			// Store our spotify-timestamp at the start
+			const startSpotifyTimestamp = SpotifyPlayer.getProgress()
+
 			const callback = (event?: Event & { data: number }) => {
 				// Make sure we even have our event
 				if (event === undefined) {
 					return
 				}
 
-				/*
-					So now we need to make sure we're not using the timestamp from a previous song.
+				// Now check to see if our timestamp changed (if it has we've fully changed)
+				if ((FirstSongLoaded === false) || (startSpotifyTimestamp !== event.data)) {
+					// Mark that our first song loaded
+					FirstSongLoaded = true
 
-					This should be impossible but how Spotify works is that it keeps yelling out the
-					timestamp no matter what and only changes the timestamp once the song has loaded.
+					// Disconnect our listener
+					this.Maid.Clean("WaitForSongStart")
 
-					So by determining whether or not our timestamp is the same as the previous we can
-					avoid running any updates whilst also avoiding any issues with the timestamp.
-				*/
-				if (event.data === LastSpotifyTimestamp) {
-					return
-				}
-				LastSpotifyTimestamp = event.data
-	
-				// Grab our timestamp from Spotify
-				const spotifyTimestamp = (event.data / 1000)
-	
-				// Now determine if we skipped
-				const deltaTime = Math.abs(spotifyTimestamp - this.Timestamp)
-
-				if (deltaTime >= (this.DeltaTime + MinimumTimeSkipDifferenceOffset)) {
-					this.UpdateTimestamp(spotifyTimestamp, (1 / 60), true)
+					// Now start natural listening process
+					this.StartNaturalTimestepping()
 				}
 			}
 	
 			SpotifyPlayer.addEventListener("onprogress", callback)
-			this.Maid.Give(() => SpotifyPlayer.removeEventListener("onprogress", callback as any))
+			this.Maid.Give(
+				() => SpotifyPlayer.removeEventListener("onprogress", callback as any),
+				"WaitForSongStart"
+			)
 		}
 
 		// Watch for IsPlaying changes
@@ -559,17 +553,40 @@ class Song implements Giveable {
 	private StartNaturalTimestepping() {
 		// Store our time now
 		let lastTime = Date.now()
+		let lastUpdatedPlaybackTimestamp = 0
 
 		// Now create our callback
 		const update = () => {
-			// Grab our time-now
+			// Determine our frame variables
 			const timeNow = Date.now()
 			const deltaTime = ((timeNow - lastTime) / 1000)
 
-			// Determine if we can even step
+			/*
+				The idea here is that we use Spotifys internal timestamp (which is set on every play/pause/seek)
+				to determine how long time has passed since then.
+
+				We then add that delta-time to the last known playback-timestamp to get our current timestamp.
+
+				Both of these provided timestamps are extremely accurate. Whenever corrections are made
+				we also automatically correct to that timestamp. Meaning that this whole system is enclosed
+				and requires no external input/correction.
+
+				The logic for when we are paused is simply so that we have can have an initial timestamp
+				update for when the song actually loads/plays (this allows us to fire that loaded signal).
+			*/
+			const lastActionTimestamp = Spicetify.Platform.PlayerAPI._state.timestamp
+			const lastPlaybackTimestamp = Spicetify.Platform.PlayerAPI._state.positionAsOfTimestamp
+
 			if (this.Playing) {
-				// Now update our timestamp
-				this.UpdateTimestamp(Math.min((this.Timestamp + deltaTime), this.Duration), deltaTime)
+				const timeSinceLastAction = (timeNow - lastActionTimestamp)
+				const timestamp = ((lastPlaybackTimestamp + timeSinceLastAction) / 1000)
+
+				lastUpdatedPlaybackTimestamp = lastPlaybackTimestamp
+
+				this.UpdateTimestamp(Math.min((timestamp + deltaTime), this.Duration), deltaTime)
+			} else if (lastUpdatedPlaybackTimestamp !== lastPlaybackTimestamp) {
+				lastUpdatedPlaybackTimestamp = lastPlaybackTimestamp
+				this.UpdateTimestamp((lastPlaybackTimestamp / 1000), 0)
 			}
 
 			// Update our last time/delta-time
@@ -598,11 +615,6 @@ class Song implements Giveable {
 
 		// Now fire our event
 		this.TimeSteppedSignal.Fire(timestamp, deltaTime, skipped)
-
-		// Start natural-timestepping if this is our first timestamp
-		if (fireChangedSignal !== undefined) {
-			this.StartNaturalTimestepping()
-		}
 	}
 
 	// Public Metadata Methods
