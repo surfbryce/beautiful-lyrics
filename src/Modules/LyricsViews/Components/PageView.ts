@@ -193,6 +193,21 @@ export default class PageView implements Giveable {
 			}
 		}
 
+		// If we're in Fullscreen mode add escape-key support
+		if (isFullscreen) {
+			const HandleEscape = (event: KeyboardEvent) => {
+				if (event.key === 'Escape') {
+					this.Close()
+				}
+			}
+
+			window.addEventListener(
+				'keydown', HandleEscape,
+				true
+			)
+			this.Maid.Give(() => window.removeEventListener('keydown', HandleEscape, true))
+		}
+
 		// Now parent our container/header (dependent on if we are cinema or not)
 		if (isCinema || isFullscreen) {
 			this.Container.firstChild!.before(this.Header)

@@ -270,11 +270,17 @@ export default () => {
 						) {
 							const element = controlsContainer.lastElementChild
 							if (element !== null) {
-								// Update our fullscreen-button
-								fullscreenButton = element as HTMLButtonElement
+								// Grab our previous element
+								const previousElement = element.previousElementSibling!
+								
+								// Clone ourselves
+								fullscreenButton = element.cloneNode(true) as HTMLButtonElement
 
-								// Update our inner-html
-								fullscreenButton.innerHTML = FullscreenOpenIconSVG
+								// Now remove our original element
+								element.remove()
+
+								// Now insert our new element
+								previousElement.after(fullscreenButton)
 
 								// Handle being clicked
 								fullscreenButton.addEventListener(
