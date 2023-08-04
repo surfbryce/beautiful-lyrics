@@ -18,8 +18,8 @@ import "../Stylings/Views.scss"
 const ViewMaid = GlobalMaid.Give(new Maid())
 
 // Behavior Constants
-const InsertCardAfterQuery = "aside .main-nowPlayingView-nowPlayingWidget"
-const SpotifyCardViewQuery = "aside .main-nowPlayingView-section:not(:is(#BeautifulLyrics-CardView)):has(.main-nowPlayingView-lyricsTitle)"
+const InsertCardAfterQuery = "section .main-nowPlayingView-nowPlayingWidget"
+const SpotifyCardViewQuery = "section .main-nowPlayingView-section:not(:is(#BeautifulLyrics-CardView)):has(.main-nowPlayingView-lyricsTitle)"
 
 // Lyrics Page Icon
 const LyricsPageIconSVG = `

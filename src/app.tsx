@@ -23,7 +23,7 @@ let CheckForLiveBackgrounds: (() => void)
 	// Define our queries for each background-container
 	const BackgroundQuerys: Map<BackgroundContainer, string> = new Map()
 	BackgroundQuerys.set('Page', '.BeautifulLyricsPage')
-	BackgroundQuerys.set('VanillaSideCard', 'aside:has(.main-nowPlayingView-section) .os-padding')
+	BackgroundQuerys.set('VanillaSideCard', 'section:has(.main-nowPlayingView-section) .os-padding')
 
 	// Define our images to create
 	// const BackgroundSizeScales = [2, 3]
