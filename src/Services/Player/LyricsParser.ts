@@ -112,7 +112,7 @@ const RightToLeftLanguages = [
 	'pes', 'urd',
 	
 	// Arabic Languages
-	'arb', 'zlm', 'uig',
+	'arb', 'uig', // Do not include "zlm" (Malay) since the Arabic variant will be registered as Arabic
 
 	// Hebrew Languages
 	'heb', 'ydd',

@@ -45,7 +45,7 @@ const StoreTemplates: Store = {
 // Define StoreItem Versions
 const ExpireCacheStoreItemVersions: Map<ExpireCacheName, number> = new Map()
 ExpireCacheStoreItemVersions.set("TrackInformation", 2)
-ExpireCacheStoreItemVersions.set("ISRCLyrics", 4)
+ExpireCacheStoreItemVersions.set("ISRCLyrics", 5)
 
 const StoreItemVersions: Map<StoreItemName, number> = new Map()
 StoreItemVersions.set("Analytics", 1)
