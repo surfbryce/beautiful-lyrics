@@ -190,7 +190,6 @@ class Song implements Giveable {
 	private Timestamp: number = 0
 	private DeltaTime: number = (1 / 60)
 	private AutomatedSyncsExecuted = 0
-	private AutomatedSyncPause?: true
 
 	private LoadedDetails?: true
 
@@ -285,15 +284,6 @@ class Song implements Giveable {
 
 				// Now fire our event
 				if (this.Playing === event.data.is_paused) {
-					// Make sure we're not automated
-					if (this.AutomatedSyncPause === true) {
-						// Unmark ourselves
-						this.AutomatedSyncPause = undefined
-
-						// Prevent ourselves from changing anything
-						return
-					}
-
 					// Trigger an update and reflect our new state
 					this.Playing = !this.Playing
 					this.IsPlayingChangedSignal.Fire(this.Playing)
@@ -597,20 +587,13 @@ class Song implements Giveable {
 			return
 		}
 
-		// Make sure we don't double mark ourselves
-		if (this.AutomatedSyncPause === undefined) {
-			// Mark that we automated a pause (this gets unmarked when we register a pause)
-			this.AutomatedSyncPause = true
-
-			// Now pause ourselves
-			SpotifyPlayer.pause()
-
-			// Immediately resume ourselves
+		// This is enough to force a sync (we have to wrap it in a try-catch because it'll fail since we're already playing)
+		try {
 			SpotifyPlayer.play()
+		} catch (error) {}
 
-			// Increment our counter for the next iteration
-			this.AutomatedSyncsExecuted += 1
-		}
+		// Increment our counter for the next iteration
+		this.AutomatedSyncsExecuted += 1
 
 		// Now set ourselves up for the next one
 		this.Maid.Give(
@@ -670,7 +653,7 @@ class Song implements Giveable {
 		}
 
 		// Trigger an automatic sync right away
-		// this.TriggerAutomatedSync()
+		this.TriggerAutomatedSync()
 
 		// Start our update-cycle
 		update()
