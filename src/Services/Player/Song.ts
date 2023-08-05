@@ -670,7 +670,7 @@ class Song implements Giveable {
 		}
 
 		// Trigger an automatic sync right away
-		this.TriggerAutomatedSync()
+		// this.TriggerAutomatedSync()
 
 		// Start our update-cycle
 		update()
