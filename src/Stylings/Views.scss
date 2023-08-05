@@ -296,6 +296,8 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 
 			/* Stop themes from screwing with us */
 			.main-coverSlotCollapsed-container {
+				pointer-events: none;
+
 				position: relative;
 				left: unset;
 				top: unset;
@@ -360,14 +362,6 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 
 			z-index: 100000; // Some themes screw with our order here
 
-			opacity: 0;
-			transition: opacity 0.125s ease-out;
-
-			cursor: pointer;
-			&:hover {
-				opacity: 0.75;
-			}
-
 			svg {
 				width: var(--radius) !important;
 				height: var(--radius) !important;
@@ -376,6 +370,65 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 
 				&:not(:is(.Svg-img-16-icon)) {
 					scale: 2.5;
+				}
+			}
+		}
+
+		.control-button-feedback {
+			--radius: 4.75vh;
+			--height: calc(40vh * 0.25);
+
+			display: flex;
+			width: 40vh;
+			height: var(--height);
+
+			position: absolute;
+			top: calc(40vh - var(--height));
+			padding-bottom: 1vh;
+
+			color: white;
+
+			z-index: 10000000;
+
+			svg {
+				width: var(--radius) !important;
+				height: var(--radius) !important;
+				left: -0.75vh;
+				display: flex;
+				fill: black;
+			}
+		}
+
+		.control-button-feedback, .control-button-heart {
+			cursor: pointer;
+
+			opacity: 0;
+			transition: opacity 0.125s ease-out;
+
+			&:hover {
+				opacity: 0.75;
+			}
+		}
+
+		&:has(.control-button-heart:hover) {
+			.control-button-feedback {
+				opacity: 0.25;
+			}
+		}
+
+		&:has(.control-button-feedback:hover) {
+			.control-button-heart {
+				opacity: 0.5;
+			}
+		}
+
+		&:has(.control-button-feedback) {
+			.control-button-heart {
+				height: calc(40vh * 0.75);
+
+				span {
+					top: 4.25vh;
+					position: relative;
 				}
 			}
 		}
