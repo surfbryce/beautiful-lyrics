@@ -103,6 +103,10 @@ type ProvidedMetadata = {
 	'collection.in_collection': string;
 	'collection.is_banned': string;
 
+	is_local?: string;
+	local_file_path?: string;
+	local_file_size?: string;
+
 	context_uri: string;
 	duration: string;
 	entity_uri: string;
@@ -175,6 +179,7 @@ class Song implements Giveable {
 	private readonly Id: string
 	private readonly Duration: number
 	private readonly CoverArt: CoverArt
+	private readonly IsLocal: boolean
 	private Details?: Details
 
 	// Private Song State
@@ -197,7 +202,7 @@ class Song implements Giveable {
 	// Constructor
 	constructor(
 		duration: number, isPlaying: boolean,
-		trackId: string, metadata: ProvidedMetadata,
+		trackId: string, metadata: ProvidedMetadata, isLocal: boolean,
 		fireChangedSignal: ((song: Song) => void)
 	) {
 		// Set our properties
@@ -210,6 +215,7 @@ class Song implements Giveable {
 				// Set our given properties
 				this.Id = trackId
 				this.Duration = duration
+				this.IsLocal = isLocal
 
 				// Define our cover art
 				this.CoverArt = {
@@ -412,142 +418,155 @@ class Song implements Giveable {
 	}
 
 	private LoadDetails() {
-		(
-			Cache.GetFromExpireCache("TrackInformation", this.Id)
-			.then(
-				trackInformation => {
-					if (trackInformation === undefined) {
-						return (
-							SpotifyFetch.request(
-								"GET",
-								`https://api.spotify.com/v1/tracks/${this.Id}`
-							) // Uncaught on purpose - it should rarely ever fail
-							.catch(error => {console.warn(error); throw error})
-							.then(
-								(response) => {
-									if ((response.status < 200) || (response.status > 299)) {
-										throw `Failed to load Track (${this.Id}) Information`
-									}
-		
-									// Extract our information
-									const trackInformation = (response.body as SpotifyTrackInformation)
-		
-									// Save our information
-									Cache.SetExpireCacheItem(
-										"TrackInformation",
-										this.Id, trackInformation,
-										TrackInformationExpiration
-									)
-		
-									// Now send our track-information out
-									return trackInformation
-								}
-							)
-						)
-					} else {
-						return trackInformation
-					}
-				}
-			)
-			.then(
-				(trackInformation): Promise<[SpotifyTrackInformation, (ParsedLyrics | false | undefined)]> => {
-					return (
-						Cache.GetFromExpireCache(
-							"ISRCLyrics",
-							trackInformation.external_ids.isrc
-						)
-						.then(storedParsedLyrics => [trackInformation, storedParsedLyrics])
-					)
-				}
-			)
-			.then(
-				([trackInformation, storedParsedLyrics]): Promise<[SpotifyTrackInformation, (ParsedLyrics | undefined)]> => {
-					// Now determine if we have our lyrics at all
-					const recordCode = trackInformation.external_ids.isrc
-	
-					if (storedParsedLyrics === undefined) {
-						return (
-							this.GetLyricsFromBackendProvider(recordCode)
-							.then(
-								(backendLyric): Promise<[(BackendLyric | SpotifyLyric | undefined), boolean]> => {
-									if ((backendLyric === undefined) || (backendLyric.IsSynced === false)) {
-										return (
-											this.GetLyricsFromSpotify(recordCode, trackInformation.popularity)
-											.then(
-												(spotifyLyric) => {
-													if (spotifyLyric === undefined) {
-														return [backendLyric, false]
-													} else {
-														return [spotifyLyric, true]
-													}
-												}
-											)
-										)
-									} else {
-										return Promise.resolve([backendLyric, false])
-									}
-								}
-							).then(
-								([lyric, isSpotifyLyric]) => {
-									// If we don't have either lyric then we clearly dont have any
-									if ((lyric === undefined)) {
-										return undefined
-									}
+		if (this.IsLocal) {
+			// Set our details
+			this.Details = {
+				ISRC: "",
 
-									// Determine our format
-									return (
-										(isSpotifyLyric)
-										? {
-											Source: "Spotify",
-											Content: (lyric as SpotifyLyric).Content
+				Lyrics: undefined
+			}
+
+			// Now mark that our details are loaded and fire our event
+			this.LoadedDetails = true
+			this.DetailsLoadedSignal.Fire()
+		} else {
+			(
+				Cache.GetFromExpireCache("TrackInformation", this.Id)
+				.then(
+					trackInformation => {
+						if (trackInformation === undefined) {
+							return (
+								SpotifyFetch.request(
+									"GET",
+									`https://api.spotify.com/v1/tracks/${this.Id}`
+								) // Uncaught on purpose - it should rarely ever fail
+								.catch(error => {console.warn(error); throw error})
+								.then(
+									(response) => {
+										if ((response.status < 200) || (response.status > 299)) {
+											throw `Failed to load Track (${this.Id}) Information`
 										}
-										: {
-											Source: "AppleMusic",
-											Content: (lyric as BackendLyric).Content
-										}
-									) as LyricsResult
-								}
+			
+										// Extract our information
+										const trackInformation = (response.body as SpotifyTrackInformation)
+			
+										// Save our information
+										Cache.SetExpireCacheItem(
+											"TrackInformation",
+											this.Id, trackInformation,
+											TrackInformationExpiration
+										)
+			
+										// Now send our track-information out
+										return trackInformation
+									}
+								)
 							)
-							.then(
-								(lyricsResult) => {
-									// Determine what our parsed-lyrics are
-									const parsedLyrics = (
-										(lyricsResult === undefined) ? undefined
-										: ParseLyrics(lyricsResult)
-									)
-	
-									// Save our information
-									Cache.SetExpireCacheItem(
-										"ISRCLyrics",
-										recordCode, (parsedLyrics ?? false),
-										SongLyricsExpiration
-									)
-	
-									// Now return our parsed-lyrics
-									return [trackInformation, parsedLyrics]
-								}
+						} else {
+							return trackInformation
+						}
+					}
+				)
+				.then(
+					(trackInformation): Promise<[SpotifyTrackInformation, (ParsedLyrics | false | undefined)]> => {
+						return (
+							Cache.GetFromExpireCache(
+								"ISRCLyrics",
+								trackInformation.external_ids.isrc
 							)
+							.then(storedParsedLyrics => [trackInformation, storedParsedLyrics])
 						)
-					} else {
-						return Promise.resolve([trackInformation, (storedParsedLyrics || undefined)])
 					}
-				}
-			)
-			.then(
-				([trackInformation, parsedLyrics]) => {
-					// Set our details
-					this.Details = {
-						ISRC: trackInformation.external_ids.isrc,
+				)
+				.then(
+					([trackInformation, storedParsedLyrics]): Promise<[SpotifyTrackInformation, (ParsedLyrics | undefined)]> => {
+						// Now determine if we have our lyrics at all
+						const recordCode = trackInformation.external_ids.isrc
+		
+						if (storedParsedLyrics === undefined) {
+							return (
+								this.GetLyricsFromBackendProvider(recordCode)
+								.then(
+									(backendLyric): Promise<[(BackendLyric | SpotifyLyric | undefined), boolean]> => {
+										if ((backendLyric === undefined) || (backendLyric.IsSynced === false)) {
+											return (
+												this.GetLyricsFromSpotify(recordCode, trackInformation.popularity)
+												.then(
+													(spotifyLyric) => {
+														if (spotifyLyric === undefined) {
+															return [backendLyric, false]
+														} else {
+															return [spotifyLyric, true]
+														}
+													}
+												)
+											)
+										} else {
+											return Promise.resolve([backendLyric, false])
+										}
+									}
+								).then(
+									([lyric, isSpotifyLyric]) => {
+										// If we don't have either lyric then we clearly dont have any
+										if ((lyric === undefined)) {
+											return undefined
+										}
 	
-						Lyrics: parsedLyrics
+										// Determine our format
+										return (
+											(isSpotifyLyric)
+											? {
+												Source: "Spotify",
+												Content: (lyric as SpotifyLyric).Content
+											}
+											: {
+												Source: "AppleMusic",
+												Content: (lyric as BackendLyric).Content
+											}
+										) as LyricsResult
+									}
+								)
+								.then(
+									(lyricsResult) => {
+										// Determine what our parsed-lyrics are
+										const parsedLyrics = (
+											(lyricsResult === undefined) ? undefined
+											: ParseLyrics(lyricsResult)
+										)
+		
+										// Save our information
+										Cache.SetExpireCacheItem(
+											"ISRCLyrics",
+											recordCode, (parsedLyrics ?? false),
+											SongLyricsExpiration
+										)
+		
+										// Now return our parsed-lyrics
+										return [trackInformation, parsedLyrics]
+									}
+								)
+							)
+						} else {
+							return Promise.resolve([trackInformation, (storedParsedLyrics || undefined)])
+						}
 					}
-	
-					// Now mark that our details are loaded and fire our event
-					this.LoadedDetails = true
-					this.DetailsLoadedSignal.Fire()
-				}
+				)
+				.then(
+					([trackInformation, parsedLyrics]) => {
+						// Set our details
+						this.Details = {
+							ISRC: trackInformation.external_ids.isrc,
+		
+							Lyrics: parsedLyrics
+						}
+		
+						// Now mark that our details are loaded and fire our event
+						this.LoadedDetails = true
+						this.DetailsLoadedSignal.Fire()
+					}
+				)
 			)
-		)
+		}
 	}
 
 	private StartNaturalTimestepping() {
@@ -636,6 +655,10 @@ class Song implements Giveable {
 		} else {
 			return new Promise(resolve => this.DetailsLoadedSignal.Connect(() => resolve(this.Details)))
 		}
+	}
+
+	public IsLocalFile(): boolean {
+		return this.IsLocal
 	}
 
 	// Public State Methods

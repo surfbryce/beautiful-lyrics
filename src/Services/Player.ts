@@ -8,6 +8,7 @@ import { Song, ProvidedMetadata } from "./Player/Song"
 
 // Behavior Constants
 const SpicetifyTrackId = /^spotify:track:([\w\d]+)$/
+const SpicetifyLocalTrackId = /^spotify:local:(.+)$/
 
 // Class
 class Player {
@@ -59,15 +60,21 @@ class Player {
 						const track = event.data.track
 
 						// Grab track details
-						const trackId = track.uri.match(SpicetifyTrackId)![1]
-						const metadata = track.metadata as ProvidedMetadata
+						const metadata: ProvidedMetadata = track.metadata as any
+						const isLocal = (metadata.is_local === "true")
+						const trackId = (
+							track.uri.match(
+								isLocal ? SpicetifyLocalTrackId
+								: SpicetifyTrackId
+							)![1]
+						)
 						const duration = (event.data.duration / 1000)
 
 						// Load our information
 						this.Song = this.Maid.Give(
 							new Song(
 								duration, !event.data.is_paused,
-								trackId, metadata,
+								trackId, metadata, isLocal,
 								(song: Song) => this.SongChangedSignal.Fire(song)
 							),
 							"Song"
