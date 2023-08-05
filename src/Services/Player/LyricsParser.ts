@@ -19,6 +19,7 @@ type LyricsResult = (
 type NaturalAlignment = ("Right" | "Left")
 type BaseInformation = {
 	NaturalAlignment: NaturalAlignment;
+	Language: string;
 }
 
 type TimeMetadata = {
@@ -122,8 +123,8 @@ const RightToLeftLanguages = [
 ]
 
 // Helper Methods
-const GetNaturalAlignment = (text: string): NaturalAlignment => {
-	return (RightToLeftLanguages.includes(franc(text)) ? "Right" : "Left")
+const GetNaturalAlignment = (language: string): NaturalAlignment => {
+	return (RightToLeftLanguages.includes(language) ? "Right" : "Left")
 }
 
 const GetFeatureAgentVersion = (element: Element) => {
@@ -176,6 +177,7 @@ const ParseAppleMusicLyrics = (text: string) => {
 	if (syncType === "Static") {
 		const result: StaticSynced = {
 			NaturalAlignment: "Left",
+			Language: "en",
 
 			Type: "Static",
 			Lyrics: []
@@ -191,20 +193,27 @@ const ParseAppleMusicLyrics = (text: string) => {
 			}
 		}
 
-		// Determine our natural-alignment
+		// Determine our language AND natural-alignment
 		{
+			// Put all our text together for processing
 			let textToProcess = result.Lyrics[0]
 			for (let index = 1; index < result.Lyrics.length; index += 1) {
 				textToProcess += `\n${result.Lyrics[index]}`
 			}
 
-			result.NaturalAlignment = GetNaturalAlignment(textToProcess)
+			// Determine our language
+			const language = franc(textToProcess)
+
+			// Now update our natural alignment and language
+			result.Language = language
+			result.NaturalAlignment = GetNaturalAlignment(language)
 		}
 
 		return result
 	} else if (syncType == "Line") {
 		const result: LineSynced = {
 			NaturalAlignment: "Left",
+			Language: "en",
 
 			StartTime: 0,
 			EndTime: 0,
@@ -255,22 +264,30 @@ const ParseAppleMusicLyrics = (text: string) => {
 			result.EndTime = lastLine.EndTime
 		}
 
-		// Determine our natural-alignment
+		// Determine our language AND natural-alignment
 		{
-			let lines = []
+			// Put all our text together for processing
+			const lines = []
 			for (const vocalGroup of result.VocalGroups) {
 				if (vocalGroup.Type === "Vocal") {
 					lines.push(vocalGroup.Text)
 				}
 			}
+			const textToProcess = lines.join("\n") 
 
-			result.NaturalAlignment = GetNaturalAlignment(lines.join("\n"))
+			// Determine our language
+			const language = franc(textToProcess)
+
+			// Now update our natural alignment and language
+			result.Language = language
+			result.NaturalAlignment = GetNaturalAlignment(language)
 		}
 
 		return result
 	} else {
 		const result: SyllableSynced = {
 			NaturalAlignment: "Left",
+			Language: "en",
 
 			StartTime: 0,
 			EndTime: 0,
@@ -402,9 +419,10 @@ const ParseAppleMusicLyrics = (text: string) => {
 			result.EndTime = lastLine.EndTime
 		}
 
-		// Determine our natural-alignment
+		// Determine our language AND natural-alignment
 		{
-			let lines = []
+			// Put all our text together for processing
+			const lines = []
 			for (const vocalGroup of result.VocalGroups) {
 				if (vocalGroup.Type === "Vocal") {
 					let text = vocalGroup.Lead[0].Text
@@ -416,8 +434,14 @@ const ParseAppleMusicLyrics = (text: string) => {
 					lines.push(text)
 				}
 			}
+			const textToProcess = lines.join("\n") 
 
-			result.NaturalAlignment = GetNaturalAlignment(lines.join("\n"))
+			// Determine our language
+			const language = franc(textToProcess)
+
+			// Now update our natural alignment and language
+			result.Language = language
+			result.NaturalAlignment = GetNaturalAlignment(language)
 		}
 
 		return result
@@ -428,6 +452,7 @@ const ParseSpotifyLyrics = (content: Spotify.LyricLines) => {
 	// We're just going to assume it's line-synced since that's all Spotify supports atm
 	const result: LineSynced = {
 		NaturalAlignment: "Left",
+		Language: "en",
 
 		StartTime: 0,
 		EndTime: 0,
@@ -436,16 +461,20 @@ const ParseSpotifyLyrics = (content: Spotify.LyricLines) => {
 		VocalGroups: []
 	}
 
-	// Determine our alignment
+	// Determine our language AND natural-alignment
 	{
+		// Put all our text together for processing
 		let textToProcess = content[0].words
 		for(let index = 2; index < content.length; index += 1) {
 			textToProcess += `\n${content[index].words}`
 		}
 
-		if (GetNaturalAlignment(textToProcess) === "Right") {
-			result.NaturalAlignment = "Right"
-		}
+		// Determine our language
+		const language = franc(textToProcess)
+
+		// Now update our natural alignment and language
+		result.Language = language
+		result.NaturalAlignment = GetNaturalAlignment(language)
 	}
 
 	// Go through every entry and start populating
