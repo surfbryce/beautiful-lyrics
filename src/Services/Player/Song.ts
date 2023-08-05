@@ -587,10 +587,28 @@ class Song implements Giveable {
 			return
 		}
 
-		// This is enough to force a sync (we have to wrap it in a try-catch because it'll fail since we're already playing)
-		try {
-			SpotifyPlayer.play()
-		} catch (error) {}
+		/*
+			So first off, I discovered that you only need to call play/resume to force a resync of the
+			timestamp.
+
+			However, if you try to call SpotifyPlayer.play() you'll find the console produces errors.
+			Now these errors in a try/catch block mean nothing but they still appear. We know it's not
+			a problem so why should we pollute the console with stuff no one cares about?
+
+			Well, I discovered that the SpotifyPlayer.play() function is actually a wrapper for the
+			internal resume method that Spotify has. When I looked at that code I then discovered that
+			the resume() method uses things we have direct access to thanks to Spicetify directly
+			exposing that internal class (which is what .origin is).
+
+			So, all I had to do was gut out the internal resume() method code and get rid of all the
+			async/await crap and what we get is the code below. This is the same as calling SpotifyPlayer.play()
+			but without the dumb errors in the console.
+		*/
+		const spotifyPlayerOrigin = (SpotifyPlayer as any).origin
+		if (!spotifyPlayerOrigin._events.emitResumeSync()) {
+			spotifyPlayerOrigin._contextPlayer.resume({})
+			.catch((error: Error) => console.warn("BeautifulLyrics: Failed to force resync", error))
+		}
 
 		// Increment our counter for the next iteration
 		this.AutomatedSyncsExecuted += 1
