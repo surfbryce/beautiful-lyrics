@@ -1,7 +1,7 @@
 // Packages
 import { Signal } from "../../../../../Packages/Signal"
 import { Maid, Giveable } from "../../../../../Packages/Maid"
-import { OnNextFrame } from "../../../../../Packages/Scheduler"
+import { OnNextFrame, Timeout } from "../../../../../Packages/Scheduler"
 
 // Modules
 import { SpotifyPlayer, SpotifyFetch } from "../Session"
@@ -165,6 +165,9 @@ const SongLyricsExpiration: ExpirationSettings = {
 	Unit: "Months"
 }
 
+// Sync Constants
+const SyncTimeouts = [0.05, 0.1, 0.15, 0.75, 2.5, 5, 10, 30]
+
 // Dynamic Flags
 let FirstSongLoaded = false
 
@@ -186,6 +189,8 @@ class Song implements Giveable {
 	private Playing: boolean
 	private Timestamp: number = 0
 	private DeltaTime: number = (1 / 60)
+	private AutomatedSyncsExecuted = 0
+	private AutomatedSyncPause?: true
 
 	private LoadedDetails?: true
 
@@ -280,9 +285,23 @@ class Song implements Giveable {
 
 				// Now fire our event
 				if (this.Playing === event.data.is_paused) {
-					this.Playing = !this.Playing
+					// Make sure we're not automated
+					if (this.AutomatedSyncPause === true) {
+						// Unmark ourselves
+						this.AutomatedSyncPause = undefined
 
+						// Prevent ourselves from changing anything
+						return
+					}
+
+					// Trigger an update and reflect our new state
+					this.Playing = !this.Playing
 					this.IsPlayingChangedSignal.Fire(this.Playing)
+
+					// If we pause then stop our automatic-sync since we are guaranteed to be synced on play
+					if (this.Playing === false) {
+						this.Maid.Clean("AutomaticSync")
+					}
 				}
 			}
 
@@ -569,6 +588,40 @@ class Song implements Giveable {
 		}
 	}
 
+	private TriggerAutomatedSync() {
+		// Store our current syncs
+		const syncsExecuted = this.AutomatedSyncsExecuted
+
+		// Make sure we aren't already paused
+		if ((this.Playing === false) || (syncsExecuted >= SyncTimeouts.length)) {
+			return
+		}
+
+		// Make sure we don't double mark ourselves
+		if (this.AutomatedSyncPause === undefined) {
+			// Mark that we automated a pause (this gets unmarked when we register a pause)
+			this.AutomatedSyncPause = true
+
+			// Now pause ourselves
+			SpotifyPlayer.pause()
+
+			// Immediately resume ourselves
+			SpotifyPlayer.play()
+
+			// Increment our counter for the next iteration
+			this.AutomatedSyncsExecuted += 1
+		}
+
+		// Now set ourselves up for the next one
+		this.Maid.Give(
+			Timeout(
+				SyncTimeouts[syncsExecuted],
+				this.TriggerAutomatedSync.bind(this)
+			),
+			"AutomaticSync"
+		)
+	}
+
 	private StartNaturalTimestepping() {
 		// Store our time now
 		let lastTime = Date.now()
@@ -615,6 +668,9 @@ class Song implements Giveable {
 			// Schedule us for another update
 			this.Maid.Give(OnNextFrame(update), "NaturalTimestepping")
 		}
+
+		// Trigger an automatic sync right away
+		this.TriggerAutomatedSync()
 
 		// Start our update-cycle
 		update()
