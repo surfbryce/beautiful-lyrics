@@ -298,7 +298,7 @@ async function main() {
 			}
 
 			// Now check again soon
-			Timeout(60, UpdateAnalytics)
+			GlobalMaid.Give(Timeout(60, UpdateAnalytics))
 		}
 
 		UpdateAnalytics()
