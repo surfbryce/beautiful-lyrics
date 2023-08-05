@@ -160,7 +160,11 @@ const TrackInformationExpiration: ExpirationSettings = {
 	Duration: 2,
 	Unit: "Weeks"
 }
-const SongLyricsExpiration: ExpirationSettings = {
+const ProviderLyricsExpiration: ExpirationSettings = {
+	Duration: 1,
+	Unit: "Months"
+}
+const ParsedLyricsExpiration: ExpirationSettings = {
 	Duration: 1,
 	Unit: "Months"
 }
@@ -477,22 +481,23 @@ class Song implements Giveable {
 					}
 				)
 				.then(
-					(trackInformation): Promise<[SpotifyTrackInformation, (ParsedLyrics | false | undefined)]> => {
+					(trackInformation): Promise<[SpotifyTrackInformation, (LyricsResult | false | undefined)]> => {
 						return (
 							Cache.GetFromExpireCache(
-								"ISRCLyrics",
+								"ProviderLyrics",
 								trackInformation.external_ids.isrc
 							)
-							.then(storedParsedLyrics => [trackInformation, storedParsedLyrics])
+							.then(storedProviderLyrics => [trackInformation, storedProviderLyrics])
 						)
 					}
 				)
 				.then(
-					([trackInformation, storedParsedLyrics]): Promise<[SpotifyTrackInformation, (ParsedLyrics | undefined)]> => {
-						// Now determine if we have our lyrics at all
+					([trackInformation, storedProviderLyrics]): Promise<
+						[SpotifyTrackInformation, (LyricsResult | false)]
+					> => {
+						// Now determine if we have any provider lyrics at all
 						const recordCode = trackInformation.external_ids.isrc
-		
-						if (storedParsedLyrics === undefined) {
+						if (storedProviderLyrics === undefined) {
 							return (
 								this.GetLyricsFromBackendProvider(recordCode)
 								.then(
@@ -514,7 +519,8 @@ class Song implements Giveable {
 											return Promise.resolve([backendLyric, false])
 										}
 									}
-								).then(
+								)
+								.then(
 									([lyric, isSpotifyLyric]) => {
 										// If we don't have either lyric then we clearly dont have any
 										if ((lyric === undefined)) {
@@ -536,27 +542,65 @@ class Song implements Giveable {
 									}
 								)
 								.then(
-									(lyricsResult) => {
-										// Determine what our parsed-lyrics are
-										const parsedLyrics = (
-											(lyricsResult === undefined) ? undefined
-											: ParseLyrics(lyricsResult)
-										)
-		
+									(providerLyrics) => {
+										// Determine our final value
+										const lyrics = (providerLyrics ?? false)
+
 										// Save our information
 										Cache.SetExpireCacheItem(
-											"ISRCLyrics",
-											recordCode, (parsedLyrics ?? false),
-											SongLyricsExpiration
+											"ProviderLyrics",
+											recordCode, lyrics,
+											ProviderLyricsExpiration
 										)
-		
-										// Now return our parsed-lyrics
-										return [trackInformation, parsedLyrics]
+
+										// Finally, return back our information
+										return [trackInformation, lyrics]
 									}
 								)
 							)
 						} else {
-							return Promise.resolve([trackInformation, (storedParsedLyrics || undefined)])
+							return Promise.resolve([trackInformation, storedProviderLyrics])
+						}
+					}
+				)
+				.then(
+					([trackInformation, storedProviderLyrics]): Promise<
+						[SpotifyTrackInformation, (LyricsResult | false), (ParsedLyrics | false | undefined)]
+					> => {
+						return (
+							Cache.GetFromExpireCache(
+								"ISRCLyrics",
+								trackInformation.external_ids.isrc
+							)
+							.then(storedParsedLyrics => [trackInformation, storedProviderLyrics, storedParsedLyrics])
+						)
+					}
+				)
+				.then(
+					([trackInformation, storedProviderLyrics, storedParsedLyrics]): Promise<
+						[SpotifyTrackInformation, (ParsedLyrics | undefined)]
+					> => {
+						// If we do not have anything stored for our parsed-lyrics then we need to generate it
+						if (storedParsedLyrics === undefined) {
+							// Set our parsed-lyrics as having failed by default
+							let parsedLyrics: (ParsedLyrics | false) = false
+
+							// If we DO have provider lyrics then we can parse them
+							if (storedProviderLyrics !== false) {
+								parsedLyrics = ParseLyrics(storedProviderLyrics)
+							}
+
+							// Save our information
+							Cache.SetExpireCacheItem(
+								"ISRCLyrics",
+								trackInformation.external_ids.isrc, parsedLyrics,
+								ParsedLyricsExpiration
+							)
+
+							// Now return our information
+							return Promise.resolve([trackInformation, parsedLyrics || undefined])
+						} else {
+							return Promise.resolve([trackInformation, storedParsedLyrics || undefined])
 						}
 					}
 				)

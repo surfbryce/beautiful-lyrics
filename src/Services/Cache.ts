@@ -1,6 +1,6 @@
 // Types
 import { SpotifyTrackInformation } from "./Player/Song"
-import { ParsedLyrics } from "./Player/LyricsParser"
+import { ParsedLyrics, LyricsResult } from "./Player/LyricsParser"
 
 // Cache Types
 type ExpirationSettings = {
@@ -17,7 +17,8 @@ type ExpireItem<C> = {
 
 type ExpireCachesItemTypes = {
     TrackInformation: SpotifyTrackInformation;
-    ISRCLyrics: (ParsedLyrics | false);
+	ProviderLyrics: (LyricsResult | false); // This is for storing lyrics from the provider
+    ISRCLyrics: (ParsedLyrics | false); // This is for storing the processed lyrics
 }
 type ExpireCacheName = (keyof ExpireCachesItemTypes)
 type Store = {
@@ -45,7 +46,8 @@ const StoreTemplates: Store = {
 // Define StoreItem Versions
 const ExpireCacheStoreItemVersions: Map<ExpireCacheName, number> = new Map()
 ExpireCacheStoreItemVersions.set("TrackInformation", 2)
-ExpireCacheStoreItemVersions.set("ISRCLyrics", 5)
+ExpireCacheStoreItemVersions.set("ProviderLyrics", 1)
+ExpireCacheStoreItemVersions.set("ISRCLyrics", 6)
 
 const StoreItemVersions: Map<StoreItemName, number> = new Map()
 StoreItemVersions.set("Analytics", 1)
