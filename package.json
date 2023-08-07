@@ -1,6 +1,6 @@
 {
   "name": "beautiful-lyrics",
-  "version": "3.1.10",
+  "version": "3.1.11",
   "private": true,
   "scripts": {
     "build": "spicetify-creator --out=dist --minify",
@@ -17,14 +17,14 @@
     "spicetify-creator": "^1.0.13"
   },
   "dependencies": {
+    "@types/wanakana": "^4.0.3",
     "cubic-spline": "^3.0.3",
     "curve-interpolator": "^3.1.1",
     "d3-ease": "^3.0.1",
-    "dat.gui": "^0.7.9",
-    "extract-colors": "^3.0.0",
     "franc": "^6.1.0",
-    "glslCanvas": "^0.2.6",
+    "pinyin": "^3.0.0-alpha.5",
+    "romaja": "^0.2.9",
     "simplebar": "latest",
-    "stackblur-canvas": "^2.6.0"
+    "wanakana": "^5.1.0"
   }
 }
