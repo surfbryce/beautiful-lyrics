@@ -670,7 +670,7 @@ class Song implements Giveable {
 	private StartNaturalTimestepping() {
 		// Store our time now
 		let lastTime = Date.now()
-		let lastUpdatedPlaybackTimestamp = 0
+		let lastUpdatedPlaybackTimestamp = -1
 
 		// Now create our callback
 		const update = () => {
