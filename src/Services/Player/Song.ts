@@ -147,7 +147,7 @@ type SpotifyLyrics = Map<string, SpotifyLyric>
 
 type BackendLyric = (
 	{
-		Source: "AppleMusis";
+		Source: "AppleMusic";
 		IsSynced: boolean;
 		Content: string;
 	}

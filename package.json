@@ -17,14 +17,13 @@
     "spicetify-creator": "^1.0.13"
   },
   "dependencies": {
-    "@types/wanakana": "^4.0.3",
     "cubic-spline": "^3.0.3",
     "curve-interpolator": "^3.1.1",
     "d3-ease": "^3.0.1",
     "franc": "^6.1.0",
+    "kuroshiro": "^1.2.0",
     "pinyin": "^3.0.0-alpha.5",
     "romaja": "^0.2.9",
-    "simplebar": "latest",
-    "wanakana": "^5.1.0"
+    "simplebar": "latest"
   }
 }
