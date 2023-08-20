@@ -167,6 +167,8 @@
 	width: var(--dot-size);
 	height: var(--dot-size);
 
+	--border-radius: 100rem; // Prevents themes from screwing with us
+	--button-radius: 100rem; // Prevents themes from screwing with us
 	border-radius: 100rem;
 	background-color: rgba(255, 255, 255, 0.85);
 

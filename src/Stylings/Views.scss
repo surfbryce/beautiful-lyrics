@@ -251,6 +251,9 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 		}
 
 		// Prevent themes from screwing with us
+		.playback-bar {
+			position: unset !important;
+		}
 		.playback-bar__progress-time-elapsed, .main-playbackBarRemainingTime-container {
 			position: relative !important;
 			margin-bottom: unset !important;
@@ -280,6 +283,9 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 			flex-direction: column;
 
 			.cover-art {
+				--cover-art-width: 40vh !important; // Prevents themes from screwing with us
+				--cover-art-height: 40vh !important;
+
 				width: 40vh !important;
 				height: 40vh !important;
 			}
