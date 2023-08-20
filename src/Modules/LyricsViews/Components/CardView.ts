@@ -140,6 +140,48 @@ export default class CardView implements Giveable {
 
 		// Determine whether or not our lyrics should be visible
 		if (isVisbile) {
+			// Handle transliteration
+			/*{
+				if (this.Lyrics.Language === "jpn") { // Japanese
+					// Clone our lyrics
+					const clonedLyrics = JSON.parse(JSON.stringify(this.Lyrics)) as ParsedLyrics
+
+					// Handle our lyrics
+					if (clonedLyrics.Type === "Static") {
+						for (const [index, line] of clonedLyrics.Lyrics.entries()) {
+							clonedLyrics.Lyrics[index] = toRomaji(line)
+						}
+					} else if (clonedLyrics.Type === "Line") {
+						for (const vocalGroup of clonedLyrics.VocalGroups) {
+							if (vocalGroup.Type === "Vocal") {
+								vocalGroup.Text = toRomaji(vocalGroup.Text)
+							}
+						}
+					} else if (clonedLyrics.Type === "Syllable") {
+						for (const vocalGroup of clonedLyrics.VocalGroups) {
+							if (vocalGroup.Type === "Vocal") {
+								for (const syllable of vocalGroup.Lead) {
+									syllable.Text = toRomaji(syllable.Text)
+								}
+
+								if (vocalGroup.Background !== undefined) {
+									for (const syllable of vocalGroup.Background) {
+										syllable.Text = toRomaji(syllable.Text)
+									}
+								}
+							}
+						}
+					}
+
+					//;(this as any).Lyrics = clonedLyrics
+				} else if (this.Lyrics.Language === "kor") { // Korean
+
+				} else if (this.Lyrics.Language === "cmn") { // Chinese
+
+				}
+				console.log(this.Lyrics.Language)
+			}*/
+
 			// Generate our lyrics
 			this.Maid.Give(
 				new LyricsRenderer(this.LyricsRootContainer, this.Song, this.Lyrics),

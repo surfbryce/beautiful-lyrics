@@ -4,7 +4,11 @@ import { Timeout } from '../../../Packages/Scheduler'
 
 // Initial Services
 import { GlobalMaid, IsSpicetifyLoaded, SpicetifyLoaded } from './Services/Session'
-import { CoverArtUpdated, Start as StartCoverArt, GetCoverArt } from './Services/CoverArt'
+import {
+	CoverArtContainer,
+	CoverArtUpdated, Start as StartCoverArt, GetCoverArt,
+	GetBlurredCoverArt, GenerateBlurredCoverArt
+} from './Services/CoverArt'
 import { Start as StartAutoUpdater } from './Services/AutoUpdater'
 import { Cache } from './Services/Cache'
 import Player from './Services/Player'
@@ -17,25 +21,25 @@ import './Stylings/main.scss'
 let CheckForLiveBackgrounds: (() => void)
 
 {
-	// Types
-	type BackgroundContainer = ("VanillaSideCard" | "Page")
+	// Version Switching
+	const UsePreBlurredApproach = false
 
 	// Define our queries for each background-container
-	const BackgroundQuerys: Map<BackgroundContainer, string> = new Map()
+	const BackgroundQuerys: Map<CoverArtContainer, string> = new Map()
 	BackgroundQuerys.set('Page', '.BeautifulLyricsPage')
-	BackgroundQuerys.set('VanillaSideCard', '.Root__right-sidebar:has(.main-nowPlayingView-section) .os-padding')
+	BackgroundQuerys.set('SidePanel', '.Root__right-sidebar:has(.main-nowPlayingView-section) .os-padding')
 
 	// Define our images to create
-	// const BackgroundSizeScales = [2, 3]
+	const BackgroundSizeScales = [2, 3]
 	const BackgroundElements = ["lyrics-background-color", "lyrics-background-back", "lyrics-background-back-center"]
-	// const ElementSizeScaleIndices = [0, 0, 1]
-	// const BackgroundContainerResizeStabilizationTime = 0.25
+	const ElementSizeScaleIndices = [0, 0, 1]
+	const BackgroundContainerResizeStabilizationTime = 0.25
 
 	// Create our maid to manage our background-containers
 	const BackgroundMaids = GlobalMaid.Give(new Maid(), "LiveBackgrounds")
 
 	// Handle managing our background-containers
-	const ManageLiveBackground = (containerType: BackgroundContainer, container: HTMLDivElement) => {
+	const ManageLiveBackground = (containerType: CoverArtContainer, container: HTMLDivElement) => {
 		// Create our maid
 		const backgroundMaid = BackgroundMaids.Give(new Maid(), containerType)
 
@@ -55,93 +59,97 @@ let CheckForLiveBackgrounds: (() => void)
 			elements.push(image)
 		}
 
-		// Store our current sizes
-		// let currentSizes: number[] = []
+		// Handle version-switching
+		let UpdateCoverArt: (() => void)
 
-		// Now handle updating our cover-art
-		/*const SetCoverArt = (blurredCoverArt?: Map<number, string>) => {
-			for (const [index, element] of elements.entries()) {
-				element.src = (
-					blurredCoverArt
-						? (blurredCoverArt.get(currentSizes[ElementSizeScaleIndices[index]]) ?? 'MISSING')
-						: ''
-				)
-			}
-		}
+		if (UsePreBlurredApproach) {
+			// Store our current sizes
+			let currentSizes: number[] = []
 
-		const UpdateCoverArt = () => {
-			// Grab our cover-art
-			const coverArt = GetCoverArt()
-			if (coverArt === undefined) {
-				return SetCoverArt()
-			}
-
-			for(const element of oldElements) {
-				element.src = coverArt.Default
-			}
-
-			// Now determine if we already have this or not
-			const cachedCoverArtSizes = GetBlurredCoverArt(coverArt, containerType, currentSizes)
-
-			// If we have it we can then update immediately, otherwise we need to generate it
-			if (cachedCoverArtSizes === undefined) {
-				GenerateBlurredCoverArt(coverArt, containerType, currentSizes)
-					.then(
-						(coverArtSizes) => {
-							// Make sure we are seeing the same cover-art
-							if (coverArt === GetCoverArt()) {
-								SetCoverArt(coverArtSizes)
-							}
-						}
+			// Now handle updating our cover-art
+			const SetCoverArt = (blurredCoverArt?: Map<number, string>) => {
+				for (const [index, element] of elements.entries()) {
+					element.src = (
+						blurredCoverArt
+							? (blurredCoverArt.get(currentSizes[ElementSizeScaleIndices[index]]) ?? 'MISSING')
+							: ''
 					)
-			} else {
-				SetCoverArt(cachedCoverArtSizes)
+				}
 			}
-		}
 
-		// Now handle updating our sizes
-		{
-			const UpdateSizes = () => {
-				// Calculate our existing width
-				const backgroundContainerWidth = backgroundContainer.offsetWidth
-				
-				// Calculate our new sizes
-				const newSizes = []
-				for(const scale of BackgroundSizeScales) {
-					newSizes.push(Math.floor(backgroundContainerWidth * scale))
+			UpdateCoverArt = () => {
+				// Grab our cover-art
+				const coverArt = GetCoverArt()
+				if (coverArt === undefined) {
+					return SetCoverArt()
 				}
 
-				// Now set our sizes
-				currentSizes = newSizes
+				for(const element of elements) {
+					element.src = coverArt.Default
+				}
 
-				// Trigger cover-art update
-				UpdateCoverArt()
+				// Now determine if we already have this or not
+				const cachedCoverArtSizes = GetBlurredCoverArt(coverArt, containerType, currentSizes)
+
+				// If we have it we can then update immediately, otherwise we need to generate it
+				if (cachedCoverArtSizes === undefined) {
+					GenerateBlurredCoverArt(coverArt, containerType, currentSizes)
+						.then(
+							(coverArtSizes) => {
+								// Make sure we are seeing the same cover-art
+								if (coverArt === GetCoverArt()) {
+									SetCoverArt(coverArtSizes)
+								}
+							}
+						)
+				} else {
+					SetCoverArt(cachedCoverArtSizes)
+				}
 			}
 
-			// Watch for size-updates
-			const observer = backgroundMaid.Give(
-				new ResizeObserver(
-					() => {
-						// Set a timeout to update our sizes (once we stabilize it will properly run)
-						backgroundMaid.Give(
-							Timeout(BackgroundContainerResizeStabilizationTime, UpdateSizes),
-							"ContainerResize"
-						)
+			// Now handle updating our sizes
+			{
+				const UpdateSizes = () => {
+					// Calculate our existing width
+					const backgroundContainerWidth = backgroundContainer.offsetWidth
+					
+					// Calculate our new sizes
+					const newSizes = []
+					for(const scale of BackgroundSizeScales) {
+						newSizes.push(Math.floor(backgroundContainerWidth * scale))
 					}
+
+					// Now set our sizes
+					currentSizes = newSizes
+
+					// Trigger cover-art update
+					UpdateCoverArt()
+				}
+
+				// Watch for size-updates
+				const observer = backgroundMaid.Give(
+					new ResizeObserver(
+						() => {
+							// Set a timeout to update our sizes (once we stabilize it will properly run)
+							backgroundMaid.Give(
+								Timeout(BackgroundContainerResizeStabilizationTime, UpdateSizes),
+								"ContainerResize"
+							)
+						}
+					)
 				)
-			)
-			observer.observe(backgroundContainer)
+				observer.observe(backgroundContainer)
 
-			// Immediately update our sizes
-			UpdateSizes()
-		}*/
+				// Immediately update our sizes
+				UpdateSizes()
+			}
+		} else {
+			UpdateCoverArt = () => {
+				const coverArt = GetCoverArt()?.Default ?? ''
 
-		// Handle updating our cover-art
-		const UpdateCoverArt = () => {
-			const coverArt = GetCoverArt()?.Default ?? ''
-
-			for (const element of elements) {
-				element.src = coverArt
+				for (const element of elements) {
+					element.src = coverArt
+				}
 			}
 		}
 
@@ -177,7 +185,7 @@ let CheckForLiveBackgrounds: (() => void)
 	}
 
 	// Handle checking for background existence updates
-	const ExistingContainers: Map<BackgroundContainer, Element> = new Map()
+	const ExistingContainers: Map<CoverArtContainer, Element> = new Map()
 	CheckForLiveBackgrounds = () => {
 		// Go through each background-container and check if it exists
 		for (const [containerType, query] of BackgroundQuerys) {

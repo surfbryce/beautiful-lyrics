@@ -62,7 +62,7 @@
 		scale: 290% 185%;
 		transform-origin: left top;
 
-		filter: saturate(2.5) brightness(0.65);
+		filter: saturate(2.5) brightness(0.65); // Blur-related
 	}
 
 	.BeautifulLyricsPage.Fullscreen &-container {
@@ -75,7 +75,7 @@
 	// These are right-side card background specific classes to adjust for contrast issues
 	&.os-padding:has(.main-nowPlayingView-content) &-container {
 		border-radius: 8px;
-		filter: saturate(2) brightness(0.7);
+		filter: saturate(2) brightness(0.7); // Blur-related
 	}
 
 	/*
@@ -101,7 +101,7 @@
 		pointer-events: none;
 		overflow: hidden;
 
-		filter: saturate(1.5) brightness(0.8);
+		filter: saturate(1.5) brightness(0.8); // Blur-related
 	}
 
 	// Sharable properties
@@ -122,8 +122,8 @@
 			translate: -50% -50%;
 		}*/
 
-		filter: blur(40px);
-		border-radius: 100em;
+		filter: blur(40px); // Blur-related
+		border-radius: 100em; // Blur-related
 	}
 
 	// The primary image which gives the blending effect it's illusional property

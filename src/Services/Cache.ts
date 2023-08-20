@@ -192,6 +192,10 @@ class CacheManager {
 		expireCacheName: N,
 		itemName: string
 	): Promise<ExpireCachesItemTypes[N] | undefined> {
+		if (expireCacheName === "ISRCLyrics") {
+			// return Promise.resolve(undefined)
+		}
+
 		return (
 			this.GetFromCacheAPI<ExpireItem<ExpireCachesItemTypes[N]>>(`ExpireCache/${expireCacheName}`, itemName)
 			.then(

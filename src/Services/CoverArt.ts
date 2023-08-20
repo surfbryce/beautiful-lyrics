@@ -7,7 +7,7 @@ import Player from './Player'
 import { CoverArt, Song } from './Player/Song'
 
 // Types
-type CoverArtContainer = ("VanillaFullScreen" | "VanillaSideCard" | "LyricsPlusFullScreen")
+type CoverArtContainer = ("Page" | "SidePanel" | "LyricsPlusFullScreen")
 
 // Create our signals/events
 const CoverArtUpdatedSignal = new Signal<(coverArt?: CoverArt) => void>()
@@ -17,12 +17,12 @@ const CoverArtUpdatedSignal = new Signal<(coverArt?: CoverArt) => void>()
 let CoverArt: (CoverArt | undefined)
 
 // Behavior Constants
-/*const BlurSizeIncrease = 1.25
+const BlurSizeIncrease = 1.25
 const BlurSize = 40
 
 const CoverArtContainerFilters: Map<(CoverArtContainer | "Default"), string> = new Map()
 CoverArtContainerFilters.set("Default", "brightness(0.5) saturate(2.5)")
-CoverArtContainerFilters.set("VanillaSideCard", "brightness(1) saturate(2.25)")
+CoverArtContainerFilters.set("SidePanel", "brightness(1) saturate(2.25)")
 
 // Store our Blurred-CoverArt
 const BlurredCoverArts: Map<string, Map<CoverArtContainer, Map<number, string>>> = new Map()
@@ -175,7 +175,7 @@ const GetBlurredCoverArt = (
 	}
 
 	return undefined
-}*/
+}
 
 // Handle update requests
 const Update = (song?: Song) => {
@@ -197,4 +197,5 @@ export const Start = () => {
 	GlobalMaid.Give(Player.SongChanged.Connect(Update))
 	Update(Player.GetSong())
 }
-//export { GetBlurredCoverArt, GenerateBlurredCoverArt }
+export { GetBlurredCoverArt, GenerateBlurredCoverArt }
+export type { CoverArtContainer }
