@@ -156,12 +156,44 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage) {
 	}
 }
 
+// Prevents themes from screwing with us
 body:has(.Root__main-view-overlay .BeautifulLyricsPage) {
-	.Root__now-playing-bar {
+	.Root__top-container {
+		grid-template-areas:
+			"left-sidebar main-view right-sidebar"
+			"now-playing-bar now-playing-bar now-playing-bar"
+			!important;
+	}
+
+	.Root__now-playing-bar, .main-nowPlayingBar-container {
 		background: none !important;
 		backdrop-filter: none !important;
 		border: none !important;
 		box-shadow: none !important;
+	}
+
+	.main-nowPlayingBar-left {
+		order: unset;
+		flex: unset;
+		min-width: 180px;
+		width: 30%;
+	}
+
+	.main-nowPlayingBar-center {
+		order: unset;
+		flex: unset;
+		width: 40%;
+	}
+
+	.main-nowPlayingBar-right {
+		order: unset;
+		flex: unset;
+		min-width: 180px;
+		width: 30%;
+	}
+
+	.player-controls__buttons {
+		display: -webkit-box;
 	}
 }
 
