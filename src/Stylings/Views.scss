@@ -156,6 +156,15 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage) {
 	}
 }
 
+body:has(.Root__main-view-overlay .BeautifulLyricsPage) {
+	.Root__now-playing-bar {
+		background: none !important;
+		backdrop-filter: none !important;
+		border: none !important;
+		box-shadow: none !important;
+	}
+}
+
 body:has(.Root__main-view-overlay .BeautifulLyricsPage:not(:is(.PlaybarDetailsHidden), :is(.Fullscreen))) {
 	.main-nowPlayingBar-left, .main-nowPlayingBar-right {
 		opacity: 0.4;
