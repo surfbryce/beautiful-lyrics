@@ -40,6 +40,10 @@ body:has(.BeautifulLyricsPage) {
 	}
 }
 
+.main-view-container:has(.BeautifulLyricsPage) {
+	margin-top: 0 !important;
+}
+
 .os-content:has(.BeautifulLyricsPage) {
 	container-type: size;
 
