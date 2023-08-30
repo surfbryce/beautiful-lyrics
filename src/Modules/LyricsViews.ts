@@ -50,8 +50,8 @@ export default () => {
 	// Also store our potential page-view
 	let ActivePageView: (PageView | undefined)
 
-	// Create our playbar icon
-	const button = new SpotifyPlaybar.Button(
+	// Create our playbar icons
+	const lyricsButton = new SpotifyPlaybar.Button(
 		"Lyrics Page",
 		LyricsPageIconSVG,
 		() => {
@@ -64,11 +64,31 @@ export default () => {
 		false,
 		false
 	)
-	ViewMaid.Give(() => button.deregister())
+	ViewMaid.Give(() => lyricsButton.deregister())
+
+	let clickedFullscreenButton = false
+	const fullscreenButton = new SpotifyPlaybar.Button(
+		"Enter Fullscreen",
+		FullscreenOpenIconSVG,
+		() => {
+			// Handle whether or not we are opening/closing
+			if ((ActivePageView === undefined) || !ActivePageView.IsFullscreen()) {
+				clickedFullscreenButton = true
+				SpotifyHistory.push("/BeautifulLyrics/Fullscreen")
+			} else {
+				ActivePageView.Close()
+			}
+		},
+		false,
+		false
+	)
+	ViewMaid.Give(() => fullscreenButton.deregister())
+
+	// Mark our fullscreen-button and force it to the right
+	fullscreenButton.element.style.order = "100000"
+	fullscreenButton.element.id = "BeautifulLyricsFullscreenButton"
 
 	// Store our potential fullscreen-button for later
-	let fullscreenButton: HTMLButtonElement
-	let clickedFullscreenButton = false
 	const SetFullscreenState = (isFullscreen: boolean) => {
 		if (isFullscreen) {
 			document.body.requestFullscreen()
@@ -81,9 +101,11 @@ export default () => {
 		}
 
 		if (isFullscreen) {
-			fullscreenButton.innerHTML = FullscreenCloseIconSVG
+			fullscreenButton.label = "Exit Fullscreen"
+			fullscreenButton.icon = FullscreenCloseIconSVG
 		} else {
-			fullscreenButton.innerHTML = FullscreenOpenIconSVG
+			fullscreenButton.label = "Enter Fullscreen"
+			fullscreenButton.icon = FullscreenOpenIconSVG
 		}
 	}
 
@@ -218,7 +240,7 @@ export default () => {
 				return SpotifyHistory.push("/BeautifulLyrics/Cinema")
 			}
 
-			button.active = true
+			lyricsButton.active = true
 			ActivePageView = ViewMaid.Give(
 				new PageView(mainPage, isCinemaView, isFullscreenView),
 				"PageView"
@@ -233,7 +255,7 @@ export default () => {
 				SetFullscreenState(false)
 			}
 
-			button.active = false
+			lyricsButton.active = false
 			ActivePageView = undefined
 		}
 	}
@@ -258,49 +280,17 @@ export default () => {
 					}
 
 					// Determine if we have our fullscreen button yet
-					if(fullscreenButton === undefined) {
-						const controlsContainer = document.querySelector<HTMLButtonElement>(".main-nowPlayingBar-extraControls")
-
-						if (
-							(controlsContainer !== null)
-							&& (
-								controlsContainer.innerHTML.includes("0v1.018l2.72-2.72a.75.75 0 0 1 1.06 0zm2.94-2.94a.75.75")
-								|| controlsContainer.innerHTML.includes("2H14V4.757a1 1 0 1 1 2 0v1.829l4.293-4.293a1")
-							)
-						) {
-							const element = controlsContainer.lastElementChild
-							if (element !== null) {
-								// Grab our previous element
-								const previousElement = element.previousElementSibling!
-								
-								// Clone ourselves
-								fullscreenButton = element.cloneNode(true) as HTMLButtonElement
-
-								// Now remove our original element
-								element.remove()
-
-								// Now insert our new element
-								previousElement.after(fullscreenButton)
-
-								// Handle being clicked
-								fullscreenButton.addEventListener(
-									"click",
-									() => {
-										// Mark that we clicked
-										clickedFullscreenButton = true
-
-										// Now handle whether or not we are opening/closing
-										if ((ActivePageView === undefined) || (!ActivePageView.IsFullscreen())) {
-											SpotifyHistory.push("/BeautifulLyrics/Fullscreen")
-										} else {
-											ActivePageView.Close()
-										}
-									}
+					const controlsContainer = document.querySelector<HTMLButtonElement>(".main-nowPlayingBar-extraControls")
+					if (controlsContainer !== null) {
+						for (const element of controlsContainer.children) {
+							if (
+								(
+									element.innerHTML.includes("0v1.018l2.72-2.72a.75.75 0 0 1 1.06 0zm2.94-2.94a.75.75")
+									|| element.innerHTML.includes("2H14V4.757a1 1 0 1 1 2 0v1.829l4.293-4.293a1")
 								)
-
-								if ((ActivePageView !== undefined) && (ActivePageView.IsFullscreen())) {
-									SetFullscreenState(true)
-								}
+								&& (element.id !== "BeautifulLyricsFullscreenButton")
+							) {
+								element.remove()
 							}
 						}
 					}
@@ -310,5 +300,10 @@ export default () => {
 
 		// Start observing
 		observer.observe(document.body, { childList: true, subtree: true })
+
+		// Finally, handle our fullscreen-check
+		if ((ActivePageView !== undefined) && ActivePageView.IsFullscreen()) {
+			SetFullscreenState(true)
+		}
 	}
 }

@@ -225,6 +225,16 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.PlaybarDetailsHidden)
 	}
 }
 
+body:not(:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen))) {
+	#BeautifulLyricsFullscreenButton {
+		scale: 1.25;
+	}
+}
+
+#BeautifulLyricsFullscreenButton {
+	color: rgba(var(--spice-rgb-selected-row),.7) !important;
+}
+
 body:has(.Root__main-view-overlay .BeautifulLyricsPage:not(:is(.Fullscreen))) {
 	.Root__now-playing-bar {
 		.main-nowPlayingBar-center {
