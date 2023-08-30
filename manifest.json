@@ -1,13 +1,13 @@
 [
 	{
 	  "name": "Beautiful Lyrics",
-	  "description": "Beautifies Lyrics by adding a Dynamic Background AND Stylized Text",
+	  "description": "Adds Synced Lyrics, Dynamic Background, Fullscreen, and more!",
 	  "preview": "./previews/icon.gif",
 	  "main": "./dist/beautiful-lyrics.js",
 	  "readme": "README.md",
 	  "authors": [
 		  { "name": "SoCalifornian", "url": "https://github.com/surfbryce" }
 	  ],
-	  "tags": ["lyrics"]
+	  "tags": ["lyrics", "fullscreen", "background"]
 	}
 ]
