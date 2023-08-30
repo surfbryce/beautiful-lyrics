@@ -39,14 +39,13 @@ declare namespace Spicetify {
             track: number;
         };
         track?: ProvidedTrack;
-        playback_id?: string;
+        playbackId?: string;
         playback_quality?: string;
         playback_speed?: number;
         position_as_of_timestamp: number;
         duration: number;
-        is_playing: boolean;
-        is_paused: boolean;
-        is_buffering: boolean;
+        isPaused: boolean;
+        isBuffering: boolean;
         play_origin: {
             feature_identifier: string;
             feature_version: string;

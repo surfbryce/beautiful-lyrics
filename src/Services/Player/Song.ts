@@ -287,7 +287,7 @@ class Song implements Giveable {
 				}
 
 				// Now fire our event
-				if (this.Playing === event.data.is_paused) {
+				if (this.Playing === event.data.isPaused) {
 					// Trigger an update and reflect our new state
 					this.Playing = !this.Playing
 					this.IsPlayingChangedSignal.Fire(this.Playing)
