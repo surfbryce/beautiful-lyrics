@@ -337,7 +337,7 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 			display: flex !important; // Prevent themes from screwing our direction
 			flex-direction: column;
 
-			.cover-art {
+			.cover-art, .main-coverSlotCollapsed-container .cover-art {
 				--cover-art-width: 40vh !important; // Prevents themes from screwing with us
 				--cover-art-height: 40vh !important;
 
