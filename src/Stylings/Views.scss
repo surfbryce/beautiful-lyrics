@@ -143,6 +143,7 @@ button:has(.LyricsPageIcon) {
 
 .LyricsPageIcon {
 	transform: translateY(-2px);
+	fill: currentColor;
 }
 
 /* Cinema Playbar Adjustments*/
@@ -233,6 +234,10 @@ body:not(:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen))) {
 
 #BeautifulLyricsFullscreenButton {
 	color: rgba(var(--spice-rgb-selected-row),.7) !important;
+
+	svg {
+		fill: currentColor;
+	}
 }
 
 body:has(.Root__main-view-overlay .BeautifulLyricsPage:not(:is(.Fullscreen))) {
