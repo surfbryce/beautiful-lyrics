@@ -73,7 +73,7 @@ class Player {
 						// Load our information
 						this.Song = this.Maid.Give(
 							new Song(
-								duration, !event.data.is_paused,
+								duration, !event.data.isPaused,
 								trackId, metadata, isLocal,
 								(song: Song) => this.SongChangedSignal.Fire(song)
 							),
