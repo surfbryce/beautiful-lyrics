@@ -136,6 +136,14 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage) {
 	}
 }
 
+.BeautifulLyricsPageViewControls {
+	button {
+		svg {
+			fill: currentColor;
+		}
+	}
+}
+
 /* Playbar Icon */
 button:has(.LyricsPageIcon) {
 	margin-right: 6px;
