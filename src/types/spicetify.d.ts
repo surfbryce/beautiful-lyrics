@@ -2,77 +2,107 @@ declare namespace Spicetify {
     type Icon = "album" | "artist" | "block" | "brightness" | "car" | "chart-down" | "chart-up" | "check" | "check-alt-fill" | "chevron-left" | "chevron-right" | "chromecast-disconnected" | "clock" | "collaborative" | "computer" | "copy" | "download" | "downloaded" | "edit" | "enhance" | "exclamation-circle" | "external-link" | "facebook" | "follow" | "fullscreen" | "gamepad" | "grid-view" | "heart" | "heart-active" | "instagram" | "laptop" | "library" | "list-view" | "location" | "locked" | "locked-active" | "lyrics" | "menu" | "minimize" | "minus" | "more" | "new-spotify-connect" | "offline" | "pause" | "phone" | "play" | "playlist" | "playlist-folder" | "plus-alt" | "plus2px" | "podcasts" | "projector" | "queue" | "repeat" | "repeat-once" | "search" | "search-active" | "shuffle" | "skip-back" | "skip-back15" | "skip-forward" | "skip-forward15" | "soundbetter" | "speaker" | "spotify" | "subtitles" | "tablet" | "ticket" | "twitter" | "visualizer" | "voice" | "volume" | "volume-off" | "volume-one-wave" | "volume-two-wave" | "watch" | "x";
     type Variant = "bass" | "forte" | "brio" | "altoBrio" | "alto" | "canon" | "celloCanon" | "cello" | "ballad" | "balladBold" | "viola" | "violaBold" | "mesto" | "mestoBold" | "metronome" | "finale" | "finaleBold" | "minuet" | "minuetBold";
     type SemanticColor = "textBase" | "textSubdued" | "textBrightAccent" | "textNegative" | "textWarning" | "textPositive" | "textAnnouncement" | "essentialBase" | "essentialSubdued" | "essentialBrightAccent" | "essentialNegative" | "essentialWarning" | "essentialPositive" | "essentialAnnouncement" | "decorativeBase" | "decorativeSubdued" | "backgroundBase" | "backgroundHighlight" | "backgroundPress" | "backgroundElevatedBase" | "backgroundElevatedHighlight" | "backgroundElevatedPress" | "backgroundTintedBase" | "backgroundTintedHighlight" | "backgroundTintedPress" | "backgroundUnsafeForSmallTextBase" | "backgroundUnsafeForSmallTextHighlight" | "backgroundUnsafeForSmallTextPress";
-    type Metadata = Partial<Record<string, string>>;
-    type ContextTrack = {
-        uri: string;
-        uid?: string;
-        metadata?: Metadata;
-    };
-    type ProvidedTrack = ContextTrack & {
-        removed?: string[];
-        blocked?: string[];
-        provider?: string;
-    };
-    type ContextOption = {
-        contextURI?: string;
-        index?: number;
-        trackUri?: string;
-        page?: number;
-        trackUid?: string;
-        sortedBy?: string;
-        filteredBy?: string;
-        shuffleContext?: boolean;
-        repeatContext?: boolean;
-        repeatTrack?: boolean;
-        offset?: number;
-        next_page_url?: string;
-        restrictions?: Record<string, string[]>;
-        referrer?: string;
-    };
-    type PlayerState = {
-        timestamp: number;
-        context_uri: string;
-        context_url: string;
-        context_restrictions: Record<string, string>;
-        index?: {
-            page: number;
-            track: number;
-        };
-        track?: ProvidedTrack;
-        playbackId?: string;
-        playback_quality?: string;
-        playback_speed?: number;
-        position_as_of_timestamp: number;
-        duration: number;
-        isPaused: boolean;
-        isBuffering: boolean;
-        play_origin: {
-            feature_identifier: string;
-            feature_version: string;
-            view_uri?: string;
-            external_referrer?: string;
-            referrer_identifier?: string;
-            device_identifier?: string;
-        };
-        options: {
-            shuffling_context?: boolean;
-            repeating_context?: boolean;
-            repeating_track?: boolean;
-        };
-        restrictions: Record<string, string[]>;
-        suppressions: {
-            providers: string[];
-        };
-        debug: {
-            log: string[];
-        };
-        prev_tracks: ProvidedTrack[];
-        next_tracks: ProvidedTrack[];
-        context_metadata: Metadata;
-        page_metadata: Metadata;
-        session_id: string;
-        queue_revision: string;
-    };
+
+	type UriType = 'spotify:album' | 'spotify:track' | 'spotify:artist';
+	type MediaType = 'audio';
+	type ImageLabel = 'standard' | 'small' | 'large' | 'xlarge';
+	type ItemType = 'track';
+	type ArtistType = 'artist';
+	type AlbumType = 'album';
+	type ProviderType = 'context';
+
+	interface Image {
+		url: string;
+		label: ImageLabel;
+	}
+
+	interface Artist {
+		type: ArtistType;
+		uri: UriType;
+		name: string;
+	}
+
+	interface Album {
+		type: AlbumType;
+		uri: UriType;
+		name: string;
+		images: Image[];
+	}
+
+	interface Item {
+		type: ItemType;
+		uri: UriType;
+		uid: string;
+		name: string;
+		mediaType: MediaType;
+		duration: {
+			milliseconds: number;
+		};
+		album: Album;
+		artists: Artist[];
+		isLocal: boolean;
+		isExplicit: boolean;
+		is19PlusOnly: boolean;
+		provider: ProviderType;
+		metadata: {
+			[key: string]: string;
+		};
+		images: Image[];
+	}
+
+	interface Restrictions {
+		canPause: boolean;
+		canResume: boolean;
+		canSeek: boolean;
+		canSkipPrevious: boolean;
+		canSkipNext: boolean;
+		canToggleRepeatContext: boolean;
+		canToggleRepeatTrack: boolean;
+		canToggleShuffle: boolean;
+		disallowPausingReasons: string[];
+		// ... other fields ...
+	}
+
+	interface PlaybackQuality {
+		bitrateLevel: number;
+		strategy: number;
+		targetBitrateLevel: number;
+		targetBitrateAvailable: boolean;
+		hifiStatus: number;
+	}
+
+	interface SpotifyData {
+		timestamp: number;
+		context: {
+			uri: UriType;
+			url: string;
+			metadata: {
+				[key: string]: string;
+			};
+		};
+		index: {
+			pageURI: string | null;
+			pageIndex: number;
+			itemIndex: number;
+		};
+		item: Item;
+		shuffle: boolean;
+		repeat: number;
+		speed: number;
+		positionAsOfTimestamp: number;
+		duration: number;
+		hasContext: boolean;
+		isPaused: boolean;
+		isBuffering: boolean;
+		restrictions: Restrictions;
+		previousItems: any[]; // Assuming any here due to lack of provided structure
+		nextItems: Item[];
+		playbackQuality: PlaybackQuality;
+		playbackId: string;
+		sessionId: string;
+		signals: any[]; // Assuming any here due to lack of provided structure
+		// ... more fields if present ...
+	}
     namespace Player {
         /**
          * Register a listener `type` on Spicetify.Player.
@@ -104,7 +134,7 @@ declare namespace Spicetify {
         /**
          * An object contains all information about current track and player.
          */
-        const data: PlayerState;
+        const data: SpotifyData;
         /**
          * Decrease a small amount of volume.
          */

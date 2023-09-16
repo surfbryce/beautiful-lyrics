@@ -43,12 +43,13 @@ class Player {
 
 			// Handle when our song changes
 			{
-				const callback = (event?: Event & { data: Spicetify.PlayerState }) => {
+				const callback = () => {
 					// Remove our previous song
 					this.Maid.Clean("Song")
 
 					// Determine if we even have a song
-					if ((event === undefined) || (event.data.track === undefined)) {
+					const track = SpotifyPlayer.data?.item
+					if (track === undefined) {
 						// Make sure we don't have our information any longer
 						this.Song = undefined
 						this.SongJustChanged = undefined
@@ -56,9 +57,6 @@ class Player {
 						// Now fire our event
 						this.SongChangedSignal.Fire()
 					} else {
-						// Store our track for ease-of-access
-						const track = event.data.track
-
 						// Grab track details
 						const metadata: ProvidedMetadata = track.metadata as any
 						const isLocal = (metadata.is_local === "true")
@@ -68,12 +66,12 @@ class Player {
 								: SpicetifyTrackId
 							)![1]
 						)
-						const duration = (event.data.duration / 1000)
+						const duration = (SpotifyPlayer.data.duration / 1000)
 
 						// Load our information
 						this.Song = this.Maid.Give(
 							new Song(
-								duration, !event.data.isPaused,
+								duration, !SpotifyPlayer.data.isPaused,
 								trackId, metadata, isLocal,
 								(song: Song) => this.SongChangedSignal.Fire(song)
 							),
@@ -86,7 +84,7 @@ class Player {
 				this.Maid.Give(() => SpotifyPlayer.removeEventListener("songchange", callback as any))
 
 				if (SpotifyPlayer.data !== undefined) {
-					callback({data: SpotifyPlayer.data} as any)
+					callback()
 				}
 			}
 		}

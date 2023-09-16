@@ -280,14 +280,10 @@ class Song implements Giveable {
 
 		// Watch for IsPlaying changes
 		{
-			const callback = (event?: Event & { data: Spicetify.PlayerState }) => {
-				// Make sure we even have our event
-				if (event === undefined) {
-					return
-				}
-
+			const callback = () => {
 				// Now fire our event
-				if (this.Playing === event.data.isPaused) {
+				const isPaused = SpotifyPlayer.data?.isPaused ?? true
+				if (this.Playing === isPaused) {
 					// Trigger an update and reflect our new state
 					this.Playing = !this.Playing
 					this.IsPlayingChangedSignal.Fire(this.Playing)
