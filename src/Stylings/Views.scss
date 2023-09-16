@@ -276,6 +276,9 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen, .Cinema))
 
 body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 	.Root__now-playing-bar {
+		// Define our overarching property
+		--cover-art-size: 45vh;
+
 		/* Prevent themes from screwing up our stuff */
 		background: unset !important;
 		margin: unset !important;
@@ -297,7 +300,7 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 			left: -25vw;
 			position: relative;
 			scale: 0.9;
-			bottom: calc(24vh + 36px);
+			bottom: calc(calc(var(--cover-art-size) - 22vh) + 36px);
 
 			height: 0;
 
@@ -334,20 +337,20 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 
 		// Regular stuff
 		.main-nowPlayingWidget-nowPlaying {
-			width: 40vh !important;
+			width: var(--cover-art-size) !important;
 
-			left: calc(50cqw - 20vh);
-			bottom: calc(26vh + 36px);
+			left: calc(50.2cqw - calc(var(--cover-art-size) / 2));
+			bottom: calc(calc(var(--cover-art-size) - 15.75vh) + 36px);
 
 			display: flex !important; // Prevent themes from screwing our direction
 			flex-direction: column;
 
 			.cover-art, .main-coverSlotCollapsed-container .cover-art {
-				--cover-art-width: 40vh !important; // Prevents themes from screwing with us
-				--cover-art-height: 40vh !important;
+				--cover-art-width: var(--cover-art-size) !important; // Prevents themes from screwing with us
+				--cover-art-height: var(--cover-art-size) !important;
 
-				width: 40vh !important;
-				height: 40vh !important;
+				width: var(--cover-art-size) !important;
+				height: var(--cover-art-size) !important;
 			}
 
 			&>div:has(.cover-art) {
@@ -417,8 +420,8 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 
 			display: flex;
 
-			width: 40vh;
-			height: 40vh;
+			width: var(--cover-art-size);
+			height: var(--cover-art-size);
 			
 			position: absolute;
 
@@ -442,14 +445,14 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 
 		.control-button-feedback {
 			--radius: 4.75vh;
-			--height: calc(40vh * 0.25);
+			--height: calc(var(--cover-art-size) * 0.25);
 
 			display: flex;
-			width: 40vh;
+			width: var(--cover-art-size);
 			height: var(--height);
 
 			position: absolute;
-			top: calc(40vh - var(--height));
+			top: calc(var(--cover-art-size) - var(--height));
 			padding-bottom: 1vh;
 
 			color: white;
@@ -490,7 +493,7 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 
 		&:has(.control-button-feedback) {
 			.control-button-heart {
-				height: calc(40vh * 0.75);
+				height: calc(var(--cover-art-size) * 0.75);
 
 				span {
 					top: 4.25vh;
@@ -525,7 +528,7 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 			width: 27vh;
 
 			left: 49.25vw;
-			top: 7vh;
+			top: 9.95vh;
 			transform-origin: center;
 			translate: -50% -50%;
 
