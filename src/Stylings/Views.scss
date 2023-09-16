@@ -136,7 +136,7 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage) {
 	}
 }
 
-.BeautifulLyricsPageViewControls {
+.BeautifulLyricsPageViewControls, #BeautifulLyrics-CardView .main-nowPlayingView-lyricsControls {
 	button {
 		svg {
 			fill: currentColor;
