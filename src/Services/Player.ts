@@ -57,6 +57,7 @@ class Player {
 						// Now fire our event
 						this.SongChangedSignal.Fire()
 					} else {
+						console.log("REGISTERED SONG", track)
 						// Grab track details
 						const metadata: ProvidedMetadata = track.metadata as any
 						const isLocal = (metadata.is_local === "true")
