@@ -236,7 +236,6 @@ class Song implements Giveable {
 
 			// Now set our state
 			this.Playing = isPlaying
-			console.log("CREATING SONG, PLAYING:", isPlaying, this.Playing)
 		}
 
 		// Handle our events
@@ -288,7 +287,6 @@ class Song implements Giveable {
 					// Trigger an update and reflect our new state
 					this.Playing = !this.Playing
 					this.IsPlayingChangedSignal.Fire(this.Playing)
-					console.log("CHANGED PLAYING STATE TO", this.Playing)
 
 					// If we pause then stop our automatic-sync since we are guaranteed to be synced on play
 					if (this.Playing === false) {
@@ -625,7 +623,6 @@ class Song implements Giveable {
 		const syncsExecuted = this.AutomatedSyncsExecuted
 
 		// Make sure we aren't already paused
-		console.log("CHECKING AUTOMATED SYNC", this.Playing)
 		if ((this.Playing === false) || (syncsExecuted >= SyncTimeouts.length)) {
 			return
 		}
