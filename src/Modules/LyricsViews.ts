@@ -263,43 +263,42 @@ export default () => {
 	// Handle DOM tracking
 	{
 		// Create our observer
-		const observer = ViewMaid.Give(
-			new MutationObserver(
-				() => {
-					DetectSideBarChanges()
+		const Check = () => {
+			DetectSideBarChanges()
 
-					// Determine if we have our main-page yet
-					if (mainPage === undefined) {
-						const potentialMainPage = document.querySelector<HTMLDivElement>(".main-view-container .os-content")
+			// Determine if we have our main-page yet
+			if (mainPage === undefined) {
+				const potentialMainPage = document.querySelector<HTMLDivElement>(".main-view-container .os-content")
 
-						if (potentialMainPage !== null) {
-							mainPage = potentialMainPage
-							ViewMaid.Give(SpotifyHistory.listen(HandleSpotifyLocation))
-							HandleSpotifyLocation(SpotifyHistory.location)
-						}
-					}
+				if (potentialMainPage !== null) {
+					mainPage = potentialMainPage
+					ViewMaid.Give(SpotifyHistory.listen(HandleSpotifyLocation))
+					HandleSpotifyLocation(SpotifyHistory.location)
+				}
+			}
 
-					// Determine if we have our fullscreen button yet
-					const controlsContainer = document.querySelector<HTMLButtonElement>(".main-nowPlayingBar-extraControls")
-					if (controlsContainer !== null) {
-						for (const element of controlsContainer.children) {
-							if (
-								(
-									element.innerHTML.includes("0v1.018l2.72-2.72a.75.75 0 0 1 1.06 0zm2.94-2.94a.75.75")
-									|| element.innerHTML.includes("2H14V4.757a1 1 0 1 1 2 0v1.829l4.293-4.293a1")
-								)
-								&& (element.id !== "BeautifulLyricsFullscreenButton")
-							) {
-								element.remove()
-							}
-						}
+			// Determine if we have our fullscreen button yet
+			const controlsContainer = document.querySelector<HTMLButtonElement>(".main-nowPlayingBar-extraControls")
+			if (controlsContainer !== null) {
+				for (const element of controlsContainer.children) {
+					if (
+						(
+							element.innerHTML.includes("0v1.018l2.72-2.72a.75.75 0 0 1 1.06 0zm2.94-2.94a.75.75")
+							|| element.innerHTML.includes("2H14V4.757a1 1 0 1 1 2 0v1.829l4.293-4.293a1")
+						)
+						&& (element.id !== "BeautifulLyricsFullscreenButton")
+					) {
+						element.remove()
 					}
 				}
-			)
-		)
+			}
+		}
+
+		const observer = ViewMaid.Give(new MutationObserver(Check))
 
 		// Start observing
 		observer.observe(document.body, { childList: true, subtree: true })
+		Check()
 
 		// Finally, handle our fullscreen-check
 		if ((ActivePageView !== undefined) && ActivePageView.IsFullscreen()) {
