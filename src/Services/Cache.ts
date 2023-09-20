@@ -210,7 +210,7 @@ class CacheManager {
 		itemName: string
 	): Promise<ExpireCachesItemTypes[N] | undefined> {
 		if (expireCacheName === "ISRCLyrics") {
-			// return Promise.resolve(undefined)
+			return Promise.resolve(undefined)
 		}
 
 		return (
