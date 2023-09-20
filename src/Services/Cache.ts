@@ -53,7 +53,7 @@ const StoreTemplates: Store = {
 const ExpireCacheStoreItemVersions: Map<ExpireCacheName, number> = new Map()
 ExpireCacheStoreItemVersions.set("TrackInformation", 2)
 ExpireCacheStoreItemVersions.set("ProviderLyrics", 1)
-ExpireCacheStoreItemVersions.set("ISRCLyrics", 7)
+ExpireCacheStoreItemVersions.set("ISRCLyrics", 8)
 
 const StoreItemVersions: Map<StoreItemName, number> = new Map()
 StoreItemVersions.set("Analytics", 1)
@@ -210,7 +210,7 @@ class CacheManager {
 		itemName: string
 	): Promise<ExpireCachesItemTypes[N] | undefined> {
 		if (expireCacheName === "ISRCLyrics") {
-			return Promise.resolve(undefined)
+			// return Promise.resolve(undefined)
 		}
 
 		return (
