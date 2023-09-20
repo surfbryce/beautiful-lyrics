@@ -92,8 +92,8 @@ const CheckForUpdate = async () => {
 	let nextTimeoutDuration = NextFailedUpdateCheck
 
 	// Grab our cached version
-	fetch ('https://api.github.com/repos/surfbryce/beautiful-lyrics/contents/dist/beautiful-lyrics.js')
-	.then(data => data.json ())
+	fetch('https://api.github.com/repos/surfbryce/beautiful-lyrics/contents/dist/beautiful-lyrics.js')
+	.then(data => data.json())
 	.then(
 		data =>
 		fetch(`https://api.github.com/repos/surfbryce/beautiful-lyrics/git/blobs/${data.sha}`)

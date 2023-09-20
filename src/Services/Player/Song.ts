@@ -578,23 +578,25 @@ class Song implements Giveable {
 					> => {
 						// If we do not have anything stored for our parsed-lyrics then we need to generate it
 						if (storedParsedLyrics === undefined) {
-							// Set our parsed-lyrics as having failed by default
-							let parsedLyrics: (ParsedLyrics | false) = false
+							return (
+								(
+									(storedProviderLyrics === false) ? Promise.resolve<false>(false)
+									: ParseLyrics(storedProviderLyrics)
+								)
+								.then(
+									parsedLyrics => {
+										// Save our information
+										Cache.SetExpireCacheItem(
+											"ISRCLyrics",
+											trackInformation.external_ids.isrc, parsedLyrics,
+											ParsedLyricsExpiration
+										)
 
-							// If we DO have provider lyrics then we can parse them
-							if (storedProviderLyrics !== false) {
-								parsedLyrics = ParseLyrics(storedProviderLyrics)
-							}
-
-							// Save our information
-							Cache.SetExpireCacheItem(
-								"ISRCLyrics",
-								trackInformation.external_ids.isrc, parsedLyrics,
-								ParsedLyricsExpiration
+										// Now return our information
+										return Promise.resolve([trackInformation, parsedLyrics || undefined])
+									}
+								)
 							)
-
-							// Now return our information
-							return Promise.resolve([trackInformation, parsedLyrics || undefined])
 						} else {
 							return Promise.resolve([trackInformation, storedParsedLyrics || undefined])
 						}

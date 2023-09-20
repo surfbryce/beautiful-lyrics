@@ -1,5 +1,9 @@
-// Modules
-import { franc } from "franc"
+// Language Modules
+import { franc, francAll } from "franc"
+import Kuroshiro from "@sglkc/kuroshiro"
+import KuromojiAnalyzer from "./KuromojiAnalyzer"
+const Aromanize = require("aromanize")
+import pinyin from "pinyin"
 
 // Type Modules
 import Spotify from "./Spotify"
@@ -17,24 +21,28 @@ type LyricsResult = (
 )
 
 type NaturalAlignment = ("Right" | "Left")
+type RomanizedLanguage = ("Chinese" | "Japanese" | "Korean")
 type BaseInformation = {
 	NaturalAlignment: NaturalAlignment;
 	Language: string;
+	RomanizedLanguage?: RomanizedLanguage;
 }
 
 type TimeMetadata = {
 	StartTime: number;
 	EndTime: number;
 }
-type LyricMetadata = (
+type LyricMetadata = {
+	Text: string;
+	RomanizedText?: string;
+}
+type VocalMetadata = (
 	TimeMetadata
-	& {
-		Text: string;
-	}
+	& LyricMetadata
 )
 
 type SyllableLyricMetadata = (
-	LyricMetadata
+	VocalMetadata
 	& {
 		IsPartOfWord: boolean;
 	}
@@ -51,12 +59,12 @@ type StaticSynced = (
 	BaseInformation
 	& {
 		Type: "Static";
-		Lyrics: string[];
+		Lyrics: LyricMetadata[];
 	}
 )
 
 type LineVocal = (
-	LyricMetadata
+	VocalMetadata
 	& {
 		Type: "Vocal";
 
@@ -113,7 +121,7 @@ const RightToLeftLanguages = [
 	'pes', 'urd',
 	
 	// Arabic Languages
-	'arb', 'uig', // Do not include "zlm" (Malay) since the Arabic variant will be registered as Arabic
+	'arb', 'uig', // Do not include "zlm" (Malay), it is in Arabic script but it's not written right-to-left
 
 	// Hebrew Languages
 	'heb', 'ydd',
@@ -121,6 +129,11 @@ const RightToLeftLanguages = [
 	// Mende Languages
 	'men'
 ]
+
+const RomajiConverter = new Kuroshiro()
+const RomajiPromise = RomajiConverter.init(KuromojiAnalyzer)
+
+const KoreanTextTest = /[\uac00-\ud7af]|[\u1100-\u11ff]|[\u3130-\u318f]|[\ua960-\ua97f]|[\ud7b0-\ud7ff]/g
 
 // Helper Methods
 const GetNaturalAlignment = (language: string): NaturalAlignment => {
@@ -137,6 +150,93 @@ const GetFeatureAgentVersion = (element: Element) => {
 	return (
 		(featureAgentVersion === undefined) ? undefined
 			: parseInt(featureAgentVersion, 10)
+	)
+}
+
+const GenerateChineseRomanization = <L extends LyricMetadata>(
+	lyricMetadata: L,
+	primaryLanguage: string
+): Promise<RomanizedLanguage | void> => {
+	if (primaryLanguage === "cmn") {
+		lyricMetadata.RomanizedText = (
+			pinyin(
+				lyricMetadata.Text,
+				{
+					segment: false,
+					group: true
+				}
+			).join("-")
+		)
+		return Promise.resolve("Chinese")
+	} else {
+		return Promise.resolve()
+	}
+}
+
+const GenerateJapaneseRomanization = <L extends LyricMetadata>(lyricMetadata: L): Promise<RomanizedLanguage | void> => {
+	if (RomajiConverter.Util.hasJapanese(lyricMetadata.Text)) {
+		return (
+			RomajiPromise.then(
+				() => RomajiConverter.convert(
+					lyricMetadata.Text,
+					{
+						to: "romaji",
+						mode: "spaced"
+					}
+				)
+			)
+			.then(
+				result => {
+					lyricMetadata.RomanizedText = result
+					return "Japanese"
+				}
+			)
+		)
+	} else {
+		return Promise.resolve()
+	}
+}
+
+const GenerateKoreanRomanization = <L extends LyricMetadata>(lyricMetadata: L): Promise<RomanizedLanguage | void> => {
+	if (KoreanTextTest.test(lyricMetadata.Text)) {
+		lyricMetadata.RomanizedText = Aromanize.hangulToLatin(lyricMetadata.Text, 'rr-translit')
+		return Promise.resolve("Korean")
+	} else {
+		return Promise.resolve()
+	}
+}
+
+const GenerateRomanization = <L extends LyricMetadata, I extends BaseInformation>(
+	lyricMetadata: L,
+	rootInformation: I
+): Promise<void> => {
+	return (
+		GenerateChineseRomanization(lyricMetadata, rootInformation.Language)
+		.then(
+			(romanizedLanguage) => {
+				if (romanizedLanguage === undefined) {
+					return GenerateJapaneseRomanization(lyricMetadata)
+				} else {
+					return romanizedLanguage
+				}
+			}
+		)
+		.then(
+			(romanizedLanguage) => {
+				if (romanizedLanguage === undefined) {
+					return GenerateKoreanRomanization(lyricMetadata)
+				} else {
+					return romanizedLanguage
+				}
+			}
+		)
+		.then(
+			(romanizedLanguage) => {
+				if (romanizedLanguage !== undefined) {
+					rootInformation.RomanizedLanguage = romanizedLanguage
+				}
+			}
+		)
 	)
 }
 
@@ -161,7 +261,7 @@ const IsNodeASpan = (node: Node): node is HTMLSpanElement => {
 
 // Parse Methods
 const parser = new DOMParser()
-const ParseAppleMusicLyrics = (text: string) => {
+const ParseAppleMusicLyrics = (text: string): Promise<ParsedLyrics> => {
 	// Our text is XML so we'll just parse it first
 	const parsedDocument = parser.parseFromString(text, "text/xml")
 	const body = parsedDocument.querySelector("body")!
@@ -187,7 +287,11 @@ const ParseAppleMusicLyrics = (text: string) => {
 			if (element.tagName === "div") {
 				for (const line of element.children) {
 					if (line.tagName === "p") {
-						result.Lyrics.push(line.textContent!)
+						// Create our lyric-metadata
+						const lyricMetadata: LyricMetadata = {
+							Text: line.textContent!
+						}
+						result.Lyrics.push(lyricMetadata)
 					}
 				}
 			}
@@ -196,9 +300,9 @@ const ParseAppleMusicLyrics = (text: string) => {
 		// Determine our language AND natural-alignment
 		{
 			// Put all our text together for processing
-			let textToProcess = result.Lyrics[0]
+			let textToProcess = result.Lyrics[0].Text
 			for (let index = 1; index < result.Lyrics.length; index += 1) {
-				textToProcess += `\n${result.Lyrics[index]}`
+				textToProcess += `\n${result.Lyrics[index].Text}`
 			}
 
 			// Determine our language
@@ -209,7 +313,14 @@ const ParseAppleMusicLyrics = (text: string) => {
 			result.NaturalAlignment = GetNaturalAlignment(language)
 		}
 
-		return result
+		// Go through and romanize everything
+		const romanizationPromises: Promise<void>[] = []
+		for(const lyricMetadata of result.Lyrics) {
+			romanizationPromises.push(GenerateRomanization(lyricMetadata, result))
+		}
+
+		// Wait for all our stored-promises to finish
+		return Promise.all(romanizationPromises).then(() => result)
 	} else if (syncType == "Line") {
 		const result: LineSynced = {
 			NaturalAlignment: "Left",
@@ -238,18 +349,17 @@ const ParseAppleMusicLyrics = (text: string) => {
 						const end = GetTimeInSeconds(line.getAttribute("end")!)
 
 						// Store our lyrics now
-						result.VocalGroups.push(
-							{
-								Type: "Vocal",
+						const vocalGroup: LineVocal = {
+							Type: "Vocal",
 
-								OppositeAligned: oppositeAligned,
+							OppositeAligned: oppositeAligned,
 
-								Text: line.textContent!,
+							Text: line.textContent!,
 
-								StartTime: start,
-								EndTime: end
-							}
-						)
+							StartTime: start,
+							EndTime: end
+						}
+						result.VocalGroups.push(vocalGroup)
 					}
 				}
 			}
@@ -283,7 +393,16 @@ const ParseAppleMusicLyrics = (text: string) => {
 			result.NaturalAlignment = GetNaturalAlignment(language)
 		}
 
-		return result
+		// Go through and romanize everything
+		const romanizationPromises: Promise<void>[] = []
+		for(const vocalGroup of result.VocalGroups) {
+			if (vocalGroup.Type == "Vocal") {
+				romanizationPromises.push(GenerateRomanization(vocalGroup, result))
+			}
+		}
+
+		// Wait for all our stored-promises to finish
+		return Promise.all(romanizationPromises).then(() => result)
 	} else {
 		const result: SyllableSynced = {
 			NaturalAlignment: "Left",
@@ -326,19 +445,18 @@ const ParseAppleMusicLyrics = (text: string) => {
 
 											const nextNode = backgroundNodes[backgroundIndex + 1]
 
-											backgroundLyrics.push(
-												{
-													Text: backgroundSyllable.textContent!,
+											const backgroundLyric: SyllableLyricMetadata = {
+												Text: backgroundSyllable.textContent!,
 
-													IsPartOfWord: (
-														(nextNode === undefined) ? false
-														: (nextNode.nodeType !== Node.TEXT_NODE)
-													),
+												IsPartOfWord: (
+													(nextNode === undefined) ? false
+													: (nextNode.nodeType !== Node.TEXT_NODE)
+												),
 
-													StartTime: start,
-													EndTime: end
-												}
-											)
+												StartTime: start,
+												EndTime: end
+											}
+											backgroundLyrics.push(backgroundLyric)
 										}
 									}
 
@@ -362,19 +480,18 @@ const ParseAppleMusicLyrics = (text: string) => {
 
 									const nextNode = lineNodes[index + 1]
 
-									leadLyrics.push(
-										{
-											Text: syllable.textContent!,
+									const leadLyric: SyllableLyricMetadata = {
+										Text: syllable.textContent!,
 
-											IsPartOfWord: (
-												(nextNode === undefined) ? false
-												: (nextNode.nodeType !== Node.TEXT_NODE)
-											),
+										IsPartOfWord: (
+											(nextNode === undefined) ? false
+											: (nextNode.nodeType !== Node.TEXT_NODE)
+										),
 
-											StartTime: start,
-											EndTime: end
-										}
-									)
+										StartTime: start,
+										EndTime: end
+									}
+									leadLyrics.push(leadLyric)
 								}
 							}
 						}
@@ -444,11 +561,28 @@ const ParseAppleMusicLyrics = (text: string) => {
 			result.NaturalAlignment = GetNaturalAlignment(language)
 		}
 
-		return result
+		// Go through and romanize everything
+		const romanizationPromises: Promise<void>[] = []
+		for(const vocalGroup of result.VocalGroups) {
+			if (vocalGroup.Type == "Vocal") {
+				for(const syllable of vocalGroup.Lead) {
+					romanizationPromises.push(GenerateRomanization(syllable, result))
+				}
+
+				if (vocalGroup.Background !== undefined) {
+					for(const syllable of vocalGroup.Background) {
+						romanizationPromises.push(GenerateRomanization(syllable, result))
+					}
+				}
+			}
+		}
+
+		// Wait for all our stored-promises to finish
+		return Promise.all(romanizationPromises).then(() => result)
 	}
 }
 
-const ParseSpotifyLyrics = (content: Spotify.LyricLines) => {
+const ParseSpotifyLyrics = (content: Spotify.LyricLines): Promise<LineSynced> => {
 	// We're just going to assume it's line-synced since that's all Spotify supports atm
 	const result: LineSynced = {
 		NaturalAlignment: "Left",
@@ -460,6 +594,7 @@ const ParseSpotifyLyrics = (content: Spotify.LyricLines) => {
 		Type: "Line",
 		VocalGroups: []
 	}
+	const romanizationPromises: Promise<void>[] = []
 
 	// Determine our language AND natural-alignment
 	{
@@ -495,83 +630,94 @@ const ParseSpotifyLyrics = (content: Spotify.LyricLines) => {
 		)
 
 		// Now store our lyrics
-		result.VocalGroups.push(
-			{
-				Type: "Vocal",
+		const vocalGroup: LineVocal = {
+			Type: "Vocal",
 
-				OppositeAligned: false,
+			OppositeAligned: false,
 
-				Text: line.words,
+			Text: line.words,
 
-				StartTime: start,
-				EndTime: end
-			}
-		)
+			StartTime: start,
+			EndTime: end
+		}
+		result.VocalGroups.push(vocalGroup)
+
+		// Handle our romanization
+		romanizationPromises.push(GenerateRomanization(vocalGroup, result))
 	}
 
 	// Now set our end/start times to our lyrics
 	result.StartTime = result.VocalGroups[0].StartTime
 	result.EndTime = result.VocalGroups[result.VocalGroups.length - 1].EndTime
 
-	return result
+	// Wait for all our stored-promises to finish
+	return Promise.all(romanizationPromises).then(() => result)
 }
 
-const ParseLyrics = (content: LyricsResult): ParsedLyrics => {
+const ParseLyrics = (content: LyricsResult): Promise<ParsedLyrics> => {
 	// Grab our parsed-lyrics
-	const parsedLyrics = (
-		(content.Source === "AppleMusic") ? ParseAppleMusicLyrics(content.Content)
-		: ParseSpotifyLyrics(content.Content)
+	return (
+		(
+			(content.Source === "AppleMusic") ? ParseAppleMusicLyrics(content.Content)
+			: ParseSpotifyLyrics(content.Content)
+		)
+		.then(
+			parsedLyrics => {
+				// Now add in interludes anywhere we can
+				if (parsedLyrics.Type !== "Static") {
+					// First check if our first vocal-group needs an interlude before it
+					let addedStartInterlude = false
+					{
+						const firstVocalGroup = parsedLyrics.VocalGroups[0]
+
+						if (firstVocalGroup.StartTime >= MinimumInterludeDuration) {
+							parsedLyrics.VocalGroups.unshift(
+								{
+									Type: "Interlude",
+
+									StartTime: 0,
+									EndTime: (firstVocalGroup.StartTime - EndInterludeEarlyBy)
+								}
+							)
+
+							addedStartInterlude = true
+						}
+					}
+
+					// Now go through our vocals and determine if we need to add an interlude anywhere
+					for (
+						let index = (parsedLyrics.VocalGroups.length - 1);
+						index > (addedStartInterlude ? 1 : 0);
+						index -= 1
+					) {
+						const endingVocalGroup = parsedLyrics.VocalGroups[index]
+						const startingVocalGroup = parsedLyrics.VocalGroups[index - 1]
+
+						if ((endingVocalGroup.StartTime - startingVocalGroup.EndTime) >= MinimumInterludeDuration) {
+							parsedLyrics.VocalGroups.splice(
+								index,
+								0,
+								{
+									Type: "Interlude",
+
+									StartTime: startingVocalGroup.EndTime,
+									EndTime: (endingVocalGroup.StartTime - EndInterludeEarlyBy)
+								}
+							)
+						}
+					}
+				}
+
+				// Now return our parsed-lyrics
+				return parsedLyrics
+			}
+		)
 	)
-
-	// Now add in interludes anywhere we can
-	if (parsedLyrics.Type !== "Static") {
-		// First check if our first vocal-group needs an interlude before it
-		let addedStartInterlude = false
-		{
-			const firstVocalGroup = parsedLyrics.VocalGroups[0]
-
-			if (firstVocalGroup.StartTime >= MinimumInterludeDuration) {
-				parsedLyrics.VocalGroups.unshift(
-					{
-						Type: "Interlude",
-
-						StartTime: 0,
-						EndTime: (firstVocalGroup.StartTime - EndInterludeEarlyBy)
-					}
-				)
-
-				addedStartInterlude = true
-			}
-		}
-
-		// Now go through our vocals and determine if we need to add an interlude anywhere
-		for (
-			let index = (parsedLyrics.VocalGroups.length - 1);
-			index > (addedStartInterlude ? 1 : 0);
-			index -= 1
-		) {
-			const endingVocalGroup = parsedLyrics.VocalGroups[index]
-			const startingVocalGroup = parsedLyrics.VocalGroups[index - 1]
-
-			if ((endingVocalGroup.StartTime - startingVocalGroup.EndTime) >= MinimumInterludeDuration) {
-				parsedLyrics.VocalGroups.splice(
-					index,
-					0,
-					{
-						Type: "Interlude",
-
-						StartTime: startingVocalGroup.EndTime,
-						EndTime: (endingVocalGroup.StartTime - EndInterludeEarlyBy)
-					}
-				)
-			}
-		}
-	}
-
-	// Now return our parsed-lyrics
-	return parsedLyrics
 }
 
 // Exports
 export { ParseLyrics }
-export type { LyricsResult, SyllableLyricMetadata, LyricMetadata, Interlude, ParsedLyrics }
+export type {
+	LyricsResult, SyllableLyricMetadata, VocalMetadata, Interlude, LyricMetadata,
+	ParsedLyrics, RomanizedLanguage
+}

@@ -8,7 +8,7 @@ import { GetSpline, Clamp } from "../SharedMethods"
 
 // Imported Types
 import { SyncedVocals, LyricState } from "../Types"
-import { LyricMetadata } from "../../../Services/Player/LyricsParser"
+import { LyricMetadata, VocalMetadata } from "../../../Services/Player/LyricsParser"
 
 // Visual Constants
 const GlowRange = [
@@ -58,7 +58,10 @@ export default class LineVocals implements SyncedVocals, Giveable {
 	public readonly RequestedTimeSkip = this.RequestedTimeSkipSignal.GetEvent()
 
 	// Constructor
-	public constructor(lineContainer: HTMLElement, lineMetadata: LyricMetadata) {
+	public constructor(
+		lineContainer: HTMLElement, lineMetadata: VocalMetadata,
+		isRomanized: boolean
+	) {
 		// First create our container
 		const container = this.Maid.Give(document.createElement('div'))
 		container.classList.add('Vocals')
@@ -80,7 +83,7 @@ export default class LineVocals implements SyncedVocals, Giveable {
 		syllableSpan.classList.add('Lyric')
 		syllableSpan.classList.add('Synced')
 		syllableSpan.classList.add('Line')
-		syllableSpan.innerText = lineMetadata.Text
+		syllableSpan.innerText = (isRomanized && lineMetadata.RomanizedText || lineMetadata.Text)
 		container.appendChild(syllableSpan)
 
 		// Now create our live-text element

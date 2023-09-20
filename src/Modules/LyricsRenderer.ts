@@ -25,7 +25,11 @@ export default class LyricsRenderer implements Giveable {
 	private Maid: Maid = new Maid()
 
 	// Constructor
-	constructor(parentContainer: HTMLDivElement, song: Song, parsedLyrics: ParsedLyrics) {
+	constructor(
+		parentContainer: HTMLDivElement,
+		song: Song, parsedLyrics: ParsedLyrics,
+		isRomanized: boolean
+	) {
 		// Create our containers
 		const scrollContainer = this.Maid.Give(document.createElement("div"))
 		scrollContainer.classList.add("LyricsScrollContainer")
@@ -49,7 +53,14 @@ export default class LyricsRenderer implements Giveable {
 				lines.push(
 					{
 						GroupContainer: lineContainer,
-						Vocals: [this.Maid.Give(new StaticVocals(lineContainer, line))]
+						Vocals: [
+							this.Maid.Give(
+								new StaticVocals(
+									lineContainer, line,
+									isRomanized
+								)
+							)
+						]
 					}
 				)
 
@@ -82,7 +93,14 @@ export default class LyricsRenderer implements Giveable {
 						vocalGroups.push(
 							{
 								GroupContainer: vocalGroupContainer,
-								Vocals: [this.Maid.Give(new LineVocals(vocalGroupContainer, vocalGroup))]
+								Vocals: [
+									this.Maid.Give(
+										new LineVocals(
+											vocalGroupContainer, vocalGroup,
+											isRomanized
+										)
+									)
+								]
 							}
 						)
 						vocalGroupStartTimes.push(vocalGroup.StartTime)
@@ -114,10 +132,22 @@ export default class LyricsRenderer implements Giveable {
 
 						// Now add our lead/background vocals
 						const vocals = []
-						vocals.push(this.Maid.Give(new SyllableVocals(vocalGroupContainer, vocalGroup.Lead, false)))
+						vocals.push(
+							this.Maid.Give(
+								new SyllableVocals(
+									vocalGroupContainer, vocalGroup.Lead, false,
+									isRomanized
+								)
+							)
+						)
 						if (vocalGroup.Background !== undefined) {
 							vocals.push(
-								this.Maid.Give(new SyllableVocals(vocalGroupContainer, vocalGroup.Background, true))
+								this.Maid.Give(
+									new SyllableVocals(
+										vocalGroupContainer, vocalGroup.Background, true,
+										isRomanized
+									)
+								)
 							)
 						}
 						vocalGroups.push(

@@ -111,10 +111,10 @@ const CreateSprings = () => {
 // Emphasis Evaluation Constants
 const MinimumEmphasizedDuration = 1
 const MaximumEmphasizedCharacters = 12
-const IsEmphasized = (metadata: SyllableLyricMetadata) => {
+const IsEmphasized = (metadata: SyllableLyricMetadata, isRomanized: boolean) => {
 	return (
 		((metadata.EndTime - metadata.StartTime) >= MinimumEmphasizedDuration)
-		&& (metadata.Text.length <= MaximumEmphasizedCharacters)
+		&& ((isRomanized && metadata.RomanizedText || metadata.Text).length <= MaximumEmphasizedCharacters)
 	)
 }
 
@@ -142,7 +142,8 @@ export default class SyllableVocals implements SyncedVocals, Giveable {
 	// Constructor
 	public constructor(
 		lineContainer: HTMLElement,
-		syllablesMetadata: SyllableLyricMetadata[], isBackground: boolean
+		syllablesMetadata: SyllableLyricMetadata[], isBackground: boolean,
+		isRomanized: boolean
 	) {
 		// First create our container
 		const container = this.Maid.Give(document.createElement('div'))
@@ -203,7 +204,7 @@ export default class SyllableVocals implements SyncedVocals, Giveable {
 			// Now handle all our syllables
 			for (const [index, syllableMetadata] of syllableGroup.entries()) {
 				// Determine if we are emphasised
-				const isEmphasized = IsEmphasized(syllableMetadata)
+				const isEmphasized = IsEmphasized(syllableMetadata, isRomanized)
 
 				// Create our main span element
 				const syllableSpan = this.Maid.Give(document.createElement('span'))
@@ -236,7 +237,7 @@ export default class SyllableVocals implements SyncedVocals, Giveable {
 				if (isEmphasized) {
 					// Store all our "letters"
 					const letterTexts: string[] = []
-					for (const letter of syllableMetadata.Text) {
+					for (const letter of (isRomanized && syllableMetadata.RomanizedText || syllableMetadata.Text)) {
 						letterTexts.push(letter)
 					}
 
@@ -246,7 +247,7 @@ export default class SyllableVocals implements SyncedVocals, Giveable {
 					// Now generate our letters
 					letters = []
 					let relativeTimestamp = 0
-					for (const letter of syllableMetadata.Text) {
+					for (const letter of letterTexts) {
 						// Create our letter-span
 						const letterSpan = this.Maid.Give(document.createElement('span'))
 						letterSpan.classList.add('Letter')
@@ -273,7 +274,7 @@ export default class SyllableVocals implements SyncedVocals, Giveable {
 					}
 				} else {
 					// Update our text
-					syllableSpan.innerText = syllableMetadata.Text
+					syllableSpan.innerText = (isRomanized && syllableMetadata.RomanizedText || syllableMetadata.Text)
 				}
 
 				// Determine our time information

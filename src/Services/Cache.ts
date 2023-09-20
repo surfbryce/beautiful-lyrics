@@ -1,6 +1,6 @@
 // Types
 import { SpotifyTrackInformation } from "./Player/Song"
-import { ParsedLyrics, LyricsResult } from "./Player/LyricsParser"
+import { ParsedLyrics, LyricsResult, RomanizedLanguage } from "./Player/LyricsParser"
 
 // Cache Types
 type ExpirationSettings = {
@@ -29,6 +29,7 @@ type Store = {
 	LyricViews: {
 		CardLyricsVisible: boolean;
 		PlaybarDetailsHidden: boolean;
+		RomanizedLanguages: {[key in RomanizedLanguage]: boolean};
 	};
 }
 type StoreItemName = (keyof Store)
@@ -39,15 +40,20 @@ const StoreTemplates: Store = {
 
 	LyricViews: {
 		CardLyricsVisible: false,
-		PlaybarDetailsHidden: false
-	}
+		PlaybarDetailsHidden: false,
+		RomanizedLanguages: {
+			Chinese: false,
+			Japanese: false,
+			Korean: false,
+		}
+	},
 }
 
 // Define StoreItem Versions
 const ExpireCacheStoreItemVersions: Map<ExpireCacheName, number> = new Map()
 ExpireCacheStoreItemVersions.set("TrackInformation", 2)
 ExpireCacheStoreItemVersions.set("ProviderLyrics", 1)
-ExpireCacheStoreItemVersions.set("ISRCLyrics", 6)
+ExpireCacheStoreItemVersions.set("ISRCLyrics", 7)
 
 const StoreItemVersions: Map<StoreItemName, number> = new Map()
 StoreItemVersions.set("Analytics", 1)
@@ -100,13 +106,24 @@ class CacheManager {
 		// Attempt to grab our whole store
 		const temporaryStore: any = {}
 		const missingItems: Record<string, any> = {}
-		for(const key of (Object.keys(templates) as StoreItemName[])) {
+		for(const [key, template] of Object.entries(templates)) {
 			const serializedValue = localStorage.getItem(this.GetItemLocation(key as StoreItemName))
 
 			if (serializedValue === null) {
-				missingItems[key] = templates[key]
+				missingItems[key] = template
 			} else {
-				temporaryStore[key] = JSON.parse(serializedValue)
+				const value = JSON.parse(serializedValue)
+				temporaryStore[key] = value
+
+				for (const [templateKey, templateValue] of Object.entries(template)) {
+					if (value[templateKey] === undefined) {
+						if (typeof templateValue === "object") {
+							value[templateKey] = JSON.parse(JSON.stringify(templateValue))
+						} else {
+							value[key] = templateValue
+						}
+					}
+				}
 			}
 		}
 
