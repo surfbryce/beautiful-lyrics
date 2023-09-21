@@ -4,13 +4,17 @@
 [![Github Version](https://img.shields.io/github/v/release/surfbryce/beautiful-lyrics)](https://github.com/surfbryce/beautiful-lyrics/) [![Github Stars badge](https://img.shields.io/github/stars/surfbryce/beautiful-lyrics?style=social)](https://github.com/surfbryce/beautiful-lyrics/)
 
 ![Thumbnail](./previews/thumbnail.gif)
-### Takes the built-in Spotify lyrics and gives them a complete uplift!
+### Completely REVAMPS the Spotify Lyrics Experience
 
 The background has been given a ***Dynamic* Color Background** that blends through the colors of the Cover-Art beautifully.
 
 Lyrics have also been completely revamped to provide an entirely new and better Lyrics experience!
 
 New **Cinema and Page Lyric Views** have been added to replace Spotifys own versions! **Page view** replaces the main-page and **Cinema view** gives you an **immersive Lyrics experience**!
+
+Did you know _Spotify doesn't give its fullscreen mode to non-premium users_? With Beautiful Lyrics **EVERYBODY** gets an extremely beautiful **Fullscreen Mode** with all the great features that the other views give!
+
+If you're a fan of **Chinese, Japanese, or Korean songs** but want to see the lyrics phonetically spelled than just toggle the **Romanization** feature! The toggle is *per supported language* so you can **pick and choose which ones are romanized**!
 
 Never worry about Updating ever! **Beautiful Lyrics is ALWAYS Up-to-Date because it Auto-Updates as _SOON_ as an update is available!** This means that if you make an issue/suggestion - it could be added and working for you (and everyone else) minutes later!
 
