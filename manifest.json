@@ -1,13 +1,13 @@
 [
 	{
 	  "name": "Beautiful Lyrics",
-	  "description": "Adds Synced Lyrics, Dynamic Background, Fullscreen, and more!",
+	  "description": "Adds Synced Lyrics, Dynamic Background, Fullscreen, Romanization, and more!",
 	  "preview": "./previews/icon.gif",
 	  "main": "./dist/beautiful-lyrics.js",
 	  "readme": "README.md",
 	  "authors": [
 		  { "name": "SoCalifornian", "url": "https://github.com/surfbryce" }
 	  ],
-	  "tags": ["lyrics", "fullscreen", "background"]
+	  "tags": ["lyrics", "fullscreen", "background", "romanization", "romaji", "romaja", "pinyin", "japanese", "korean", "chinese"]
 	}
 ]
