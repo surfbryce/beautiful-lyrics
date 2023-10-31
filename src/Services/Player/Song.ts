@@ -154,8 +154,6 @@ type BackendLyric = (
 )
 
 // Behavior Constants
-const MinimumTimeSkipDifferenceOffset = (1 / 120) // Difference extender (based off DeltaTime)
-
 const TrackInformationExpiration: ExpirationSettings = {
 	Duration: 2,
 	Unit: "Weeks"
