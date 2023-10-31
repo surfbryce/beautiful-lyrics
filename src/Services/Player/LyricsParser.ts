@@ -1,5 +1,5 @@
 // Language Modules
-import { franc, francAll } from "franc"
+import { franc } from "franc"
 import Kuroshiro from "@sglkc/kuroshiro"
 import KuromojiAnalyzer from "./KuromojiAnalyzer"
 const Aromanize = require("aromanize")
@@ -133,7 +133,9 @@ const RightToLeftLanguages = [
 const RomajiConverter = new Kuroshiro()
 const RomajiPromise = RomajiConverter.init(KuromojiAnalyzer)
 
-const KoreanTextTest = /[\uac00-\ud7af]|[\u1100-\u11ff]|[\u3130-\u318f]|[\ua960-\ua97f]|[\ud7b0-\ud7ff]/g
+const KoreanTextTest = /[\uac00-\ud7af]|[\u1100-\u11ff]|[\u3130-\u318f]|[\ua960-\ua97f]|[\ud7b0-\ud7ff]/
+const ChineseTextText = /([\u4E00-\u9FFF])/
+const JapaneseTextText = /([ぁ-んァ-ン])/
 
 // Helper Methods
 const GetNaturalAlignment = (language: string): NaturalAlignment => {
@@ -157,7 +159,7 @@ const GenerateChineseRomanization = <L extends LyricMetadata>(
 	lyricMetadata: L,
 	primaryLanguage: string
 ): Promise<RomanizedLanguage | void> => {
-	if (primaryLanguage === "cmn") {
+	if ((primaryLanguage === "cmn") || ChineseTextText.test(lyricMetadata.Text)) {
 		lyricMetadata.RomanizedText = (
 			pinyin(
 				lyricMetadata.Text,
@@ -173,8 +175,11 @@ const GenerateChineseRomanization = <L extends LyricMetadata>(
 	}
 }
 
-const GenerateJapaneseRomanization = <L extends LyricMetadata>(lyricMetadata: L): Promise<RomanizedLanguage | void> => {
-	if (RomajiConverter.Util.hasJapanese(lyricMetadata.Text)) {
+const GenerateJapaneseRomanization = <L extends LyricMetadata>(
+	lyricMetadata: L,
+	primaryLanguage: string
+): Promise<RomanizedLanguage | void> => {
+	if ((primaryLanguage === "jpn") || JapaneseTextText.test(lyricMetadata.Text)) {
 		return (
 			RomajiPromise.then(
 				() => RomajiConverter.convert(
@@ -197,8 +202,11 @@ const GenerateJapaneseRomanization = <L extends LyricMetadata>(lyricMetadata: L)
 	}
 }
 
-const GenerateKoreanRomanization = <L extends LyricMetadata>(lyricMetadata: L): Promise<RomanizedLanguage | void> => {
-	if (KoreanTextTest.test(lyricMetadata.Text)) {
+const GenerateKoreanRomanization = <L extends LyricMetadata>(
+	lyricMetadata: L,
+	primaryLanguage: string
+): Promise<RomanizedLanguage | void> => {
+	if ((primaryLanguage === "kor") || KoreanTextTest.test(lyricMetadata.Text)) {
 		lyricMetadata.RomanizedText = Aromanize.hangulToLatin(lyricMetadata.Text, 'rr-translit')
 		return Promise.resolve("Korean")
 	} else {
@@ -211,11 +219,11 @@ const GenerateRomanization = <L extends LyricMetadata, I extends BaseInformation
 	rootInformation: I
 ): Promise<void> => {
 	return (
-		GenerateChineseRomanization(lyricMetadata, rootInformation.Language)
+		GenerateJapaneseRomanization(lyricMetadata, rootInformation.Language)
 		.then(
 			(romanizedLanguage) => {
 				if (romanizedLanguage === undefined) {
-					return GenerateJapaneseRomanization(lyricMetadata)
+					return GenerateKoreanRomanization(lyricMetadata, rootInformation.Language)
 				} else {
 					return romanizedLanguage
 				}
@@ -224,7 +232,7 @@ const GenerateRomanization = <L extends LyricMetadata, I extends BaseInformation
 		.then(
 			(romanizedLanguage) => {
 				if (romanizedLanguage === undefined) {
-					return GenerateKoreanRomanization(lyricMetadata)
+					return GenerateChineseRomanization(lyricMetadata, rootInformation.Language)
 				} else {
 					return romanizedLanguage
 				}
