@@ -167,6 +167,10 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage) {
 
 // Prevents themes from screwing with us
 body:has(.Root__main-view-overlay .BeautifulLyricsPage) {
+	.Root__main-view {
+		z-index: 5;
+	}
+
 	.Root__top-container {
 		grid-template-areas:
 			"top-bar top-bar top-bar"
