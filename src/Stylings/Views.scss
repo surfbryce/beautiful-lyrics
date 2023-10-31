@@ -169,9 +169,9 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage) {
 body:has(.Root__main-view-overlay .BeautifulLyricsPage) {
 	.Root__top-container {
 		grid-template-areas:
+			"top-bar top-bar top-bar"
 			"left-sidebar main-view right-sidebar"
-			"now-playing-bar now-playing-bar now-playing-bar"
-			!important;
+			"now-playing-bar now-playing-bar now-playing-bar" !important;
 	}
 
 	.Root__now-playing-bar, .main-nowPlayingBar-container {
@@ -237,6 +237,12 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.PlaybarDetailsHidden)
 body:not(:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen))) {
 	#BeautifulLyricsFullscreenButton {
 		scale: 1.25;
+	}
+}
+
+body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
+	.body-drag-top {
+		height: unset !important;
 	}
 }
 

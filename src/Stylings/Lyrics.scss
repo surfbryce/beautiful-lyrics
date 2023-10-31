@@ -111,7 +111,7 @@
 	letter-spacing: 0em;
 	transition: color 0.1s, transform 0.1s ease-in-out, padding 0.1s ease-in-out;
 
-	font-family: "BeautifulLyrics";
+	font-family: "BeautifulLyrics" !important;
 
 	unicode-bidi: isolate;
 
@@ -206,45 +206,45 @@
 
 /* Lead Vocals-Container */
 .Vocals.Lead {
-	opacity: var(--vocal-idle-opacity);
+	opacity: var(--vocal-idle-opacity) !important;
 
-	font-size: var(--lyrics-size);
-	font-weight: 700;
+	font-size: var(--lyrics-size) !important;
+	font-weight: 700 !important;
 }
 
 .Vocals.Lead.Sung {
-	opacity: var(--vocal-sung-opacity);
+	opacity: var(--vocal-sung-opacity) !important;
 }
 
 .Vocals.Lead.Active {
-	opacity: var(--vocal-active-opacity);
+	opacity: var(--vocal-active-opacity) !important;
 }
 
 .VocalsGroup:is(button):hover .Vocals.Lead {
 	--text-blur: 0 !important;
-	opacity: var(--vocal-active-opacity);
+	opacity: var(--vocal-active-opacity) !important;
 }
 
 /* Background Vocals-Container */
 .Vocals.Background {
-	opacity: var(--background-idle-opacity);
+	opacity: var(--background-idle-opacity) !important;
 
 	--font-size: calc(var(--lyrics-size) * 0.75);
-	font-size: var(--font-size);
-	font-weight: 500;
-	margin-top: calc(var(--font-size) * -0.05);
+	font-size: var(--font-size) !important;
+	font-weight: 500 !important;
+	margin-top: calc(var(--font-size) * -0.05) !important;
 }
 
 .Vocals.Background.Sung {
-	opacity: var(--background-sung-opacity);
+	opacity: var(--background-sung-opacity) !important;
 }
 
 .Vocals.Background.Active {
-	opacity: var(--background-active-opacity);
+	opacity: var(--background-active-opacity) !important;
 }
 
 .VocalsGroup:is(button):hover .Vocals.Background {
-	opacity: var(--background-active-opacity);
+	opacity: var(--background-active-opacity) !important;
 }
 
 /* Base Lyric */
