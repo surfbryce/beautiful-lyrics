@@ -6,9 +6,43 @@ import { Timeout } from '../../../../Packages/Scheduler'
 // Create our Global-Maid (this is used so we can clean-up everything prior to updating)
 const GlobalMaid = new Maid()
 
-// Store our current-script/style
-const Script = (document.currentScript as HTMLScriptElement)
-const IsDevelopment = (Script.src.includes("https://xpui.app.spotify.com/"))
+// Store our current-script/style and handle other-scripts not existing
+let Script: HTMLScriptElement
+let IsDevelopment = false
+{
+	let productionScript: (HTMLScriptElement | undefined)
+	let developmentScript: (HTMLScriptElement | undefined)
+
+	for(const script of document.getElementsByTagName("script")) {
+		if (script.src.includes('beautiful-lyrics.js')) {
+			if (script.src.includes("https://xpui.app.spotify.com/")) {
+				if (developmentScript === undefined) {
+					developmentScript = script
+				} else {
+					script.remove()
+				}
+			} else {
+				if (productionScript === undefined) {
+					productionScript = script
+				} else {
+					script.remove()
+				}
+			}
+		}
+	}
+
+	if (developmentScript === undefined) {
+		Script = productionScript!
+	} else {
+		IsDevelopment = true
+
+		if (productionScript !== undefined) {
+			productionScript.remove()
+		}
+
+		Script = developmentScript
+	}
+}
 
 // Spotify Types
 type HistoryLocation = {
