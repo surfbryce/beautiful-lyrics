@@ -44,6 +44,10 @@ body:has(.BeautifulLyricsPage) {
 	margin-top: 0 !important;
 }
 
+.main-topBar-container {
+	pointer-events: none !important; // This allows points events for things below the divs empty space
+}
+
 .os-content:has(.BeautifulLyricsPage) {
 	container-type: size;
 
