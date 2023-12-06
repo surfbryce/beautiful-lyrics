@@ -491,6 +491,7 @@ class Song implements Giveable {
 					> => {
 						// Now determine if we have any provider lyrics at all
 						const recordCode = trackInformation.external_ids.isrc
+						console.log("REGISTERED", "PLEASE UPDATE!!!", recordCode)
 						if (storedProviderLyrics === undefined) {
 							return (
 								this.GetLyricsFromBackendProvider(recordCode)

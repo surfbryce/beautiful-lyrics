@@ -578,3 +578,21 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen) .NoLyrics
 		visibility: hidden;
 	}
 }
+
+@property --Test {
+	syntax: "<number>";
+	initial-value: 0;
+	inherits: false;
+}
+
+.simplebar-content-wrapper::-webkit-scrollbar {
+	--Test: 0;
+}
+
+.simplebar-content-wrapper::-webkit-scrollbar:active {
+	--Test: 1;
+}
+
+.simplebar-content-wrapper {
+	opacity: var(--Test);
+}

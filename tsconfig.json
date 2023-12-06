@@ -1,16 +1,25 @@
 {
-  "compilerOptions": {
-    "target": "ES2020",
-    "jsx": "react",
-    "module": "commonjs",
-    "resolveJsonModule": true,
-    "outDir": "dist",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "skipLibCheck": true
-  },
-  "include": [
-    "./src/**/*.*"
-  ]
+	"compilerOptions": {
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+
+		"lib": [
+			"ESNext",
+			"DOM"
+		],
+		"skipLibCheck": true,
+
+		"types": [
+			"bun-types", // add Bun global
+			"web"
+		],
+		"downlevelIteration": true,
+
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"esModuleInterop": true,
+		"target": "ESNext",
+
+		"outDir": "dist",
+	}
 }
