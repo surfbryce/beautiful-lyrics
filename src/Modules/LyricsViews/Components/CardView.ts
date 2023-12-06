@@ -11,7 +11,7 @@ import { SpotifyHistory } from "../../../Services/Session"
 
 // Templates
 const CardContainer = `<div id="BeautifulLyrics-CardView" class="main-nowPlayingView-section main-nowPlayingView-sectionHeaderSpacing" style=""><div id="Header" class="Type__TypeElement-sc-goli3j-0 TypeElement-balladBold-textBase-type main-nowPlayingView-sectionHeader main-nowPlayingView-lyricsTitle" data-encore-id="type">Lyrics</div></div>`
-const ShowLyricsButton = `<button id="ShowLyrics" class="Button-sc-y0gtbx-0 Button-sm-buttonSecondary-useBrowserDefaultFocusStyle Button-sm-buttonSecondary-isUsingKeyboard-useBrowserDefaultFocusStyle ButtonSecondary___StyledEncoreButtonSecondary-sc-1nxt2rd-0 StyledEncoreButtonSecondary-sm" data-encore-id="buttonSecondary">Show lyrics</button>`
+const ShowLyricsButton = `<button id="ShowLyrics" class="Button-sc-y0gtbx-0 Button-small-buttonSecondary-isUsingKeyboard-useBrowserDefaultFocusStyle ButtonSecondary___StyledEncoreButtonSecondary-sc-1nxt2rd-0 StyledEncoreButtonSecondary-sm">Show lyrics</button>`
 const RomanizationIcons = {
 	Disabled: `
 		<svg role="img" height="17" width="17" aria-hidden="true" viewBox="0 0 125.45 131.07" data-encore-id="icon" class="Svg-sc-ytk21e-0 Svg-img-16-icon">
