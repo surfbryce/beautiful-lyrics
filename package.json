@@ -3,8 +3,9 @@
   "version": "3.2.1",
   "private": true,
   "scripts": {
-    "start": "bun bundle.ts & spicetify config extensions beautiful-lyrics.js & spicetify apply enable-devtools",
-	"production": "bun bundle.ts --production & spicetify config extensions beautiful-lyrics.js & spicetify apply enable-devtools"
+    "build": "spicetify-creator --out=dist --minify",
+    "start": "spicetify-creator & spicetify config extensions beautiful-lyrics.js & spicetify apply enable-devtools",
+    "production": "spicetify config extensions beautiful-lyrics.js- & spicetify apply enable-devtools"
   },
   "license": "MIT",
   "devDependencies": {
@@ -13,14 +14,6 @@
     "@types/kuromoji": "^0.1.1",
     "@types/react": "^18.2.6",
     "@types/react-dom": "^18.2.4",
-    "@types/web": "^0.0.125",
-    "bun-types": "^1.0.15",
-    "postcss": "^8.4.32",
-    "sass": "^1.69.5",
-	"autoprefixer": "latest",
-    "browserslist": "latest",
-    "caniuse-lite": "^1.0.30001566",
-	"front-matter": "^4.0.2",
     "spicetify-creator": "^1.0.13"
   },
   "dependencies": {

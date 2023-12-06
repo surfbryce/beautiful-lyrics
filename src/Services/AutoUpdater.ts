@@ -73,10 +73,8 @@ const ApplyUpdate = (source: string) => {
 	// First destroy our GlobalMaid
 	GlobalMaid.Destroy()
 
-	// Find our existing stuff
-	for(const element of document.querySelectorAll("#Beautiful-Lyrics")) {
-		element.remove()
-	}
+	// Find our existing-style and remove it
+	document.querySelector("#beautifulDlyrics")?.remove()
 
 	// Now create our new script
 	const newScript = document.createElement("script")
