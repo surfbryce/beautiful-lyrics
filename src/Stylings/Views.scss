@@ -150,11 +150,15 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage) {
 
 /* Playbar Icon */
 button:has(.LyricsPageIcon) {
-	margin-right: 6px;
+	margin-right: 2px;
+
+	&:after {
+		transform: translateX(-370%) translateY(-40%) !important;
+	}
 }
 
 .LyricsPageIcon {
-	transform: translateY(-2px);
+	transform: translateY(2px);
 	fill: currentColor;
 }
 
