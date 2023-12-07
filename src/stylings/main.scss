@@ -1,4 +1,12 @@
 .Root__right-sidebar:has(.main-nowPlayingView-section) {
+	--background-tint: color-mix(
+		in srgb,
+		rgb(var(--spice-rgb-selected-row)) 7%,
+		transparent
+	);
+	--spice-card: var(--background-tint);
+	--background-tinted-base: var(--background-tint);
+
 	.main-nowPlayingView-content {
 		background: transparent;
 	}
