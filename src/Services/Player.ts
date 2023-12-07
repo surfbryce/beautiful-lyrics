@@ -49,7 +49,7 @@ class Player {
 
 					// Determine if we even have a song
 					const track = SpotifyPlayer.data?.item
-					if (track === undefined) {
+					if ((track === undefined) || (track.type !== "track")) {
 						// Make sure we don't have our information any longer
 						this.Song = undefined
 						this.SongJustChanged = undefined
