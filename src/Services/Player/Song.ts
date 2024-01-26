@@ -506,7 +506,6 @@ class Song implements Giveable {
 												this.GetLyricsFromSpotify(recordCode, trackInformation.popularity)
 												.then(
 													(spotifyLyric) => {
-														debugger
 														if (spotifyLyric === undefined) {
 															return [backendLyric, false]
 														} else {
