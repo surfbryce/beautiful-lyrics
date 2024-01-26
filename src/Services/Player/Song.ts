@@ -404,9 +404,14 @@ class Song implements Giveable {
 			.then(
 				(response) => {
 					if (response.ok === false) {
-						throw `Failed to load Lyrics for Track (${
+						// throw `Failed to load Lyrics for Track (${
+						// 	this.Id
+						// }), Error: ${response.status} ${response.statusText}`
+						console.error(`Failed to load Lyrics for Track (${
 							this.Id
-						}), Error: ${response.status} ${response.statusText}`
+						}), Error: ${response.status} ${response.statusText}`)
+
+						return ''
 					}
 
 					return response.text()
@@ -501,6 +506,7 @@ class Song implements Giveable {
 												this.GetLyricsFromSpotify(recordCode, trackInformation.popularity)
 												.then(
 													(spotifyLyric) => {
+														debugger
 														if (spotifyLyric === undefined) {
 															return [backendLyric, false]
 														} else {
