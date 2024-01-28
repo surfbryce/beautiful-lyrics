@@ -395,6 +395,10 @@ class Song implements Giveable {
 					return undefined
 				}
 			)
+			.catch((e) => {
+				console.warn(e)
+				return undefined
+			})
 		)
 	}
 	
@@ -421,6 +425,10 @@ class Song implements Giveable {
 					}
 				}
 			)
+			.catch((e) => {
+				console.warn(e)
+				return undefined
+			})
 		)
 	}
 
