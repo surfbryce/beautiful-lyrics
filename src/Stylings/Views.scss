@@ -407,7 +407,7 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 			position: relative;
 			margin: unset;
 			left: -0.25vh;
-			top: 1.5vh;
+			 top: 1.5vh;
 
 			justify-items: center;
 			align-items: center;
@@ -439,6 +439,11 @@ body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
 					margin: auto;
 				}
 			}
+		}
+		
+		.main-nowPlayingWidget-trackInfo+button
+		{
+			margin-top: 1.5vh!important;
 		}
 
 		.control-button-heart {
