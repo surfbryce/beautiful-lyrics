@@ -56,7 +56,6 @@ type HistoryLocation = {
 const SpicetifyLoadedSignal = new Signal<() => void>()
 let AllSpicetifyLoaded = false
 let SpotifyPlayer = Spicetify.Player
-let SpotifyFetch = Spicetify.CosmosAsync
 let SpotifyShowNotification = Spicetify.showNotification
 let SpotifyPlatform = Spicetify.Platform
 let SpotifyHistory: {
@@ -69,20 +68,21 @@ let SpotifyHistory: {
 	entries: HistoryLocation[];
 } = SpotifyPlatform?.History
 let SpotifyPlaybar = Spicetify.Playbar
+let SpotifySession = ((SpotifyPlatform !== undefined) ? Spicetify.Platform.Session : undefined)
 {
 	const WaitForSpicetify = () => {
 		// Update our variables
 		SpotifyPlayer = Spicetify.Player
-		SpotifyFetch = Spicetify.CosmosAsync
 		SpotifyShowNotification = Spicetify.showNotification
 		SpotifyPlatform = Spicetify.Platform
 		SpotifyHistory = SpotifyPlatform?.History
 		SpotifyPlaybar = Spicetify.Playbar
+		SpotifySession = ((SpotifyPlatform !== undefined) ? Spicetify.Platform.Session : undefined)
 
 		// Check if we have them all yet
 		if (
 			(SpotifyPlayer === undefined)
-			|| (SpotifyFetch === undefined)
+			|| (SpotifySession === undefined)
 			|| (SpotifyShowNotification === undefined)
 			|| (SpotifyPlatform === undefined)
 			|| (SpotifyHistory === undefined)
@@ -99,7 +99,21 @@ let SpotifyPlaybar = Spicetify.Playbar
 	WaitForSpicetify()
 }
 
+// Custom fetch function
+export const SpotifyFetch = (url: string) => {
+	return fetch(
+		url,
+		{
+			headers: {
+				"Authorization": `Bearer ${SpotifySession.accessToken}`,
+				"Spotify-App-Version": SpotifyPlatform.version,
+				"App-Platform": SpotifyPlatform.PlatformData.app_platform
+			}
+		}
+	)
+}
+
 // Exports
 export const SpicetifyLoaded = SpicetifyLoadedSignal.GetEvent()
 export const IsSpicetifyLoaded = () => AllSpicetifyLoaded
-export {GlobalMaid, SpotifyPlayer, SpotifyFetch, SpotifyHistory, SpotifyPlaybar, Script, IsDevelopment, HistoryLocation}
+export {GlobalMaid, SpotifyPlayer, SpotifyHistory, SpotifyPlaybar, Script, IsDevelopment, HistoryLocation}

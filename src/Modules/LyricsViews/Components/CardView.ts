@@ -2,7 +2,7 @@
 import { Maid, Giveable } from "../../../../../../Packages/Maid"
 
 // Modules
-import { ParsedLyrics } from "../../../Services/Player/LyricsParser"
+import { ParsedLyrics } from "../../../Services/Player/LyricsUtilities"
 import { Song } from "../../../Services/Player/Song"
 import LyricsRenderer from "../../LyricsRenderer"
 import { CreateElement, ToggleLanguageRomanization, IsLanguageRomanized, LanguageRomanizationChanged } from "../SharedMethods"

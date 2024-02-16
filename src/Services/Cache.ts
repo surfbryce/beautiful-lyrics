@@ -1,6 +1,12 @@
+// Debug Constant
+const DoNotCache = true
+
+// Modules
+import { IsDevelopment } from "./Session"
+
 // Types
 import { SpotifyTrackInformation } from "./Player/Song"
-import { ParsedLyrics, LyricsResult, RomanizedLanguage } from "./Player/LyricsParser"
+import { ProviderLyrics, TransformedLyrics, RomanizedLanguage } from "./Player/LyricsUtilities"
 
 // Cache Types
 type ExpirationSettings = {
@@ -16,9 +22,9 @@ type ExpireItem<C> = {
 }
 
 type ExpireCachesItemTypes = {
-    TrackInformation: SpotifyTrackInformation;
-	ProviderLyrics: (LyricsResult | false); // This is for storing lyrics from the provider
-    ISRCLyrics: (ParsedLyrics | false); // This is for storing the processed lyrics
+	TrackInformation: SpotifyTrackInformation;
+	ProviderLyrics: (ProviderLyrics | false); // This is for storing lyrics from the provider
+	TransformedLyrics: (TransformedLyrics | false); // This is for storing the transformed lyrics
 }
 type ExpireCacheName = (keyof ExpireCachesItemTypes)
 type Store = {
@@ -52,8 +58,8 @@ const StoreTemplates: Store = {
 // Define StoreItem Versions
 const ExpireCacheStoreItemVersions: Map<ExpireCacheName, number> = new Map()
 ExpireCacheStoreItemVersions.set("TrackInformation", 2)
-ExpireCacheStoreItemVersions.set("ProviderLyrics", 1)
-ExpireCacheStoreItemVersions.set("ISRCLyrics", 9)
+ExpireCacheStoreItemVersions.set("ProviderLyrics", 2)
+ExpireCacheStoreItemVersions.set("TransformedLyrics", 1)
 
 const StoreItemVersions: Map<StoreItemName, number> = new Map()
 StoreItemVersions.set("Analytics", 1)
@@ -209,9 +215,9 @@ class CacheManager {
 		expireCacheName: N,
 		itemName: string
 	): Promise<ExpireCachesItemTypes[N] | undefined> {
-		/*if (expireCacheName === "ProviderLyrics" || expireCacheName === "ISRCLyrics") {
+		if (DoNotCache && IsDevelopment) {
 			return Promise.resolve(undefined)
-		}*/
+		}
 
 		return (
 			this.GetFromCacheAPI<ExpireItem<ExpireCachesItemTypes[N]>>(`ExpireCache/${expireCacheName}`, itemName)

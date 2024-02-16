@@ -2,7 +2,7 @@
 import { Maid, Giveable } from '../../../../../../Packages/Maid'
 
 // Imported Types
-import { LyricMetadata } from '../../../Services/Player/LyricsParser'
+import { LyricMetadata } from '../../../Services/Player/LyricsUtilities'
 import { BaseVocals } from '../Types'
 
 // Class

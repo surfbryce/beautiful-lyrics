@@ -5,7 +5,7 @@ import { Signal } from "../../../../../Packages/Signal"
 import { Cache } from "../../Services/Cache"
 
 // Types
-import { RomanizedLanguage } from "../../Services/Player/LyricsParser"
+import { RomanizedLanguage } from "../../Services/Player/LyricsUtilities"
 
 // Shared Signals
 const LanguageRomanizationChangedSignal = new Signal<(language: string, isRomanized: boolean) => void>()

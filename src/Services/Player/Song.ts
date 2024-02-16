@@ -6,7 +6,10 @@ import { OnNextFrame, Timeout } from "../../../../../Packages/Scheduler"
 // Modules
 import { SpotifyPlayer, SpotifyFetch } from "../Session"
 import { Cache, ExpirationSettings } from '../Cache'
-import { ParseLyrics, ParsedLyrics, LyricsResult } from "./LyricsParser"
+import {
+	ParseSpotifyLyrics, TransformProviderLyrics,
+	ProviderLyrics, TransformedLyrics
+} from "./LyricsUtilities"
 import Spotify from "./Spotify"
 
 // Types
@@ -136,7 +139,7 @@ type Details = {
 	ISRC: string;
 
 	// Dynamic
-	Lyrics?: ParsedLyrics;
+	Lyrics?: TransformedLyrics;
 }
 
 type SpotifyLyric = {
@@ -144,14 +147,6 @@ type SpotifyLyric = {
 	Content: Spotify.LyricLines;
 }
 type SpotifyLyrics = Map<string, SpotifyLyric>
-
-type BackendLyric = (
-	{
-		Source: "AppleMusic";
-		IsSynced: boolean;
-		Content: string;
-	}
-)
 
 // Behavior Constants
 const TrackInformationExpiration: ExpirationSettings = {
@@ -162,7 +157,7 @@ const ProviderLyricsExpiration: ExpirationSettings = {
 	Duration: 1,
 	Unit: "Months"
 }
-const ParsedLyricsExpiration: ExpirationSettings = {
+const TransformedLyricsExpiration: ExpirationSettings = {
 	Duration: 1,
 	Unit: "Months"
 }
@@ -301,10 +296,8 @@ class Song implements Giveable {
 	// Private Detail methods
 	private GetLyricsFromSpotify(recordCode: string, ourPopularity: number) {
 		return (
-			SpotifyFetch.request(
-				"GET",
-				`https://api.spotify.com/v1/search?q=isrc:${recordCode}&type=track`
-			)
+			SpotifyFetch(`https://api.spotify.com/v1/search?q=isrc:${recordCode}&type=track`)
+			// Uncaught on purpose, should never fail
 			.catch(error => {console.warn(error); throw error})
 			.then(
 				(response) => {
@@ -312,7 +305,7 @@ class Song implements Giveable {
 						throw `Failed to get Requests for RecordCode (${recordCode})`
 					}
 	
-					return response.body as Spotify.RecordReleases
+					return response.json() as Promise<Spotify.RecordReleases>
 				}
 			)
 			.then(
@@ -348,13 +341,14 @@ class Song implements Giveable {
 	
 					for(const releaseId of releaseIds) {
 						lyricsPromises.push(
-							SpotifyFetch.request(
-								"GET",
-								`https://spclient.wg.spotify.com/color-lyrics/v2/track/${releaseId}?format=json&vocalRemoval=false`
+							SpotifyFetch(
+								`https://spclient.wg.spotify.com/color-lyrics/v2/track/${
+									releaseId
+								}?format=json&vocalRemoval=false&market=from_token`
 							)
 							.catch(error => {console.warn(error); return undefined})
 							.then(
-								(response?: Spicetify.CosmosAsync.Response) => {
+								response => {
 									if (response === undefined) {
 										return // Also means no lyrics
 									}
@@ -363,14 +357,19 @@ class Song implements Giveable {
 										return
 									}
 
-									const retrievedLyrics = response.body as Spotify.RetrievedLyrics
-	
-									lyrics.set(
-										releaseId,
-										{
-											Type: retrievedLyrics.lyrics.syncType,
-											Content: retrievedLyrics.lyrics.lines
-										}
+									return (
+										response.json()
+										.then(
+											(retrievedLyrics: Spotify.RetrievedLyrics) => {
+												lyrics.set(
+													releaseId,
+													{
+														Type: retrievedLyrics.lyrics.syncType,
+														Content: retrievedLyrics.lyrics.lines
+													}
+												)
+											}
+										)
 									)
 								}
 							)
@@ -398,7 +397,7 @@ class Song implements Giveable {
 		)
 	}
 	
-	private GetLyricsFromBackendProvider(recordCode: string) {
+	private GetLyricsFromBackendProvider(recordCode: string): Promise<ProviderLyrics | undefined> {
 		return (
 			fetch(`https://beautiful-lyrics.socalifornian.live/lyrics/${recordCode}`)
 			.then(
@@ -417,7 +416,7 @@ class Song implements Giveable {
 					if (text.length === 0) {
 						return undefined
 					} else {
-						return (JSON.parse(text) as BackendLyric)
+						return JSON.parse(text)
 					}
 				}
 			)
@@ -443,20 +442,20 @@ class Song implements Giveable {
 					trackInformation => {
 						if (trackInformation === undefined) {
 							return (
-								SpotifyFetch.request(
-									"GET",
-									`https://api.spotify.com/v1/tracks/${this.Id}`
-								) // Uncaught on purpose - it should rarely ever fail
+								SpotifyFetch(`https://api.spotify.com/v1/tracks/${this.Id}`)
+								// Uncaught on purpose - it should rarely ever fail
 								.catch(error => {console.warn(error); throw error})
 								.then(
-									(response) => {
+									response => {
 										if ((response.status < 200) || (response.status > 299)) {
 											throw `Failed to load Track (${this.Id}) Information`
 										}
-			
-										// Extract our information
-										const trackInformation = (response.body as SpotifyTrackInformation)
-			
+
+										return response.json()
+									}
+								)
+								.then(
+									(trackInformation: SpotifyTrackInformation) => {
 										// Save our information
 										Cache.SetExpireCacheItem(
 											"TrackInformation",
@@ -475,7 +474,7 @@ class Song implements Giveable {
 					}
 				)
 				.then(
-					(trackInformation): Promise<[SpotifyTrackInformation, (LyricsResult | false | undefined)]> => {
+					(trackInformation): Promise<[SpotifyTrackInformation, (ProviderLyrics | false | undefined)]> => {
 						return (
 							Cache.GetFromExpireCache(
 								"ProviderLyrics",
@@ -486,53 +485,30 @@ class Song implements Giveable {
 					}
 				)
 				.then(
-					([trackInformation, storedProviderLyrics]): Promise<
-						[SpotifyTrackInformation, (LyricsResult | false)]
-					> => {
+					([trackInformation, storedProviderLyrics]): Promise<[SpotifyTrackInformation, (ProviderLyrics | false)]> => {
 						// Now determine if we have any provider lyrics at all
 						const recordCode = trackInformation.external_ids.isrc
 						if (storedProviderLyrics === undefined) {
 							return (
 								this.GetLyricsFromBackendProvider(recordCode)
 								.then(
-									(backendLyric): Promise<[(BackendLyric | SpotifyLyric | undefined), boolean]> => {
-										if ((backendLyric === undefined) || (backendLyric.IsSynced === false)) {
+									(backendLyric): Promise<ProviderLyrics | undefined> => {
+										if ((backendLyric === undefined) || (backendLyric.Type === "Static")) {
 											return (
 												this.GetLyricsFromSpotify(recordCode, trackInformation.popularity)
 												.then(
 													(spotifyLyric) => {
 														if (spotifyLyric === undefined) {
-															return [backendLyric, false]
+															return backendLyric
 														} else {
-															return [spotifyLyric, true]
+															return ParseSpotifyLyrics(spotifyLyric.Content)
 														}
 													}
 												)
 											)
 										} else {
-											return Promise.resolve([backendLyric, false])
+											return Promise.resolve(backendLyric)
 										}
-									}
-								)
-								.then(
-									([lyric, isSpotifyLyric]) => {
-										// If we don't have either lyric then we clearly dont have any
-										if ((lyric === undefined)) {
-											return undefined
-										}
-	
-										// Determine our format
-										return (
-											(isSpotifyLyric)
-											? {
-												Source: "Spotify",
-												Content: (lyric as SpotifyLyric).Content
-											}
-											: {
-												Source: "AppleMusic",
-												Content: (lyric as BackendLyric).Content
-											}
-										) as LyricsResult
 									}
 								)
 								.then(
@@ -559,54 +535,54 @@ class Song implements Giveable {
 				)
 				.then(
 					([trackInformation, storedProviderLyrics]): Promise<
-						[SpotifyTrackInformation, (LyricsResult | false), (ParsedLyrics | false | undefined)]
+						[SpotifyTrackInformation, (ProviderLyrics | false), (TransformedLyrics | false | undefined)]
 					> => {
 						return (
 							Cache.GetFromExpireCache(
-								"ISRCLyrics",
+								"TransformedLyrics",
 								trackInformation.external_ids.isrc
 							)
-							.then(storedParsedLyrics => [trackInformation, storedProviderLyrics, storedParsedLyrics])
+							.then(storedTransformedLyrics => [trackInformation, storedProviderLyrics, storedTransformedLyrics])
 						)
 					}
 				)
 				.then(
-					([trackInformation, storedProviderLyrics, storedParsedLyrics]): Promise<
-						[SpotifyTrackInformation, (ParsedLyrics | undefined)]
+					([trackInformation, storedProviderLyrics, storedTransformedLyrics]): Promise<
+						[SpotifyTrackInformation, (TransformedLyrics | undefined)]
 					> => {
-						// If we do not have anything stored for our parsed-lyrics then we need to generate it
-						if (storedParsedLyrics === undefined) {
+						// If we do not have anything stored for our transformed-lyrics then we need to generate it
+						if (storedTransformedLyrics === undefined) {
 							return (
 								(
 									(storedProviderLyrics === false) ? Promise.resolve<false>(false)
-									: ParseLyrics(storedProviderLyrics)
+									: TransformProviderLyrics(storedProviderLyrics)
 								)
 								.then(
-									parsedLyrics => {
+									transformedLyrics => {
 										// Save our information
 										Cache.SetExpireCacheItem(
-											"ISRCLyrics",
-											trackInformation.external_ids.isrc, parsedLyrics,
-											ParsedLyricsExpiration
+											"TransformedLyrics",
+											trackInformation.external_ids.isrc, transformedLyrics,
+											TransformedLyricsExpiration
 										)
 
 										// Now return our information
-										return Promise.resolve([trackInformation, parsedLyrics || undefined])
+										return Promise.resolve([trackInformation, transformedLyrics || undefined])
 									}
 								)
 							)
 						} else {
-							return Promise.resolve([trackInformation, storedParsedLyrics || undefined])
+							return Promise.resolve([trackInformation, storedTransformedLyrics || undefined])
 						}
 					}
 				)
 				.then(
-					([trackInformation, parsedLyrics]) => {
+					([trackInformation, transformedLyrics]) => {
 						// Set our details
 						this.Details = {
 							ISRC: trackInformation.external_ids.isrc,
 		
-							Lyrics: parsedLyrics
+							Lyrics: transformedLyrics
 						}
 		
 						// Now mark that our details are loaded and fire our event

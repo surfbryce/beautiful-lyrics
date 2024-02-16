@@ -9,7 +9,7 @@ import { SpotifyHistory, SpotifyPlaybar } from "../../../Services/Session"
 import { Cache } from "../../../Services/Cache"
 
 // Types
-import { ParsedLyrics } from "../../../Services/Player/LyricsParser"
+import { ParsedLyrics } from "../../../Services/Player/LyricsUtilities"
 
 // Templates
 const Container = `<div class="BeautifulLyricsPage"><div class="RootContainer"></div></div>`
