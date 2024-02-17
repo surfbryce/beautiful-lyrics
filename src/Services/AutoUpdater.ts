@@ -5,7 +5,7 @@ import {Timeout} from '../../../../Packages/Scheduler'
 import {version as PackageVersion} from '../../package.json'
 
 // Services
-import {GlobalMaid, IsDevelopment, Script} from './Session'
+import {GlobalMaid, IsDevelopment, Script, ShowNotification} from './Session'
 
 // Behavior Constants 
 const JustUpdatedNotificationLifetime = 7.5 // Measured in Seconds
@@ -116,19 +116,20 @@ const CheckForUpdate = async () => {
 			&& ((cachedVersion.Major > 2) || ((cachedVersion.Major == 2) && (cachedVersion.Minor >= 4)))
 		) {
 			// Now send out the notifcation
-			Spicetify.showNotification(
+			ShowNotification(
 				`<h3>Beautiful Lyrics Updated!</h3>
 				<h4 style = 'margin-top: 4px; margin-bottom: 4px; font-weight: normal;'>No need to re-install - it's already running!</h4>
 				<span style = 'opacity: 0.75;'>Version ${ExtensionVersion.Text} -> ${cachedVersion.Text}</span>`,
 				(
-					(
+					(versionDistance.Major > 0) ? "success"
+					: (
 						(versionDistance.Major < 0)
 						|| (versionDistance.Minor < 0)
 						|| (versionDistance.Patch < 0)
-					)
-					|| (versionDistance.Major > 0)
+					) ? "warning"
+					: "info"
 				),
-				(JustUpdatedNotificationLifetime * 1000)
+				JustUpdatedNotificationLifetime
 			)
 
 			// Obviously we should return here

@@ -68,7 +68,7 @@ let SpotifyHistory: {
 	entries: HistoryLocation[];
 } = SpotifyPlatform?.History
 let SpotifyPlaybar = Spicetify.Playbar
-let SpotifySession = ((SpotifyPlatform !== undefined) ? Spicetify.Platform.Session : undefined)
+let SpotifySnackbar = (Spicetify as any).Snackbar
 {
 	const WaitForSpicetify = () => {
 		// Update our variables
@@ -77,16 +77,16 @@ let SpotifySession = ((SpotifyPlatform !== undefined) ? Spicetify.Platform.Sessi
 		SpotifyPlatform = Spicetify.Platform
 		SpotifyHistory = SpotifyPlatform?.History
 		SpotifyPlaybar = Spicetify.Playbar
-		SpotifySession = ((SpotifyPlatform !== undefined) ? Spicetify.Platform.Session : undefined)
+		SpotifySnackbar = (Spicetify as any).Snackbar
 
 		// Check if we have them all yet
 		if (
 			(SpotifyPlayer === undefined)
-			|| (SpotifySession === undefined)
 			|| (SpotifyShowNotification === undefined)
 			|| (SpotifyPlatform === undefined)
 			|| (SpotifyHistory === undefined)
 			|| (SpotifyPlaybar === undefined)
+			|| (SpotifySnackbar === undefined)
 		) {
 			GlobalMaid.Give(Timeout(0, WaitForSpicetify), "WaitForSpicetify")
 		} else {
@@ -100,15 +100,91 @@ let SpotifySession = ((SpotifyPlatform !== undefined) ? Spicetify.Platform.Sessi
 }
 
 // Custom fetch function
-export const SpotifyFetch = (url: string) => {
-	return fetch(
-		url,
-		{
-			headers: {
-				"Authorization": `Bearer ${SpotifySession.accessToken}`,
-				"Spotify-App-Version": SpotifyPlatform.version,
-				"App-Platform": SpotifyPlatform.PlatformData.app_platform
+type TokenProviderResponse = {accessToken: string, accessTokenExpirationTimestampMs: number}
+let tokenProviderResponse: (TokenProviderResponse | undefined)
+let accessTokenPromise: Promise<string> | undefined
+const NeedsToRefresh = (tokenProviderResponse?: TokenProviderResponse): Promise<boolean> => {
+	if (tokenProviderResponse === undefined) {
+		return Promise.resolve(true)
+	}
+
+	// Otherwise, check if we have to wait at all
+	const timeUntilRefresh = ((tokenProviderResponse.accessTokenExpirationTimestampMs - Date.now()) / 1000)
+	if (timeUntilRefresh > 2) {
+		return Promise.resolve(false)
+	} else if (timeUntilRefresh > 0) {
+		const initialPromise = (
+			new Promise(resolve => GlobalMaid.Give(Timeout((timeUntilRefresh + 0.5), resolve)))
+			.then(_ => true)
+		)
+		accessTokenPromise = (initialPromise as any)
+		return initialPromise
+	}
+
+	// Otherwise, we need to refresh
+	return Promise.resolve(true)
+}
+export const GetAccessToken = (): Promise<string> => {
+	if (accessTokenPromise !== undefined) {
+		return accessTokenPromise
+	}
+
+	return (
+		NeedsToRefresh(tokenProviderResponse)
+		.then(
+			needsToRefresh => {
+				if (needsToRefresh) {
+					return (
+						SpotifyPlatform.AuthorizationAPI._tokenProvider()
+						.then(
+							(result: TokenProviderResponse) => {
+								tokenProviderResponse = result, accessTokenPromise = undefined
+								return GetAccessToken() // Re-run this to make sure we don't need to refresh again
+							}
+						)
+					)
+				}
+
+				return Promise.resolve(tokenProviderResponse!.accessToken)
 			}
+		)
+	)
+}
+
+export const SpotifyFetch = (url: string) => {
+	return (
+		GetAccessToken()
+		.then(
+			accessToken => fetch(
+				url,
+				{
+					headers: {
+						"Authorization": `Bearer ${accessToken}`,
+						"Spotify-App-Version": SpotifyPlatform.version,
+						"App-Platform": SpotifyPlatform.PlatformData.app_platform
+					}
+				}
+			)
+		)
+	)
+}
+
+// Custom notification function
+export const ShowNotification = (
+	html: string, variant: ("info" | "success" | "warning" | "error" | "default"),
+	hideAfter: number
+) => {
+	SpotifySnackbar.enqueueSnackbar(
+		Spicetify.React.createElement(
+			"div",
+			{
+				dangerouslySetInnerHTML: {
+					__html: html.trim()
+				}
+			}
+		), {
+			variant: variant,
+			autoHideDuration: (hideAfter * 1000)
 		}
 	)
 }
