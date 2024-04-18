@@ -4,8 +4,8 @@ import "../../../node_modules/simplebar-core/dist/simplebar.css"
 import SimpleBar from "simplebar"
 
 // Packages
-import { Maid, Giveable } from "../../../../../Packages/Maid"
-import { Timeout, OnNextFrame } from "../../../../../Packages/Scheduler"
+import { Maid, Giveable } from "$spicetify-packages/Maid"
+import { Timeout, OnNextFrame } from "$spicetify-packages/Scheduler"
 
 // Imported Types
 import { BaseVocals, SyncedVocals } from "./Types"

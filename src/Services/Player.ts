@@ -1,6 +1,6 @@
 // Packages
-import { Signal } from "../../../../Packages/Signal"
-import { Maid } from "../../../../Packages/Maid"
+import { Signal } from "$spicetify-packages/Signal"
+import { Maid } from "$spicetify-packages/Maid"
 
 // Modules
 import { GlobalMaid, SpotifyPlayer } from "./Session"

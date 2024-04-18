@@ -1,5 +1,5 @@
 // Packages
-import { Signal } from "../../../../../Packages/Signal"
+import { Signal } from "$spicetify-packages/Signal"
 
 // Modules
 import { Cache } from "../../Services/Cache"

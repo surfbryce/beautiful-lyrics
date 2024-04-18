@@ -1,5 +1,5 @@
 // Packages
-import { Maid, Giveable } from "../../../../../../Packages/Maid"
+import { Maid, Giveable } from "$spicetify-packages/Maid"
 
 // Modules
 import { Song } from "../../../Services/Player/Song"

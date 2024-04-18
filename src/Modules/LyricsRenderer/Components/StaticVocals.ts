@@ -1,5 +1,5 @@
 // Packages
-import { Maid, Giveable } from '../../../../../../Packages/Maid'
+import { Maid, Giveable } from '$spicetify-packages/Maid'
 
 // Imported Types
 import { LyricMetadata } from '../../../Services/Player/LyricsUtilities'

@@ -1,5 +1,5 @@
 // Packages
-import {Timeout} from '../../../../Packages/Scheduler'
+import {Timeout} from '$spicetify-packages/Scheduler'
 
 // Project Details
 import {version as PackageVersion} from '../../package.json'

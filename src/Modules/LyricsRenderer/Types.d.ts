@@ -1,6 +1,6 @@
 // Packages
-import Spring from "../../../../../Packages/Spring"
-import { Event } from "../../../../../Packages/Signal"
+import Spring from "$spicetify-packages/Spring"
+import { Event } from "$spicetify-packages/Signal"
 
 // General Types
 type TimeValue = {

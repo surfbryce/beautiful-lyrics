@@ -1,6 +1,6 @@
 // Packages
-import { Maid, Giveable } from "../../../../Packages/Maid"
-import { OnNextFrame } from "../../../../Packages/Scheduler"
+import { Maid, Giveable } from "$spicetify-packages/Maid"
+import { OnNextFrame } from "$spicetify-packages/Scheduler"
 
 // Modules
 import { LyricsScroller, VocalGroups } from "./LyricsRenderer/LyricsScroller"

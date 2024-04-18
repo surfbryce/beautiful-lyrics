@@ -8,7 +8,11 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": "./",
+    "paths": {
+      "$spicetify-packages/*": ["spicetify-packages/*"]
+    }
   },
   "include": [
     "./src/**/*.*"

@@ -1,7 +1,7 @@
 // Packages
-import { Maid, Giveable } from "../../../../../../Packages/Maid"
-import { Signal } from "../../../../../../Packages/Signal"
-import Spring from "../../../../../../Packages/Spring"
+import { Maid, Giveable } from "$spicetify-packages/Maid"
+import { Signal } from "$spicetify-packages/Signal"
+import Spring from "$spicetify-packages/Spring"
 
 // Modules
 import { GetSpline, Clamp } from "../SharedMethods"

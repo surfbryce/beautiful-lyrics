@@ -1,6 +1,6 @@
 // Packages
-import { Maid } from '../../../Packages/Maid'
-import { Timeout } from '../../../Packages/Scheduler'
+import { Maid } from '$spicetify-packages/Maid'
+import { Timeout } from '$spicetify-packages/Scheduler'
 
 // Initial Services
 import { GlobalMaid, IsSpicetifyLoaded, SpicetifyLoaded } from './Services/Session'

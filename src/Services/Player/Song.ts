@@ -1,7 +1,7 @@
 // Packages
-import { Signal } from "../../../../../Packages/Signal"
-import { Maid, Giveable } from "../../../../../Packages/Maid"
-import { OnNextFrame, Timeout } from "../../../../../Packages/Scheduler"
+import { Signal } from "$spicetify-packages/Signal"
+import { Maid, Giveable } from "$spicetify-packages/Maid"
+import { OnNextFrame, Timeout } from "$spicetify-packages/Scheduler"
 
 // Modules
 import { SpotifyPlayer, SpotifyFetch } from "../Session"
