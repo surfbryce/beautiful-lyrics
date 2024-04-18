@@ -24,6 +24,7 @@
     "d3-ease": "^3.0.1",
     "franc": "^6.1.0",
     "pinyin": "^3.0.0-alpha.5",
-    "simplebar": "latest"
+    "simplebar": "latest",
+    "simplebar-core": "^1.2.4"
   }
 }
