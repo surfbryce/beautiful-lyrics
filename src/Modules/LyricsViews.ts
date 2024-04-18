@@ -268,7 +268,7 @@ export default () => {
 
 			// Determine if we have our main-page yet
 			if (mainPage === undefined) {
-				const potentialMainPage = document.querySelector<HTMLDivElement>(".main-view-container .os-content")
+				const potentialMainPage = document.querySelector<HTMLDivElement>(".main-view-container")
 
 				if (potentialMainPage !== null) {
 					mainPage = potentialMainPage
