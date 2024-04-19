@@ -27,7 +27,7 @@ let CheckForLiveBackgrounds: (() => void)
 	// Define our queries for each background-container
 	const BackgroundQuerys: Map<CoverArtContainer, string> = new Map()
 	BackgroundQuerys.set('Page', '.BeautifulLyricsPage')
-	BackgroundQuerys.set('SidePanel', '.Root__right-sidebar:has(.main-nowPlayingView-section) .os-padding')
+	BackgroundQuerys.set('SidePanel', '#Desktop_PanelContainer_Id')
 
 	// Define our images to create
 	const BackgroundSizeScales = [2, 3]
