@@ -1,0 +1,1330 @@
+// External Support
+body:has(.BeautifulLyricsPage) {
+	.main-topBar-background {
+		opacity: 0 !important;
+	}
+}
+
+// Shared Styles
+.ViewControls {
+	#Romanize {
+		svg.Enable {
+			height: calc(var(--ViewControlSize) * 0.475);
+			width: auto;
+			aspect-ratio: 1;
+		}
+
+		svg.Disable {
+			height: calc(var(--ViewControlSize) * 0.4);
+			width: auto;
+			aspect-ratio: 1;
+		}
+	}
+
+	#Close svg {
+		height: calc(var(--ViewControlSize) * 0.4);
+		width: auto;
+		aspect-ratio: 1;
+	}
+}
+
+.BeautifulLyricsPage {
+	width: 100cqw;
+	height: 100cqh;
+
+	top: 0;
+	left: 0;
+
+	position: absolute !important;
+
+	overflow: visible;
+
+	&:hover {
+		overflow: hidden !important;
+		margin: 0 !important;
+	}
+
+	container-type: size;
+
+	.Content {
+		--ContentSidePadding: 0.5cqw;
+
+		display: block;
+		width: calc(100cqw - (var(--ContentSidePadding) * 2));
+		height: 100cqh;
+		container-type: size;
+
+		position: absolute;
+		top: 0;
+		left: var(--ContentSidePadding);
+
+		z-index: 100;
+
+		// Lyrics
+		.LyricsScrollContainer {
+			mask-image: linear-gradient(
+				180deg,
+				transparent 0,
+				transparent 16px,
+				var(--spice-sidebar) 24px,
+				var(--spice-sidebar) calc(100% - 64px),
+				transparent calc(100% - 16px),
+				transparent
+			);
+		}
+
+		.Lyrics {
+			padding-left: var(--LyricsPaddingLeft);
+			padding-right: var(--LyricsPaddingRight);
+
+			--use-offset: 1;
+		}
+	}
+}
+
+// Contained Page
+.BeautifulLyricsPage.Contained {
+	@keyframes Depress {
+		0% {
+			transform: scale(calc(1 - (var(--ShrinkDelta) * 1)));
+		}
+	
+		16% {
+			transform: scale(calc(1 - (var(--ShrinkDelta) * -0.32)));
+		}
+	
+		28% {
+			transform: scale(calc(1 - (var(--ShrinkDelta) * 0.13)));
+		}
+	
+		44% {
+			transform: scale(calc(1 - (var(--ShrinkDelta) * -0.05)));
+		}
+	
+		59% {
+			transform: scale(calc(1 - (var(--ShrinkDelta) * 0.02)));
+		}
+	
+		73% {
+			transform: scale(calc(1 - (var(--ShrinkDelta) * -0.01)));
+		}
+	
+		88% {
+			transform: scale(calc(1 - (var(--ShrinkDelta) * 0)));
+		}
+	
+		100% {
+			transform: scale(calc(1 - (var(--ShrinkDelta) * 0)));
+		}
+	}
+
+	.Content {
+		--LyricsPaddingLeft: 17.5cqw;
+		--LyricsPaddingRight: 15cqw;
+
+		.Lyrics {
+			margin-top: 25cqh;
+			margin-bottom: 45cqh;
+
+			line-height: 2.5cqh;
+		}
+
+		.NoLyrics {
+			display: flex;
+	
+			position: absolute;
+			left: 50cqw;
+			top: 50cqh;
+	
+			transform: translate(-50%, -50%);
+	
+			font-size: 3cqw;
+			color: white;
+	
+			opacity: 0.5;
+		}
+	
+		.LoadingLyrics {
+			width: calc(100cqw - var(--LyricsPaddingRight) - 17.5cqw);
+			height: 80cqh;
+	
+			position: absolute;
+			top: 25cqh;
+			left: var(--LyricsPaddingLeft);
+	
+			mask-size: contain;
+			mask-repeat: no-repeat repeat;
+			mask-position: left top;
+		}
+	}
+}
+
+// Fullscreen Page
+.BeautifulLyricsPage.Fullscreen {
+	.Content {
+		/* Good PlayPanel Values
+			Small: min(30cqw, 50cqh) width and calc(50cqh - (var(--PlayPanelWidth)* 0.65)) padding-top
+			Mediumish: calc(min(30cqw, 50cqh) * 1.1) width and calc(50cqh - (var(--PlayPanelWidth)* 0.6)) padding-top
+		*/
+
+		// Play-Panel
+		--PlayPanelWidth: calc(min(30cqw, 50cqh) * 1.1);
+		--PlayPanelRightSpace: calc(var(--PlayPanelWidth) / 4);
+
+		--PlayPanelAppliedLeftSpace: calc(50cqw - var(--PlayPanelWidth) - var(--PlayPanelRightSpace));
+		&.NoLyrics {
+			--PlayPanelAppliedLeftSpace: calc(50cqw - (var(--PlayPanelWidth) * 0.5));
+
+			.PlayPanelMouseArea {
+				width: 100cqw;
+			}
+
+			.Lyrics {
+				display: none;
+			}
+		}
+
+		.PlayPanel {
+			display: block;
+			width: var(--PlayPanelWidth);
+			height: 100cqh;
+			padding-top: calc(50cqh - (var(--PlayPanelWidth)* 0.6));
+			padding-bottom: var(--ContentSidePadding);
+	
+			position: absolute;
+			left: var(--PlayPanelAppliedLeftSpace);
+
+			font-family: "BeautifulLyrics" !important;
+
+			container-type: size;
+			z-index: 2;
+
+			--CoverArtCornerRadius: 2cqh;
+			.MediaSpace {
+				--ControlsVisibleScale: 1;//0;
+				--CoverArtHoverScale: 1;//0;
+
+				width: 100cqw;
+				height: 100cqw;
+
+				margin-bottom: 4cqw;
+	
+				container-type: size;
+
+				&.Loading {
+					.CoverArt {
+						display: none;
+					}
+				}
+
+				.AddToPlaylistCover {
+					display: none;
+					width: 100cqw;
+					height: 100cqh;
+					background: rgba(0, 0, 0, 0.25);
+					border-radius: var(--CoverArtCornerRadius);
+					padding-top: 12.5cqh;
+
+					flex-direction: column;
+					align-items: center;
+
+					position: absolute;
+
+					backdrop-filter: blur(25px);
+
+					z-index: 4;
+
+					&.Closing {
+						pointer-events: none;
+					}
+
+					.Header {
+						display: flex;
+						width: 75cqw;
+						height: 6cqh;
+						flex-shrink: 0;
+
+						gap: 1.5cqw;
+						justify-content: center;
+						align-items: center;
+
+						container-type: size;
+
+						&:has(.Action:hover) .Action:not(:hover) {
+							opacity: 0.5;
+						}
+						.Action {
+							display: flex;
+							height: 100cqh;
+							aspect-ratio: 1;
+							border-radius: 15cqh;
+
+							justify-content: center;
+							align-items: center;
+
+							cursor: pointer;
+
+							transition:
+								opacity 0.15s cubic-bezier(0.61, 1, 0.88, 1),
+								transform 0.175s cubic-bezier(0.37, 0, 0.63, 1)
+							;
+
+							--ShrinkScale: 0.9;
+							--ShrinkDelta: calc(1 - var(--ShrinkScale));
+							&:not(.Pressed) {
+								animation: Depress 0.6s;
+								animation-fill-mode: forwards;
+							}
+							&.Pressed { transform: scale(var(--ShrinkScale)); }
+
+							svg {
+								height: 75cqh;
+								width: unset;
+								fill: white;
+							}
+
+							&.Close svg {
+								transform: translateY(3cqh);
+							}
+						}
+
+						&> .Divider {
+							width: 0.75cqw;
+							height: 50cqh;
+							background: rgb(255 255 255 / 16%);
+							border-radius: 100cqh;
+							flex-shrink: 0;
+
+							margin-left: -0.25cqw;
+							margin-right: 0.25cqw;
+						}
+
+						.Path {
+							display: flex;
+							height: 100cqh;
+							overflow: hidden;
+
+							.SizeMeasurement {
+								display: flex;
+								flex-shrink: 0;
+								min-width: max-content;
+
+								gap: 15cqh;
+
+								&:has(.Branch:not(.Current):hover) .Branch:not(:hover) {
+									opacity: 0.5;
+								}
+								.Branch {
+									display: flex;
+									height: 100cqh;
+									flex-shrink: 0;
+									min-width: max-content;
+	
+									justify-content: start;
+									align-items: center;
+									gap: 20cqh;
+
+									transition:
+										opacity 0.15s cubic-bezier(0.61, 1, 0.88, 1),
+										transform 0.175s cubic-bezier(0.37, 0, 0.63, 1);
+
+									--ShrinkScale: 0.95;
+									--ShrinkDelta: calc(1 - var(--ShrinkScale));
+									&:not(.Pressed) {
+										animation: Depress 0.6s;
+										animation-fill-mode: forwards;
+									}
+
+									&:not(.Current) {
+										opacity: 0.75;
+
+										&:hover {
+											opacity: 1;
+
+											cursor: pointer;
+	
+											.Name span {
+												color: white;
+											}
+										}
+
+										&.Pressed { transform: scale(var(--ShrinkScale)); }
+									}
+
+									svg {
+										height: 60cqh;
+										fill: white;
+									}
+									&:not(.Library) svg {
+										transform: translateY(1cqh);
+									}
+									&.Library svg {
+										height: 75cqh;
+										margin-right: -5cqh;
+									}
+
+									span {
+										font-size: 50cqh;
+									}
+	
+									.Divider {
+										color: rgb(255 255 255 / 35%);
+										font-weight: 700;
+										margin-right: 5cqh;
+									}
+	
+									.Name {
+										display: flex;
+										max-width: 50cqw;
+
+										--TextScrollGradientStartMargin: 1cqw;
+										--TextScrollGradientEndMargin: 1cqw;
+									}
+									.Name span {
+										color: rgb(255 255 255 / 75%);
+
+										transition: color 0.125s cubic-bezier(0.61, 1, 0.88, 1);
+									}
+									&:not(.Library) .Name {
+										transform: translateY(2.5cqh);
+									}
+									&.Current .Name span {
+										color: rgb(255 255 255 / 95%);
+									}
+								}
+							}
+						}
+					}
+
+					input {
+						width: 70cqw;
+						border-radius: 1cqh;
+						border: none;
+						padding: 1cqh;
+						outline: rgba(96, 96, 96, 0.212) 0.25cqh solid;
+						flex-shrink: 0;
+
+						margin-top: 1.5cqh;
+						margin-bottom: 1.5cqh;
+						
+						color: white;
+						font-size: 3cqh;
+						text-align: center;
+
+						transition: outline 0.15s cubic-bezier(0.61, 1, 0.88, 1);
+
+						&.Loading::placeholder {
+							color: white;
+						}
+						&:not(.Loading) {
+							background: rgb(0 0 0 / 69%);
+						}
+
+						&:disabled {
+							color: white;
+							pointer-events: none;
+						}
+
+						&:focus-visible {
+							outline: rgba(96, 96, 96, 0.95) 0.25cqh solid;
+						}
+					}
+
+					.Grid {
+						--GapWidth: 1cqw;
+						--GridItemWidth: 40cqw;
+						--MaximumWidth: calc(var(--GapWidth) + (var(--GridItemWidth) * 2));
+
+						display: flex;
+						width: 100cqw;
+						padding-left: calc((100cqw - var(--MaximumWidth)) / 2);
+						padding-right: calc((100cqw - var(--MaximumWidth)) / 2);
+						padding-bottom: 10cqh;
+						
+						gap: var(--GapWidth);
+						flex-wrap: wrap;
+						// justify-content: center;
+						overflow: auto;
+
+						--TextScrollGradientStartMargin: 0cqw;
+						--TextScrollGradientEndMargin: 5cqw;
+						mask-image: linear-gradient(
+							180deg,
+							transparent 0, white var(--TextScrollGradientStartMargin),
+							black var(--TextScrollGradientStartMargin), black calc(100% - var(--TextScrollGradientEndMargin)),
+							transparent 100%,
+							transparent
+						);
+
+						&:has(.GridItem:not(.Loading):hover) .GridItem:not(.Loading, :hover) {
+							opacity: 0.65;
+						}
+						.GridItem {
+							display: flex;
+							width: var(--GridItemWidth);
+							height: 10cqh;
+							background-color: rgb(0 0 0 / 26%);
+							padding: 0.75cqw;
+							border-radius: 1.5cqw;
+
+							transition:
+								background-color 0.15s cubic-bezier(0.61, 1, 0.88, 1),
+								opacity 0.2s cubic-bezier(0.61, 1, 0.88, 1),
+								transform 0.175s cubic-bezier(0.37, 0, 0.63, 1);
+
+							container-type: size;
+
+							&:not(.Loading):hover {
+								background-color: rgb(0 0 0 / 50%);
+
+								cursor: pointer;
+							}
+
+							--ShrinkScale: 0.95;
+							--ShrinkDelta: calc(1 - var(--ShrinkScale));
+							&:not(.Loading, .Pressed) {
+								animation: Depress 0.6s;
+								animation-fill-mode: forwards;
+							}
+							&.Pressed { transform: scale(var(--ShrinkScale)); }
+
+							--CoverBorderRadius: 10cqh;
+							.Cover {
+								display: flex;
+								height: 100cqh;
+								aspect-ratio: 1;
+								border-radius: var(--CoverBorderRadius);
+								flex-shrink: 0;
+
+								justify-content: center;
+								align-items: center;
+
+								overflow: hidden;
+
+								container-type: size;
+
+								&:not(.Loading) {
+									background: rgb(131 131 131 / 24%);
+								}
+							}
+
+							span {
+								text-wrap: nowrap;
+							}
+
+							--CoverToDetailsGap: 5cqw;
+							--StaticWidth: calc(100cqw - 100cqh - var(--CoverToDetailsGap));
+							--ScrollOffset: 2cqw;
+							--TextScrollGradientStartMargin: var(--ScrollOffset);
+							--TextScrollGradientEndMargin: calc(var(--ScrollOffset) * 1.5);
+							--TextShiftToStart: 0cqw;
+
+							&.Folder {
+								.Cover svg {
+									height: 70cqh;
+									fill: white;
+
+									transform: translateY(-1cqh);
+								}
+
+								.Name {
+									display: flex;
+									width: var(--StaticWidth);
+	
+									margin-left: var(--CoverToDetailsGap);
+	
+									color: white;
+									font-size: 35cqh;
+	
+									justify-content: start;
+									align-items: center;
+								}
+							}
+
+							&.Playlist {
+								.Cover.Loading {
+									.Added, .Placeholder, img {
+										display: none;
+									}
+								}
+
+								.Cover .Added {
+									display: none;
+									height: 60cqh;
+									fill: white;
+
+									z-index: 2;
+
+									--Scale: 1;
+									--Rotation: 0;
+									--YOffset: 0;
+									transform:
+										scale(var(--Scale))
+										translateY(calc(1cqh * var(--YOffset)))
+										rotate(calc(1deg * var(--Rotation)));
+
+									&.Active, &.Animating {
+										display: unset;
+									}
+								}
+
+								.Cover .Placeholder {
+									width: 100cqh;
+									height: 100cqh;
+									fill: white;
+
+									transform: scale(0.75) translateY(-1cqh);
+
+									position: absolute;
+								}
+
+								.Cover:has(.Added.Active) img {
+									filter: brightness(0.65);
+								}
+								.Cover img {
+									width: 100cqh;
+									height: 100cqh;
+									border-radius: var(--CoverBorderRadius);
+
+									position: absolute;
+
+									transition: filter 0.15s cubic-bezier(0.61, 1, 0.88, 1);
+								}
+
+								.Details {
+									padding-top: 8.5cqh;
+
+									width: var(--StaticWidth);
+									margin-left: var(--CoverToDetailsGap);
+
+									.Name {
+										display: flex;
+
+										font-size: 37.5cqh;
+										color: white;
+
+										&.Loading {
+											margin-bottom: 5cqh;
+
+											span {
+												visibility: hidden;
+											}
+										}
+									}
+
+									.Collaborators {
+										display: flex;
+
+										font-size: 27.5cqh;
+										color: rgb(255 255 255 / 57%);
+
+										&.Loading span {
+											visibility: hidden;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+
+				.ViewControls {
+					display: none;
+					width: 100cqw;
+					scale: 1.15;
+
+					position: absolute;
+					top: 7.5cqh;
+
+					gap: 3cqw;
+					justify-content: center;
+
+					z-index: 3;
+
+					--ViewControlSize: 7.5cqh;
+
+					.ViewControl {
+						cursor: pointer;
+					}
+
+					#AddToPlaylist svg {
+						height: calc(var(--ViewControlSize) * 0.475);
+						width: auto;
+						aspect-ratio: 1;
+					}
+
+					#SmallerView {
+						svg.Small {
+							height: calc(var(--ViewControlSize) * 0.45);
+							width: auto;
+							aspect-ratio: 1;
+						}
+
+						svg.Fullscreen {
+							height: calc(var(--ViewControlSize) * 0.525);
+							width: auto;
+							aspect-ratio: 1;
+						}
+					}
+					
+					#Fullscreen svg {
+						height: calc(var(--ViewControlSize) * 0.49); // 22px
+						width: auto;
+						aspect-ratio: 1;
+					}
+				}
+
+				.LikeState {
+					display: none;
+					width: 100cqw;
+					height: 100cqh;
+					overflow: hidden;
+
+					position: absolute;
+					left: 0;
+					top: 0;
+
+					z-index: 2;
+
+					.Hitbox {
+						width: 100cqw;
+						--HitboxHeight: 47.5cqh; //55
+						height: var(--HitboxHeight);
+						overflow: visible;
+
+						position: absolute;
+						top: 24cqh; // 18.5
+
+						cursor: pointer;
+
+						svg {
+							display: none;
+	
+							--Height: 45cqh;
+							height: var(--Height);
+							aspect-ratio: 1;
+							fill: #fff;
+	
+							position: absolute;
+							left: calc(50cqw - (var(--Height) / 2) + 0.45cqw);
+							top: calc((var(--HitboxHeight) / 2) - (var(--Height) / 2) + 1.75cqh);
+						}
+
+						.Loading {
+							&.Full {
+								--Height: 42.5cqh;
+								--Width: 58cqw;
+								--LeftOfset: 0.45cqw;
+								--TopOffset: 2.25cqh;
+
+								scale: 0.5;
+
+								mask-image: var(--FilledMask);
+							}
+							&.Outline {
+								--Height: 42.5cqh;
+								--Width: 58cqw;
+								--LeftOfset: 0.45cqw;
+								--TopOffset: 2cqh;
+
+								scale: 0.75;
+
+								mask-image: var(--OutlineMask);
+							}
+
+							&.Full, &.Outline {
+								display: block;
+							}
+
+							display: none;
+							height: var(--Height);
+							width: var(--Width);
+
+							position: absolute;
+							left: calc(50cqw - (var(--Width) / 2) + var(--LeftOfset));
+							top: calc((var(--HitboxHeight) / 2) - (var(--Height) / 2) + var(--TopOffset));
+
+							mask-size: contain;
+							mask-repeat: no-repeat;
+							mask-position: center center;
+
+							z-index: 2;
+						}
+						&:has(.Loading.Full), &:has(.Loading.Outline) {
+							.Filled {
+								visibility: hidden;
+							}
+						}
+	
+						.Filled {
+							overflow: visible;
+	
+							.Left {
+								--TransformOffset: 0.5px;
+								transform-origin: 50% 100%;
+							}
+							.Right {
+								--TransformOffset: -0.5px;
+								transform-origin: 50% 100%;
+							}
+
+							.Left, .Right {
+								--Rotation: 0;
+								--XOffset: 0;
+								--YOffset: 0;
+								transform:
+									translateX(calc(var(--TransformOffset) + (1cqw * var(--XOffset))))
+									translateY(calc(1cqh * var(--YOffset)))
+									rotate(calc(1deg * var(--Rotation)));
+							}
+						}
+
+						.Filled, .Outline {
+							--Scale: 1;
+							--Opacity: 1;
+
+							transform: scale(var(--Scale));
+							opacity: var(--Opacity);
+						}
+	
+						.Filled.Active, .Filled:has(.Animating), .Filled.Animating,
+						.Outline.Animating, .Outline.Active {
+							display: unset;
+						}
+					}
+				}
+
+				.PlaybackControls {
+					display: none;
+					width: 100cqw;
+					height: 7.5cqh;
+					padding-left: 1.5cqw;
+
+					position: absolute;
+					bottom: 10cqh;
+
+					gap: 3.5cqw;
+					justify-content: center;
+					align-items: center;
+
+					z-index: 3;
+
+					container-type: size;
+
+					&:hover .PlaybackControl:not(:hover) {
+						opacity: 0.5 !important;
+					}
+
+					.PlaybackControl {
+						display: flex;
+						aspect-ratio: 1;
+						fill: #fff;
+
+						align-items: center;
+						justify-content: center;
+
+						cursor: pointer;
+
+						transition: opacity 0.175s cubic-bezier(0.37, 0, 0.63, 1);
+
+						// Animation
+						--ShrinkScale: 0.9;
+						--ShrinkDelta: calc(1 - var(--ShrinkScale));
+						&:hover {
+							opacity: 1 !important;
+						}
+						&:not(.Pressed) {
+							animation: Depress 0.6s;
+							animation-fill-mode: forwards;
+						}
+						&.Pressed {
+							transform: scale(var(--ShrinkScale));
+							transition: opacity transform 0.175s cubic-bezier(0.37, 0, 0.63, 1);
+						}
+
+						// Specific Visual Adjustments
+						&.Shuffle {
+							height: 100cqh;
+							opacity: 0.75;
+
+							margin-bottom: -4.75cqh;
+							margin-right: -0.35cqw;
+
+							svg {
+								height: 44cqh;
+							}
+						}
+
+						&.LastTrack {
+							rotate: 180deg;
+						}
+
+						&.SkipTrack {
+							height: 125cqh;
+							opacity: 0.95;
+							
+							svg {
+								height: 90cqh;
+								aspect-ratio: 1;
+							}
+						}
+
+						&.TogglePlayState {
+							height: 150cqh;
+
+							margin-right: -0.75cqw;
+
+							svg {
+								height: 100cqh;
+							}
+
+							.Pause {
+								margin-left: -1cqw;
+							}
+						}
+
+						&.ToggleLoopState {
+							height: 100cqh;
+							opacity: 0.725;
+
+							margin-left: -0.575cqw;
+							margin-bottom: -4.5cqh;
+
+							svg {
+								height: 47cqh;
+							}
+						}
+
+						&.Shuffle.Enabled, &.ToggleLoopState.Enabled {
+							filter: brightness(2.75);
+
+							svg {
+								filter: drop-shadow(0px 0px 5px white);
+							}
+						}
+					}
+				}
+	
+				.VolumeControl {
+					--Width: 84cqw;
+
+					display: none;
+					width: var(--Width);
+					height: 1.5cqh;
+
+					position: absolute;
+					bottom: 2cqh;
+					left: calc((100cqw - var(--Width)) / 2);
+					margin-bottom: 1.75cqh;
+
+					justify-content: center;
+					align-items: center;
+
+					z-index: 3;
+
+					container-type: size;
+	
+					.VolumeLevels {
+						height: 250cqh;
+						aspect-ratio: 1;
+						fill: rgb(255 255 255 / 90%);
+
+						margin-right: 1.5cqw;
+
+						.Level {
+							transition: opacity 100ms linear;
+
+							&.Hidden {
+								opacity: 0;
+							}
+						}
+					}
+
+					.SliderBar {
+						height: 75cqh;
+					}
+				}
+
+				.CoverArt {
+					position: absolute;
+					top: 0;
+					left: 0;
+
+					width: 100cqh;
+					height: 100cqh;
+					border-radius: var(--CoverArtCornerRadius);
+
+					opacity: 0.85;
+					box-shadow: #00000045 0 9px 20px 0px;
+				}
+
+				&.ControlsVisible {
+					--AddToPlaylistOpacity: 1;
+					--ViewControlsOpacity: 1;
+					--LikeStateOpacity: 0.9;
+					--PlaybackControlsOpacity: 0.85;
+					--VolumeControlOpacity: 0.85;
+					--ImageDarkness: 0.5;
+					--ImageTransparency: 0.25;
+
+					--AddToPlaylistOpenProgress: 0;
+					--HoverMultiplier: calc(
+						0.5
+						+ (
+							0.5
+							* max(0, (var(--CoverArtHoverScale) - var(--AddToPlaylistOpenProgress)))
+						)
+					);
+
+					.AddToPlaylistCover.Open {
+						display: flex;
+						opacity: calc(
+							var(--AddToPlaylistOpacity)
+							* var(--ControlsVisibleScale)
+							* var(--AddToPlaylistOpenProgress)
+						);
+					}
+
+					.ViewControls {
+						display: flex;
+						padding-left: 1.25cqw;
+						opacity: calc(
+							var(--ViewControlsOpacity)
+							* var(--ControlsVisibleScale)
+							* var(--HoverMultiplier)
+						);
+					}
+
+					.LikeState {
+						display: block;
+						opacity: calc(
+							var(--LikeStateOpacity)
+							* var(--ControlsVisibleScale)
+							* var(--HoverMultiplier)
+						);
+					}
+
+					.PlaybackControls {
+						display: flex;
+						opacity: calc(
+							var(--PlaybackControlsOpacity)
+							* var(--ControlsVisibleScale)
+							* var(--HoverMultiplier)
+						);
+					}
+
+					.VolumeControl {
+						display: flex;
+						opacity: calc(
+							var(--VolumeControlOpacity)
+							* var(--ControlsVisibleScale)
+							* var(--HoverMultiplier)
+						);
+					}
+
+					.CoverArt {
+						filter:
+							brightness(
+								calc(
+									1
+									- (
+										var(--ImageDarkness)
+										* var(--CoverArtScale)
+										* var(--HoverMultiplier)
+									)
+								)
+							)
+							opacity(
+								calc(
+									1
+									- (
+										var(--ImageTransparency)
+										* var(--CoverArtScale)
+										* var(--HoverMultiplier)
+									)
+								)
+							);
+						backdrop-filter: blur(calc(10px * var(--CoverArtScale)));
+					}
+				}
+			}
+
+			.Timeline {
+				display: flex;
+				opacity: 0.85;
+				width: 100cqw;
+				padding-left: 0cqw;
+				padding-right: 0.25cqw;
+
+				justify-content: center;
+				align-items: center;
+
+				margin-bottom: 1.75cqh;
+
+				.Position {
+					padding-right: 1.5cqw;
+				}
+				.Length {
+					padding-left: 1.5cqw;
+				}
+				.Position, .Length {
+					font-size: 2cqh;
+					color: #ffffffb5;
+					font-weight: 500;
+					font-variant-numeric: tabular-nums;
+				}
+
+				.SliderBar {
+					height: 0.65cqh;
+				}
+			}
+
+			.SliderBar {
+				--TraveledColor: rgb(255 255 255 / 90%);
+				--RemainingColor: rgb(255 255 255 / 38%);
+				--SliderProgress: 0.6;
+
+				width: auto;
+				flex-grow: 1;
+				border-radius: 100cqw;
+				background: linear-gradient(
+					90deg,
+					var(--TraveledColor) 0px, var(--TraveledColor) calc(100% * var(--SliderProgress)),
+					var(--RemainingColor) calc(100% * var(--SliderProgress)), var(--RemainingColor)
+				);
+				
+				container-type: size;
+
+				.Hitbox {
+					cursor: pointer;
+
+					--ExcessHeight: 200cqh;
+					--ExcessWidth: 200cqh;
+
+					display: block;
+					width: calc(100cqw + var(--ExcessWidth));
+					height: calc(100cqh + var(--ExcessHeight));
+
+					position: absolute;
+					top: calc(var(--ExcessHeight) * -0.5);
+					left: calc(var(--ExcessWidth) * -0.5);
+
+					z-index: 1;
+				}
+
+				.Handle {
+					display: block;
+					height: 185cqh;
+					aspect-ratio: 1;
+					border-radius: 100cqw;
+					background: #ffffff;
+
+					position: absolute;
+					top: 54cqh;
+					left: calc(100cqw * var(--SliderProgress));
+					transform: translate(-50%, -50%);
+				}
+			}
+
+			.TrackDetails {
+				display: flex;
+				width: 100cqw;
+				height: 17.5cqw;
+	
+				flex-direction: column;
+
+				container-type: size;
+	
+				.DetailsShelf {
+					display: flex;
+
+					&.Title {
+						--TitleHeight: 35cqh;
+
+						--StaticWidth: 100cqw;
+						--ScrollOffset: 2.5cqw;
+						--TextScrollGradientStartMargin: var(--ScrollOffset);
+						--TextScrollGradientEndMargin: calc(var(--ScrollOffset) * 1.5);
+						--TextShiftToStart: 25cqw;
+
+						color: rgb(255 255 255 / 85%);
+						font-size: var(--TitleHeight);
+						line-height: var(--TitleHeight);
+						font-weight: 700;
+						text-wrap: nowrap;
+
+						&:not(.TextScroll) {
+							justify-content: center;
+						}
+
+						&.Loading {
+							width: 75cqw;
+							height: var(--TitleHeight);
+
+							margin-left: calc(25cqw / 2);
+						}
+					}
+
+					&.Release {
+						--ReleaseHeight: 30cqh;
+						--FontHeight: calc(var(--ReleaseHeight)* 0.85);
+
+						display: flex;
+						width: 100cqw;
+
+						color: rgb(241 241 241 / 60%);
+						font-size: var(--FontHeight);
+						line-height: var(--ReleaseHeight);
+
+						margin-top: 1.5cqw;
+
+						justify-content: center;
+						align-items: center;
+
+						text-wrap: nowrap;
+						overflow: hidden;
+
+						.Date {
+							&.Loading {
+								width: 15cqw;
+								height: var(--FontHeight);
+							}
+						}
+
+						.Separator {
+							display: inline-block;
+							background: rgb(234 234 234 / 28%);
+							height: calc(var(--ReleaseHeight)* 0.125);
+							width: calc(var(--ReleaseHeight)* 0.25);
+							border-radius: 100cqh;
+
+							margin-left: 7.5cqh;
+							margin-right: 6.5cqh;
+						}
+
+						.Artists {
+							--TextScrollGradientStartMargin: 1cqw;
+							--TextScrollGradientEndMargin: 1cqw;
+
+							max-width: 86cqw;
+
+							color: rgb(255 255 255 / 39%);
+
+							a {
+								color: rgb(255 255 255 / 68%) !important;
+							}
+
+							&.Loading {
+								width: 35cqw;
+								height: var(--FontHeight);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// Play-Panel Mouse area
+		.PlayPanelMouseArea {
+			display: block;
+			width: calc(var(--PlayPanelAppliedLeftSpace) + var(--PlayPanelWidth) + (var(--PlayPanelRightSpace) * 0.5));
+			height: calc(100cqh - (var(--ContentSidePadding) * 2));
+
+			position: absolute;
+			top: var(--ContentSidePadding);
+			left: 0;
+
+			z-index: -1;
+		}
+
+		// Lyrics
+		--LyricsPaddingLeft: calc(50cqw - (var(--PlayPanelRightSpace) * 0.3));
+		--LyricsPaddingRight: calc(var(--PlayPanelAppliedLeftSpace) * 0.25);
+
+		.LoadingLyrics {
+			width: calc(100cqw - var(--LyricsPaddingLeft) - var(--LyricsPaddingRight));
+			height: 80cqh;
+	
+			position: absolute;
+			top: 25cqh;
+			left: calc(var(--LyricsPaddingLeft) - 0.5cqw);
+	
+			mask-size: contain;
+			mask-repeat: no-repeat;
+			mask-position: left center;
+		}
+
+		.Lyrics {
+			margin-top: 25cqh;
+			margin-bottom: 55cqh;
+
+			line-height: 2.25cqh;
+		}
+	}
+}
+
+// External Container View Support
+div[class=""]:has(.BeautifulLyricsPage) {
+	&:has(.BeautifulLyricsPage) {
+		container-type: size;
+
+		.main-view-container__scroll-node-child-spacer {
+			display: flex;
+			z-index: 200000;
+
+			width: 12cqh;
+
+			position: relative;
+			left: calc(50cqw - 6cqw);
+
+			.ViewControls {
+				display: flex;
+
+				gap: 8px;
+
+				margin: auto;
+				padding-top: 3cqh;
+
+				opacity: 0;
+				transition: opacity .2s;
+
+				--ViewControlSize: 4.25cqh;
+
+				#Cinema svg {
+					height: calc(var(--ViewControlSize) * 0.45);
+					width: auto;
+					aspect-ratio: 1;
+				}
+			}
+
+			&:hover {
+				.ViewControls {
+					opacity: 1;
+				}
+			}
+		}
+	}
+
+	&:has(.BeautifulLyricsPage.Contained:hover) {
+		.ViewControls {
+			opacity: 0.3;
+		}
+	}
+}
+
+// External Fullscreen View Support
+.Root__main-view-overlay:has(.BeautifulLyricsPage) {
+	pointer-events: auto;
+}
+
+.main-view-container:has(.BeautifulLyricsPage) {
+	margin-top: 0 !important;
+}
+
+.main-topBar-container {
+	pointer-events: none !important; // This allows points events for things below the divs empty space
+}
+
+body:has(.Root__main-view-overlay .BeautifulLyricsPage) {
+	overflow: hidden;
+}

@@ -1,0 +1,147 @@
+.LoadingLyricsCard {
+	display: flex;
+	height: 340px;
+	background-color: var(--background-tinted-base) !important;
+	border-radius: 8px !important;
+	opacity: 0.35;
+}
+
+#BeautifulLyrics-CardView {
+	display: flex;
+	max-height: 340px;
+	background-color: var(--background-tinted-base) !important;
+	border-radius: 8px;
+	padding: 16px;
+
+	-ms-flex-direction: column;
+	flex-direction: column;
+	gap: 16px;
+
+	-webkit-box-orient: vertical;
+	-webkit-box-direction: normal;
+
+	container-type: inline-size;
+
+	.Header {
+		display: flex;
+		height: 25px;
+		min-height: 25px;
+
+		color: var(--spice-text);
+		font-family: var(--encore-body-font-stack);
+		font-size: var(--encore-text-size-base);
+		font-weight: 700;
+
+		align-items: center;
+		gap: 8px;
+
+		-webkit-box-align: center;
+		-ms-flex-align: center;
+
+		.Title {
+			display: -webkit-box;
+			-webkit-box-orient: vertical;
+
+			-webkit-box-flex: 1;
+			flex: 1 1 0%;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			-webkit-line-clamp: 1;
+		}
+
+		.ShowLyrics {
+			display: inline-flex;
+			background-color: transparent;
+			border-radius: 9999px;
+			min-inline-size: 0px;
+			min-block-size: var(--encore-control-size-smaller, 32px);
+			padding-block-start: calc(var(--encore-spacing-tighter-4, 4px) - 1px);
+			padding-block-end: calc(var(--encore-spacing-tighter-4, 4px) - 1px);
+			padding-inline-start: calc(var(--encore-spacing-base, 16px) - 1px);
+			padding-inline-end: calc(var(--encore-spacing-base, 16px) - 1px);
+			border: 1px solid rgb(255 255 255 / 62%);
+			box-sizing: border-box;
+
+			position: relative;
+
+			cursor: pointer;
+			
+			touch-action: manipulation;
+
+			vertical-align: middle;
+			transform: translate3d(0px, 0px, 0px);
+
+			color: var(--text-base, #000000);
+			font-size: 0.875rem;
+			font-weight: 700;
+			font-family: var(--font-family, CircularSp, CircularSp-Arab, CircularSp-Hebr, CircularSp-Cyrl, CircularSp-Grek, CircularSp-Deva, var(--fallback-fonts, sans-serif));
+			text-align: center;
+			text-decoration: none;
+			text-transform: none;
+
+			align-items: center;
+			justify-content: center;
+
+			overflow-wrap: anywhere;
+
+			transition-duration: 33ms;
+			transition-property: background-color, border-color, color, box-shadow, filter, transform;
+
+			-webkit-box-align: center;
+			-webkit-box-pack: center;
+			-webkit-tap-highlight-color: transparent;
+
+			user-select: none;
+		}
+
+		.Controls {
+			display: flex;
+			opacity: 0;
+
+			gap: 8px;
+
+			-webkit-margin-end: -4px;
+			margin-inline-end: -4px;
+
+			-webkit-transition: opacity .2s;
+			transition: opacity .2s;
+
+			--ViewControlSize: 30px;
+		}
+	}
+
+	&:hover {
+		.Header .Controls {
+			opacity: 1;
+		}
+	}
+
+	.LyricsContent {
+		--use-offset: 1;
+
+		padding: 16px;
+
+		flex: 1;
+		-webkit-box-flex: 1;
+
+		font-family: CircularSpTitle, CircularSpTitle-Tall, CircularSp-Arab, CircularSp-Hebr, CircularSp-Cyrl, CircularSp-Grek, CircularSp-Deva, var(--fallback-fonts, sans-serif);
+		font-size: 1.5rem;
+		line-height: 2.5rem;
+
+		-webkit-mask-image: linear-gradient(180deg, transparent 0, transparent 16px, var(--spice-sidebar) 24px, var(--spice-sidebar) calc(100% - 64px), transparent calc(100% - 16px), transparent);
+		mask-image: linear-gradient(180deg, transparent 0, transparent 16px, var(--spice-sidebar) 24px, var(--spice-sidebar) calc(100% - 64px), transparent calc(100% - 16px), transparent);
+
+		overflow: hidden;
+
+		margin: -16px;
+
+		.ContentContainer {
+			display: block;
+			width: 100cqw;
+			height: 25cqh;
+			container-type: size;
+
+			z-index: 100;
+		}
+	}
+}

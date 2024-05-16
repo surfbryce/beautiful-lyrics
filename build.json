@@ -1,0 +1,11 @@
+{
+	"$schema": "https://schemas.socalifornian.live/Spices/Build/Schema.json",
+	"Name": "beautiful-lyrics",
+	"Version": "4.0.0",
+
+	"ReleaseLocation": {
+		"Type": "Hosted",
+		"Url": "https://extensions-storage.socalifornian.live",
+		"VersionCheckUrl": "https://extensions.socalifornian.live/version"
+	}
+}

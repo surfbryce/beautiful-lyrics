@@ -1,0 +1,70 @@
+/* Playbar Icon */
+button:has(.LyricsPageIcon) {
+	margin-right: 2px;
+
+	&:after {
+		transform: translateX(-370%) translateY(-40%) !important;
+	}
+}
+
+.LyricsPageIcon {
+	transform: translateY(2px);
+	fill: currentColor;
+}
+
+/* Cinema Playbar Adjustments*/
+body:has(.Root__main-view-overlay .BeautifulLyricsPage) {
+	.main-genericButton-button.main-genericButton-buttonActive {
+		color: white;
+
+		&:after {
+			background-color: white;
+		}
+	}
+}
+
+// Prevents themes from screwing with us
+body:has(.Root__main-view-overlay .BeautifulLyricsPage) {
+	.Root__main-view {
+		z-index: 5;
+	}
+
+	.Root__top-container {
+		grid-template-areas:
+			"top-bar top-bar top-bar"
+			"left-sidebar main-view right-sidebar"
+			"now-playing-bar now-playing-bar now-playing-bar" !important;
+	}
+
+	.player-controls__buttons {
+		display: -webkit-box;
+	}
+}
+
+body:not(:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen))) {
+	#BeautifulLyricsFullscreenButton {
+		scale: 1.25;
+	}
+}
+
+body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen)) {
+	.body-drag-top {
+		height: unset !important;
+	}
+}
+
+#BeautifulLyricsFullscreenButton {
+	color: rgba(var(--spice-rgb-selected-row),.7) !important;
+
+	svg {
+		fill: currentColor;
+	}
+}
+
+body:has(.Root__main-view-overlay .BeautifulLyricsPage:is(.Fullscreen, .Cinema)) {
+	.Root__top-container {
+		/* Prevent themes from screwing up our stuff */
+		padding-top: calc(24px + var(--panel-gap)*2) !important; // Restore original
+		position: unset !important;
+	}
+}

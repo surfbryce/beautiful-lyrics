@@ -1,0 +1,13 @@
+{
+	"tasks": {
+		"test": "deno run --allow-read --allow-run --allow-net --allow-env --allow-write ./Tasks/Test.ts",
+		"release": "deno run --allow-read --allow-run --allow-net --allow-env --allow-write ./Tasks/Release.ts"
+	},
+
+	"compilerOptions": {
+		"lib": [
+			"ESNext",
+			"DOM", "DOM.Iterable"
+		]
+	}
+}
