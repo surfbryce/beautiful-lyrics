@@ -143,7 +143,12 @@ out
 .svelte-kit
 
 # End of https://www.toptal.com/developers/gitignore/api/node
-src/app.draft.tsx
-Drafts/sdfblend.glsl
-Drafts/sdfblend.app.tsx
-Drafts/app.draft.tsx
+
+# Non-Essential Files
+Tasks/Release.ts
+**/.DS_Store
+.DS_STORE
+Drafts/**/*
+Builds/Test/*
+Builds/Release/bundle@*.*
+deno.lock

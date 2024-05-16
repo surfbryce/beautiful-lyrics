@@ -3,7 +3,7 @@
 	  "name": "Beautiful Lyrics",
 	  "description": "Adds Synced Lyrics, Dynamic Background, Fullscreen, Romanization, and more!",
 	  "preview": "./previews/icon.gif",
-	  "main": "./dist/beautiful-lyrics.js",
+	  "main": "./Builds/Release/beautiful-lyrics.mjs",
 	  "readme": "README.md",
 	  "authors": [
 		  { "name": "SoCalifornian", "url": "https://github.com/surfbryce" }

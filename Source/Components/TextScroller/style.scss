@@ -1,0 +1,40 @@
+.TextScrollStaticSizing {
+	width: calc(var(--StaticWidth) + (var(--ScrollOffset) * 2));
+	margin-left: calc(-1 * var(--ScrollOffset));
+	padding-left: var(--ScrollOffset);
+	padding-right: var(--ScrollOffset);
+}
+
+.TextScroll {
+	overflow: hidden;
+
+	--TextScrollShift: 0cqw;
+
+	span {
+		margin-left: calc(-1 * var(--TextScrollShift));
+	}
+
+	mask-image: linear-gradient(
+		90deg,
+		transparent 0,
+		white var(--TextScrollGradientStartMargin), black var(--TextScrollGradientStartMargin),
+		black calc(100% - var(--TextScrollGradientEndMargin)), transparent 100%,
+		transparent
+	);
+
+	&:not(.TextScrollStaticSizing) {
+		width: var(--TextWidth);
+		margin-left: calc(-1 * var(--TextScrollGradientStartMargin));
+		margin-right: calc(-1 * var(--TextScrollGradientEndMargin));
+
+		.ExtraShift {
+			display: block;
+			position: absolute;
+			width: calc(var(--TextScrollGradientStartMargin) + var(--TextScrollGradientEndMargin));
+		}
+
+		span {
+			margin-left: calc(var(--TextScrollGradientStartMargin) + (-1 * var(--TextScrollShift)));
+		}
+	}
+}
