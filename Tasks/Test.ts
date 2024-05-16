@@ -1,2 +1,2 @@
-import StartTest from "../../../Spices/Debug/Test.ts"
+import StartTest from "jsr:@socali/spices/Debug/Test"
 StartTest()
