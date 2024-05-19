@@ -7,8 +7,7 @@
 # A New and More Beautiful Spotify Lyrics Experience
 
 ## Karaoke Lyrics for EVERYONE
-If you aren't Premium, Spotify takes away a lot, and one of those things
-are Lyrics.
+If you don't have Premium, Spotify won't give you any lyrics.
 
 Beautiful Lyrics provides Lyrics to _EVERYONE_ for **FREE**.
 Beautiful Lyrics supports **Karaoke**, _Line_, and Statically synced lyrics with
