@@ -11,7 +11,8 @@
 	--TextScrollShift: 0cqw;
 
 	span {
-		margin-left: calc(-1 * var(--TextScrollShift));
+		display: block;
+		transform: translateX(calc(-1 * var(--TextScrollShift)));
 	}
 
 	mask-image: linear-gradient(
@@ -34,7 +35,7 @@
 		}
 
 		span {
-			margin-left: calc(var(--TextScrollGradientStartMargin) + (-1 * var(--TextScrollShift)));
+			transform: translateX(calc(var(--TextScrollGradientStartMargin) + (-1 * var(--TextScrollShift))));
 		}
 	}
 }
