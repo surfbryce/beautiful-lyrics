@@ -958,24 +958,8 @@ export default class PageView implements Giveable {
 					)
 				}
 
-				// Handle our close button
-				{
-					const closeTooltip = Spotify.Tippy(
-						closeButton,
-						{
-							...Spotify.TippyProps,
-							content: "Close"
-						}
-					)
-					this.Maid.Give(() => closeTooltip.destroy())
-
-					closeButton.addEventListener(
-						"click",
-						() => this.Close()
-					)
-				}
-
 				// Handle our view changing
+				let exitedFullscreenFromButton: (true | undefined)
 				{
 					// Setup our tooltips
 					const smallViewTooltip = Spotify.Tippy(
@@ -1032,11 +1016,14 @@ export default class PageView implements Giveable {
 						const SetToFullscreen = () => RequestFullscreenState(true)
 						fullscreenButton.addEventListener("click", SetToFullscreen)
 
-						const SetToSmallView = () => (
-							(document.fullscreenElement === null)
-							? SpotifyHistory.push("/BeautifulLyrics/Page")
-							: RequestFullscreenState(false)
-						)
+						const SetToSmallView = () => {
+							if (document.fullscreenElement === null) {
+								SpotifyHistory.push("/BeautifulLyrics/Page")
+							} else {
+								exitedFullscreenFromButton = true
+								RequestFullscreenState(false)
+							}
+						}
 						smallViewButton.addEventListener("click", SetToSmallView)
 
 						this.Maid.GiveItems(
@@ -1050,6 +1037,45 @@ export default class PageView implements Giveable {
 					UpdateToFullscreenState()
 					document.addEventListener("fullscreenchange", UpdateToFullscreenState)
 					this.Maid.Give(() => document.removeEventListener("fullscreenchange", UpdateToFullscreenState))
+				}
+
+				// Handle our close button
+				{
+					const closeTooltip = Spotify.Tippy(
+						closeButton,
+						{
+							...Spotify.TippyProps,
+							content: "Close"
+						}
+					)
+					this.Maid.Give(() => closeTooltip.destroy())
+
+					closeButton.addEventListener(
+						"click",
+						() => this.Close()
+					)
+
+					// Listen for escape-key functionality
+					const OnEscapePress = (event: KeyboardEvent) => {
+						if (event.key === "Escape") {
+							event.preventDefault()
+							this.Close()
+						}
+					}
+					document.addEventListener("keydown", OnEscapePress)
+					this.Maid.Give(() => document.removeEventListener("keydown", OnEscapePress))
+
+					// Watch for when our fullscreen state changes (determines if we close ourselves or not)
+					const OnFullscreenChange = () => {
+						if (
+							(document.fullscreenElement === null)
+							&& (exitedFullscreenFromButton === undefined)
+						) {
+							this.Close()
+						}
+					}
+					document.addEventListener("fullscreenchange", OnFullscreenChange)
+					this.Maid.Give(() => document.removeEventListener("fullscreenchange", OnFullscreenChange))
 				}
 
 				// Handle our toggle-details button
