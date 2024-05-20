@@ -1268,7 +1268,9 @@ div[class=""]:has(.BeautifulLyricsPage) {
 	&:has(.BeautifulLyricsPage) {
 		container-type: size;
 
-		.main-view-container__scroll-node-child-spacer {
+		.main-view-container__scroll-node-child-spacer, .main-view-container__scroll-node-child {
+			min-height: unset !important;
+
 			display: flex;
 			z-index: 200000;
 
