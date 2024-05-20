@@ -18,7 +18,7 @@ import {
 import {
 	Song, SongChanged,
 	SongLyrics, SongLyricsLoaded, HaveSongLyricsLoaded
-} from "jsr:@socali/spices/Spicetify/Services/Player"
+} from "@socali/Spices/Player"
 
 // Components
 import CardView from "./Card/mod.ts"
@@ -26,7 +26,7 @@ import ContainedPageView from "./Page/Contained.ts"
 import FullscreenPageView from "./Page/Fullscreen.ts"
 
 // Our Modules
-import { CreateElement } from "./Shared.ts"
+import { CreateElement, ApplyDynamicBackground } from "./Shared.ts"
 import Icons from "./Icons.ts"
 
 // Create our maid
@@ -36,7 +36,7 @@ const ViewMaid = GlobalMaid.Give(new Maid())
 const LoadingLyricsCard = `<div class="LoadingLyricsCard Loading"></div>`
 
 // DOM Search Constants
-const MainPage = ".Root__main-view .main-view-container div[class=\"\"]"
+const MainPage = ".Root__main-view .main-view-container div[data-overlayscrollbars-viewport]"
 const RightSidebar = ".Root__right-sidebar"
 const CardInsertAnchor = ".main-nowPlayingView-nowPlayingWidget"
 const SpotifyCardViewQuery = ".main-nowPlayingView-section:not(:is(#BeautifulLyrics-CardView)):has(.main-nowPlayingView-lyricsTitle)"
@@ -154,7 +154,7 @@ OnSpotifyReady
 
 			// Handle checking to see if the NowPlaying view is open
 			const CheckForNowPlaying = () => {
-				// First check to see if we have multiple elements or not (should only be one when noy in use)
+				// First check to see if we have multiple elements or not (should only be one when not in use)
 				if (sidebar.children.length === 1) {
 					ViewMaid.Clean("NowPlayingView")
 					return
@@ -174,6 +174,21 @@ OnSpotifyReady
 
 				// Create our maid
 				const nowPlayingMaid = ViewMaid.Give(new Maid(), "NowPlayingView")
+
+				// Immediately add our class to the top container
+				const backgroundMaid = nowPlayingMaid.Give(new Maid())
+				const CheckDynamicBackground = () => {
+					if (SpotifyHistory.location.pathname.startsWith("/BeautifulLyrics")) {
+						backgroundMaid.CleanUp()
+					} else {
+						ApplyDynamicBackground(
+							sidebar.querySelector<HTMLDivElement>(".main-buddyFeed-container")!,
+							backgroundMaid
+						)
+					}
+				}
+				CheckDynamicBackground()
+				nowPlayingMaid.Give(SpotifyHistory.listen(CheckDynamicBackground))
 
 				// Now we can monitor for Spotifys lyrics card (and hide it)
 				const cardContainer = cardAnchor.parentElement!
