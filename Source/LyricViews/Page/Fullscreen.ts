@@ -964,10 +964,7 @@ export default class PageView implements Giveable {
 						closeButton,
 						{
 							...Spotify.TippyProps,
-							content: (
-								makeSpotifyFullscreen ? "Exit Fullscreen"
-								: "Close Cinema"
-							)
+							content: "Close"
 						}
 					)
 					this.Maid.Give(() => closeTooltip.destroy())
@@ -1003,15 +1000,16 @@ export default class PageView implements Giveable {
 
 						// Switch the inner content of our small-view button
 						smallViewTooltip.setContent(
-							notFullscreen ? "Exit Cinema"
-							: "Exit Fullscreen"
+							notFullscreen ? "__WAITING__"
+							: "Back to Cinema"
 						)
 						smallViewButton.innerHTML = (
-							notFullscreen ? Icons.SmallerView
+							notFullscreen ? ""
 							: Icons.FullscreenClose
 						)
 
 						// Hide our fullscreen button (since we're already in fullscreen!)
+						smallViewButton.style.display = (notFullscreen ? "none" : "")
 						fullscreenButton.style.display = (
 							notFullscreen ? ""
 							: "none"
