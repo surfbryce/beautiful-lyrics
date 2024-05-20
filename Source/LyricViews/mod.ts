@@ -177,10 +177,13 @@ OnSpotifyReady
 
 				// Immediately add our class to the top container
 				const backgroundMaid = nowPlayingMaid.Give(new Maid())
+				let backgroundApplied = false
 				const CheckDynamicBackground = () => {
-					if (SpotifyHistory.location.pathname.startsWith("/BeautifulLyrics")) {
+					if (SpotifyHistory.location.pathname === "/BeautifulLyrics/Fullscreen") {
 						backgroundMaid.CleanUp()
-					} else {
+						backgroundApplied = false
+					} else if (backgroundApplied === false) {
+						backgroundApplied = true
 						ApplyDynamicBackground(
 							sidebar.querySelector<HTMLDivElement>(".main-buddyFeed-container")!,
 							backgroundMaid
