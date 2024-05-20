@@ -1,12 +1,12 @@
 // Import Types
-import { type TransformedLyrics } from "jsr:@socali/spices/Spicetify/Services/Player"
+import { type TransformedLyrics } from "@socali/Spices/Player"
 
 // Web-Modules
 import { Maid, Giveable } from "jsr:@socali/modules/Maid"
 import { OnPreRender } from "jsr:@socali/modules/Scheduler"
 
 // Spices
-import { Timestamp, TimeStepped, SeekTo } from "jsr:@socali/spices/Spicetify/Services/Player"
+import { Timestamp, TimeStepped, SeekTo } from "@socali/Spices/Player"
 
 // Our Types
 import { BaseVocals, SyncedVocals } from "./LyricsRenderer/Types.d.ts"

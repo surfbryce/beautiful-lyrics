@@ -9,7 +9,7 @@ import {
 	Spotify,
 	SpotifyHistory
 } from "jsr:@socali/spices/Spicetify/Services/Session"
-import { SongLyrics } from "jsr:@socali/spices/Spicetify/Services/Player"
+import { SongLyrics } from "@socali/Spices/Player"
 
 // Our Modules
 import LyricsRenderer from "../../Modules/LyricsRenderer.ts"
