@@ -24,7 +24,7 @@ import {
 	IsLiked, IsLikedChanged, SetIsLiked,
 
 	SongDetails, SongDetailsLoaded, HaveSongDetailsLoaded
-} from "jsr:@socali/spices/Spicetify/Services/Player"
+} from "@socali/Spices/Player"
 import {
 	GetPlaylistsAndFolders,
 	GetPlaylistDetails, GetPlaylistContents,
@@ -40,7 +40,7 @@ import Button from "../../Components/Button.ts"
 
 // Our Modules
 import { CreateLyricsRenderer, SetupRomanizationButton } from "./Shared.ts"
-import { CreateElement } from "../Shared.ts"
+import { CreateElement, ApplyDynamicBackground } from "../Shared.ts"
 import LyricViewIcons from "../Icons.ts"
 import Icons from "./Icons.ts"
 import { RunAnimation } from "./Animator.ts"
@@ -205,6 +205,9 @@ export default class PageView implements Giveable {
 
 		// Create our container
 		const container = this.Maid.Give(CreateElement<HTMLDivElement>(Container))
+
+		// Apply our dynamic background
+		ApplyDynamicBackground(container, this.Maid)
 
 		// Handle lyric-rendering changes
 		const content = container.querySelector<HTMLDivElement>(".Content")!
