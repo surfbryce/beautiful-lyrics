@@ -1,0 +1,58 @@
+name: 'Bug Report'
+description: 'Reporting Helps Beautiful Lyrics Improve'
+title: '[Bug]: '
+labels: ['Extension Bug']
+assignees: surfbryce
+
+body:
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Bug Report Checklist
+      description: Please check off the following items before submitting your bug report.
+      options:
+        - label: '**If you are making a Bug Report about the Extension being broken in some way, read this**: https://github.com/surfbryce/beautiful-lyrics/wiki/Making-a-Bug-Report#there-is-something-wrong-with-the-extension-not-lyrics'
+          required: true
+        - label: '**If you are making a Bug Report about Lyrics in some way, read this**: https://github.com/surfbryce/beautiful-lyrics/wiki/Making-a-Bug-Report#song-lyrics-are-missing-are-incorrect-or-arent-the-best-synced-version'
+          required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also tell us, what did you expect to happen?
+
+  - type: input
+    id: country
+    attributes:
+      label: The country you are from
+      description: Spotify doesn't work in some countries, and my extension has issues with VPNs, this is IMPORTANT
+      placeholder: United States
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Spotify/Spicetify Version
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: What os are you seeing the problem on?
+      multiple: true
+      options:
+        - Windows
+        - Mac
+        - Linux
+
+  - type: input
+    id: problem-files
+    attributes:
+      label: Spotify HTML/CSS files when the Issue is ACTIVELY happening
+
+  - type: textarea
+    id: console-screenshot
+    attributes:
+      label: Screenshot of the entire Console
+      description: Please provide a screenshot of the entire Console. This will help us diagnose the issue.
