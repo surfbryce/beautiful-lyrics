@@ -19,7 +19,7 @@ body:
     id: song-and-artist-names
     attributes:
       label: Song and Artist Names
-      description: Please list the song names and who they are by in a list. Each list item should be in this format: "X. Song Name // Song Artists"
+      description: 'Please list the song names and who they are by in a list. Each list item should be in this format: "Song Name // Song Artists"'
       placeholder: |
         Song Name // Song Artists
         Song Name // Song Artists
