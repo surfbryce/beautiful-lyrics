@@ -1,0 +1,26 @@
+name: Song is Missing Lyrics
+description: ''
+title: 'Song Name // Song Artists'
+labels: ['Missing Lyrics']
+
+body:
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Missing Lyrics Checklist
+      description: Please check off the following items before submitting your missing lyrics report.
+      options:
+        - label: IF you just have one song, put the song name and artist in the Bug Report Title, it should be in this format: "Song Name // Song Artists"
+          required: true
+        - label: IF you have multiple songs you want to report, have the title mention that there are multiple songs without lyrics, and then put all the song names and who they are by in a list. Each list item should be in this format: "X. Song Name // Song Artists"
+          required: true
+
+  - type: textarea
+    id: song-and-artist-names
+    attributes:
+      label: Song and Artist Names
+      description: Please list the song names and who they are by in a list. Each list item should be in this format: "X. Song Name // Song Artists"
+      placeholder: |
+        1. Song Name // Song Artists
+        2. Song Name // Song Artists
+        3. Song Name // Song Artists

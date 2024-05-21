@@ -1,0 +1,27 @@
+name: Song doesn't have the Best Synced Version
+description: ''
+title: 'Song Name // Song Artists'
+labels: ['Improve Lyric Sync']
+
+body:
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Missing Lyrics Checklist
+      description: Please check off the following items before submitting your missing lyrics report.
+      - label: FIRST, for any song you want to report, check Musixmatch and check to see if the Sync Type is better than Beautiful Lyrics.
+        required: true
+      - label: IF you have just one song, make the bug-report title the song name and the artists who made it ("Song Name // Song Artists")
+        required: true
+      - label: IF you have multiple songs you want to report, have the title mention that there are multiple songs with worse synced versions that Musixmatch, for the contents of your bug-report, list them by their song name and who it is by ("Song Name // Song Artists")
+        required: true
+
+  - type: textarea
+    id: song-and-artist-names
+    attributes:
+      label: Song and Artist Names
+      description: Please list the song names and who they are by in a list. Each list item should be in this format: "X. Song Name // Song Artists"
+      placeholder: |
+        Song Name // Song Artists
+        Song Name // Song Artists
+        Song Name // Song Artists
