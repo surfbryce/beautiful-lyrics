@@ -2,7 +2,7 @@
 import { UpdateNoticeConfiguration } from "jsr:@socali/spices/AutoUpdate/UpdateNotice"
 
 // Spices
-import { GlobalMaid, OnSpotifyReady } from "jsr:@socali/spices/Spicetify/Services/Session"
+import { GlobalMaid, OnSpotifyReady } from "@socali/Spices/Session"
 import { GetInstantStore } from "jsr:@socali/spices/Spicetify/Services/Cache"
 
 // Web-Modules
