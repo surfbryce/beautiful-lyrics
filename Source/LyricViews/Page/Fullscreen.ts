@@ -13,7 +13,7 @@ import type PlaylistItemMetadata from "jsr:@socali/spices/Spicetify/Types/App/Pl
 import {
 	Spotify,
 	SpotifyHistory, SpotifyPlayer
-} from "jsr:@socali/spices/Spicetify/Services/Session"
+} from "@socali/Spices/Session"
 import {
 	IsPlaying, IsPlayingChanged, SetIsPlaying,
 	Timestamp, TimeStepped, SeekTo, GetTimestampString,
@@ -1069,6 +1069,7 @@ export default class PageView implements Giveable {
 					const OnFullscreenChange = () => {
 						if (
 							(document.fullscreenElement === null)
+							&& makeSpotifyFullscreen
 							&& (exitedFullscreenFromButton === undefined)
 						) {
 							this.Close()
