@@ -59,7 +59,7 @@ body:has(.SliderBar.Active) {
 .BeautifulLyricsBackground {
 	// This is the overarching container, the parent of the container class
 	overflow: hidden;
-	position: static;
+	position: relative;
 
 	// This is needed so that the gradient-background can be visible
 	&.main-nowPlayingView-sectionHeaderSpacing.main-nowPlayingView-lyricsGradient, .main-buddyFeed-content {
