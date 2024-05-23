@@ -160,6 +160,10 @@ body:has(.BeautifulLyricsPage) {
 }
 
 // Fullscreen Page
+body:has(.BeautifulLyricsPage.Fullscreen) {
+	overflow: hidden !important;
+}
+
 .BeautifulLyricsPage.Fullscreen {
 	.Content {
 		/* Good PlayPanel Values
@@ -1264,9 +1268,13 @@ body:has(.BeautifulLyricsPage) {
 }
 
 // External Container View Support
-div[class=""]:has(.BeautifulLyricsPage) {
+div[class=""], div.os-host {
 	&:has(.BeautifulLyricsPage) {
 		container-type: size;
+
+		main {
+			display: none;
+		}
 
 		.main-view-container__scroll-node-child-spacer, .main-view-container__scroll-node-child {
 			min-height: unset !important;
