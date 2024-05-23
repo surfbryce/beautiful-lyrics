@@ -14,7 +14,7 @@ import {
 	GlobalMaid,
 	OnSpotifyReady,
 	HistoryLocation, SpotifyHistory, SpotifyPlaybar
-} from "jsr:@socali/spices/Spicetify/Services/Session"
+} from "@socali/Spices/Session"
 import {
 	Song, SongChanged,
 	SongLyrics, SongLyricsLoaded, HaveSongLyricsLoaded
@@ -36,7 +36,8 @@ const ViewMaid = GlobalMaid.Give(new Maid())
 const LoadingLyricsCard = `<div class="LoadingLyricsCard Loading"></div>`
 
 // DOM Search Constants
-const MainPage = ".Root__main-view .main-view-container div[data-overlayscrollbars-viewport]"
+const CurrentMainPage = ".Root__main-view .main-view-container div[data-overlayscrollbars-viewport]"
+const LegacyMainPage = ".Root__main-view .main-view-container .os-host"
 const RightSidebar = ".Root__right-sidebar"
 const CardInsertAnchor = ".main-nowPlayingView-nowPlayingWidget"
 const SpotifyCardViewQuery = ".main-nowPlayingView-section:not(:is(#BeautifulLyrics-CardView)):has(.main-nowPlayingView-lyricsTitle)"
@@ -155,7 +156,10 @@ OnSpotifyReady
 			// Handle checking to see if the NowPlaying view is open
 			const CheckForNowPlaying = () => {
 				// First check to see if we have multiple elements or not (should only be one when not in use)
-				if (sidebar.children.length === 1) {
+				if (
+					(sidebar.querySelector("aside") === null)
+					&& (sidebar.children.length === 1)
+				) {
 					ViewMaid.Clean("NowPlayingView")
 					return
 				}
@@ -245,6 +249,7 @@ OnSpotifyReady
 .then( // Location Handler
 	() => {
 		let pageContainer: HTMLDivElement
+		let pageContainerIsLegacy = false
 
 		const HandleSpotifyLocation = (location: HistoryLocation) => {
 			// Remove our previous page-view
@@ -253,7 +258,7 @@ OnSpotifyReady
 			// Now handle our page-view
 			if (location.pathname === "/BeautifulLyrics/Page") {
 				SetPlaybarPageIconActiveState(true)
-				ActivePageView = ViewMaid.Give(new ContainedPageView(pageContainer), "PageView")
+				ActivePageView = ViewMaid.Give(new ContainedPageView(pageContainer, pageContainerIsLegacy), "PageView")
 				ActivePageView.Closed.Connect(() => SetPlaybarPageIconActiveState(false))
 				ActivePageView.Closed.Connect(() => ActivePageView = undefined)
 			} else if (location.pathname === "/BeautifulLyrics/Fullscreen") {
@@ -264,11 +269,20 @@ OnSpotifyReady
 
 		// Wait until we find our MainPageContainer
 		const SearchDOM = () => {
-			const possibleContainer = document.querySelector<HTMLDivElement>(MainPage) ?? undefined
+			// Go through each container possibility
+			let possibleContainer = document.querySelector<HTMLDivElement>(CurrentMainPage) ?? undefined
+			let possiblyLegacy = false
+			if (possibleContainer === undefined) {
+				possibleContainer = document.querySelector<HTMLDivElement>(LegacyMainPage) ?? undefined
+				possiblyLegacy = true
+			}
+
+			// If we still have no container we need to wait again for it
 			if (possibleContainer === undefined) {
 				ViewMaid.Give(Defer(SearchDOM))
 			} else {
 				pageContainer = possibleContainer
+				pageContainerIsLegacy = possiblyLegacy
 				HandleSpotifyLocation(SpotifyHistory.location)
 				ViewMaid.Give(SpotifyHistory.listen(HandleSpotifyLocation))
 			}
