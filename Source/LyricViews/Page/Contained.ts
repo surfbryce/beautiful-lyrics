@@ -9,7 +9,7 @@ import { Timeout } from "jsr:@socali/modules/Scheduler"
 import {
 	Spotify,
 	SpotifyHistory
-} from "jsr:@socali/spices/Spicetify/Services/Session"
+} from "@socali/Spices/Session"
 import { Song, SongChanged } from "@socali/Spices/Player"
 
 // Our Modules
@@ -54,7 +54,7 @@ export default class PageView implements Giveable {
 	public readonly Closed = this.Maid.Destroyed
 
 	// Constructor
-	constructor(page: HTMLDivElement) {
+	constructor(page: HTMLDivElement, isLegacy: boolean) {
 		// Determine our last-page
 		const lastPage = SpotifyHistory.entries[SpotifyHistory.entries.length - 2]
 		if ((lastPage !== undefined) && (lastPage.pathname.startsWith("/BeautifulLyrics") === false)) {
@@ -118,7 +118,12 @@ export default class PageView implements Giveable {
 		}
 
 		// Now parent our container/header
-		page.querySelector<HTMLDivElement>(HeaderQuery)!.appendChild(header)
+		const headerContainer = page.querySelector<HTMLDivElement>(HeaderQuery)!
+		if (isLegacy) {
+			page.style.containerType = "inline-size"
+			this.Maid.Give(() => page.style.containerType = "")
+		}
+		headerContainer.appendChild(header)
 		page.appendChild(container)
 
 		// Handle watching for no-songs
