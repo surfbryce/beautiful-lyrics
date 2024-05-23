@@ -8,7 +8,7 @@ import { Maid, Giveable } from "jsr:@socali/modules/Maid"
 import {
 	Spotify,
 	SpotifyHistory
-} from "jsr:@socali/spices/Spicetify/Services/Session"
+} from "@socali/Spices/Session"
 import { SongLyrics } from "@socali/Spices/Player"
 
 // Our Modules

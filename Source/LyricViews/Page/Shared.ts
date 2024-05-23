@@ -2,7 +2,7 @@
 import { Maid } from "jsr:@socali/modules/Maid"
 
 // Spices
-import { Spotify } from "jsr:@socali/spices/Spicetify/Services/Session"
+import { Spotify } from "@socali/Spices/Session"
 import {
 	SongChanged,
 	SongLyrics, SongLyricsLoaded, HaveSongLyricsLoaded
