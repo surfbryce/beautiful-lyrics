@@ -132,7 +132,7 @@ body:has(.SliderBar.Active) {
 				translate: -50% -50%;
 			}*/
 
-			filter: blur(40px); // Blur-related
+			filter: hue-rotate(var(--PlaceholderHueShift)) blur(40px); // Blur-related
 			border-radius: 100em; // Blur-related
 		}
 

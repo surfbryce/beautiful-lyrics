@@ -710,8 +710,8 @@ body:has(.BeautifulLyricsPage.Fullscreen) {
 							fill: #fff;
 	
 							position: absolute;
-							left: calc(50cqw - (var(--Height) / 2) + 0.45cqw);
-							top: calc((var(--HitboxHeight) / 2) - (var(--Height) / 2) + 1.75cqh);
+							left: calc(50cqw - (var(--Height) / 2) + 0.5cqw); // 0.45
+							top: calc((var(--HitboxHeight) / 2) - (var(--Height) / 2) + 0.9cqh); // 1.75
 						}
 
 						.Loading {
@@ -960,6 +960,8 @@ body:has(.BeautifulLyricsPage.Fullscreen) {
 
 					opacity: 0.95;
 					box-shadow: #00000045 0 9px 20px 0px;
+
+					filter: hue-rotate(var(--CoverArtHueShift));
 				}
 
 				&.ControlsVisible {
@@ -1047,7 +1049,8 @@ body:has(.BeautifulLyricsPage.Fullscreen) {
 										* var(--HoverMultiplier)
 									)
 								)
-							);
+							)
+							hue-rotate(var(--CoverArtHueShift));
 						backdrop-filter: blur(calc(10px * var(--CoverArtScale)));
 					}
 				}
