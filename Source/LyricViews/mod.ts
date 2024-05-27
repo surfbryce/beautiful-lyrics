@@ -17,7 +17,8 @@ import {
 } from "@socali/Spices/Session"
 import {
 	Song, SongChanged,
-	SongLyrics, SongLyricsLoaded, HaveSongLyricsLoaded
+	SongLyrics, SongLyricsLoaded, HaveSongLyricsLoaded,
+  SongDetails
 } from "@socali/Spices/Player"
 
 // Components
@@ -149,7 +150,7 @@ OnSpotifyReady
 		const CheckForSidebar = () => {
 			const sidebar = document.querySelector<HTMLDivElement>(RightSidebar)
 			if (sidebar === null) {
-				Defer(CheckForSidebar)
+				ViewMaid.Give(Defer(CheckForSidebar))
 				return
 			}
 
@@ -234,29 +235,16 @@ OnSpotifyReady
 					SongLyricsLoaded.Connect(ShouldCreateCard),
 					SpotifyHistory.listen(ShouldCreateCard)
 				)
-
-				// Watch our cardAnchor parent for when we are removed
-				nowPlayingMaid.Give(
-					new MutationObserver(
-						() => {
-							if (sidebar.contains(cardAnchor) === false) {
-								ViewMaid.Clean("NowPlayingView")
-								ViewMaid.Give(Defer(CheckForNowPlaying))
-							}
-						}
-					)
-				).observe(
-					cardAnchor.parentElement!,
-					{ childList: true }
-				)
 			}
 
 			// Now we can create an observer for just the direct children of the sidebar (determines when visible or not)
-			const sidebarChildObserver = ViewMaid.Give(
-				new MutationObserver(() => ViewMaid.Give(Defer(CheckForNowPlaying), "SidebarObserver"))
-			)
+			const deferSidebarObserverChange = () => ViewMaid.Give(Defer(CheckForNowPlaying), "SidebarObserver")
+			const sidebarChildObserver = ViewMaid.Give(new MutationObserver(deferSidebarObserverChange))
 			CheckForNowPlaying()
 			sidebarChildObserver.observe(sidebar, { childList: true })
+
+			// We also watch for song changes since our cardAnchor could change in place
+			ViewMaid.Give(SongChanged.Connect(deferSidebarObserverChange))
 		}
 		CheckForSidebar()
 	}
