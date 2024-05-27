@@ -19,6 +19,16 @@ body:has(.SliderBar.Active) {
 		background: transparent !important;
 	}
 
+	.BeautifulLyricsBackground div:has(> video) {
+		mask: linear-gradient(
+			180deg,
+			transparent 0,
+			transparent 0px, black 0px,
+			black 70%, transparent 100%,
+			transparent
+		);
+	}
+
 	.BeautifulLyricsBackground .main-trackInfo-artists {
 		opacity: 0.75;
 		filter: brightness(1.15);
