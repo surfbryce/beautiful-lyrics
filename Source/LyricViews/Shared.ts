@@ -1,13 +1,19 @@
 // Imported Types
 import type { RomanizedLanguage } from "@socali/Spices/Player"
 
+// NPM Packages
+import seedrandom from "npm:seedrandom"
+
 // Web-Modules
 import { Signal } from "jsr:@socali/modules/Signal"
 import type { Maid } from "jsr:@socali/modules/Maid"
 
 // Spices
 import { GetInstantStore } from "jsr:@socali/spices/Spicetify/Services/Cache"
-import { Song, SongChanged } from "@socali/Spices/Player"
+import {
+	Song, SongChanged,
+	SongContext, SongContextChanged
+} from "@socali/Spices/Player"
 
 // Our store
 export const Store = GetInstantStore<
@@ -222,6 +228,30 @@ export const GetBlurredCoverArt = (
 // Handle applying our dynamic-background
 const BackgroundClassName = "BeautifulLyricsBackground"
 const BackgroundElements = ["Front", "Back", "BackCenter"]
+
+export const GetCoverArtForSong = (): [string, (number | undefined)] => {
+	const coverArt = (
+		Song?.IsLocal
+		? (
+			Song?.CoverArt
+			?? (
+				(SongContext?.CoverArt !== undefined)
+				? `spotify:image:${SongContext.CoverArt}`
+				: undefined
+			)
+		)
+		: Song?.CoverArt.Big
+	)
+	if (coverArt === undefined) {
+		return [
+			"https://images.socalifornian.live/SongPlaceholderFull.png",
+			(75 + ((360 - 75) * seedrandom(Song?.Uri)()))
+		]
+	} else {
+		return [coverArt, undefined]
+	}
+}
+
 export const ApplyDynamicBackground = (element: HTMLElement, maid: Maid) => {
 	// Give our element the class
 	{
@@ -254,13 +284,15 @@ export const ApplyDynamicBackground = (element: HTMLElement, maid: Maid) => {
 
 	// Update our background-images
 	const UpdateBackgroundImages = () => {
-		const coverArt = (Song?.CoverArt.Big || "")
+		const [coverArt, placeholderHueShift] = GetCoverArtForSong()
 		for (const element of elements) {
+			element.style.setProperty("--PlaceholderHueShift", `${placeholderHueShift ?? 0}deg`)
 			element.src = coverArt
 		}
 	}
 	UpdateBackgroundImages()
 	maid.Give(SongChanged.Connect(UpdateBackgroundImages))
+	maid.Give(SongContextChanged.Connect(UpdateBackgroundImages))
 
 	// Add our container to the background
 	element.prepend(backgroundContainer)
