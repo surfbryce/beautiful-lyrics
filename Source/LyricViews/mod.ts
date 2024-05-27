@@ -234,6 +234,21 @@ OnSpotifyReady
 					SongLyricsLoaded.Connect(ShouldCreateCard),
 					SpotifyHistory.listen(ShouldCreateCard)
 				)
+
+				// Watch our cardAnchor parent for when we are removed
+				nowPlayingMaid.Give(
+					new MutationObserver(
+						() => {
+							if (sidebar.contains(cardAnchor) === false) {
+								ViewMaid.Clean("NowPlayingView")
+								ViewMaid.Give(Defer(CheckForNowPlaying))
+							}
+						}
+					)
+				).observe(
+					cardAnchor.parentElement!,
+					{ childList: true }
+				)
 			}
 
 			// Now we can create an observer for just the direct children of the sidebar (determines when visible or not)
