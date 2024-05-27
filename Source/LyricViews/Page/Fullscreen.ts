@@ -23,7 +23,8 @@ import {
 	Song, SongChanged, GetDurationString,
 	IsLiked, IsLikedChanged, SetIsLiked,
 
-	SongDetails, SongDetailsLoaded, HaveSongDetailsLoaded
+	SongDetails, SongDetailsLoaded, HaveSongDetailsLoaded,
+  SongContext
 } from "@socali/Spices/Player"
 import {
 	GetPlaylistsAndFolders,
@@ -40,7 +41,7 @@ import Button from "../../Components/Button.ts"
 
 // Our Modules
 import { CreateLyricsRenderer, SetupRomanizationButton } from "./Shared.ts"
-import { CreateElement, ApplyDynamicBackground } from "../Shared.ts"
+import { CreateElement, GetCoverArtForSong, ApplyDynamicBackground } from "../Shared.ts"
 import LyricViewIcons from "../Icons.ts"
 import Icons from "./Icons.ts"
 import { RunAnimation } from "./Animator.ts"
@@ -242,6 +243,7 @@ export default class PageView implements Giveable {
 			const trackTitleContainer = trackDetailsSpace.querySelector<HTMLDivElement>(".Title")!
 			const trackTitle = trackTitleContainer.querySelector<HTMLSpanElement>("span")!
 			const trackReleaseDate = trackDetailsSpace.querySelector<HTMLSpanElement>(".Date")!
+			const trackReleaseDetailsSeparator = trackDetailsSpace.querySelector<HTMLDivElement>(".Separator")!
 			const trackArtistsContainer = trackDetailsSpace.querySelector<HTMLDivElement>(".Artists")!
 			const trackArtists = trackArtistsContainer.querySelector<HTMLSpanElement>("span")!
 
@@ -1511,6 +1513,9 @@ export default class PageView implements Giveable {
 
 					// Determine if we should show that we're loading
 					if (HaveSongDetailsLoaded === false) {
+						coverArt.style.setProperty("--CoverArtHueShift", "0deg")
+						coverArt.style.backgroundColor = ""
+
 						mediaSpace.classList.toggle("Loading", true)
 						trackTitleContainer.classList.toggle("Loading", true)
 						trackArtistsContainer.classList.toggle("Loading", true)
@@ -1531,9 +1536,32 @@ export default class PageView implements Giveable {
 
 					// Determine if we need to show a custom message or just show the details
 					if (SongDetails !== undefined) {
-						coverArt.src = Song!.CoverArt.Big
+						const [coverArtUrl, placeholderHueShift] = GetCoverArtForSong()
+						coverArt.style.backgroundColor = (placeholderHueShift === undefined) ? "" : "white"
+						coverArt.style.setProperty("--CoverArtHueShift", `${placeholderHueShift ?? 0}deg`)
+						coverArt.src = coverArtUrl
 
-						{
+						if (SongDetails.IsLocal) {
+							if ((SongContext === undefined) || (SongContext.Type === "Other")) {
+								const trackTitleLink = detailsMaid.Give(document.createElement("span"))
+								trackTitleLink.textContent = SongDetails.Name
+								trackTitle.appendChild(trackTitleLink)
+							} else {
+								const trackTitleLink = detailsMaid.Give(document.createElement("a"))
+								trackTitleLink.href = (
+									(SongContext.Type === "LocalFiles") ? "/collection/local-files"
+									: (SongContext.Type === "Playlist") ? `/playlist/${SongContext.Id}`
+									: (SongContext.Type === "Album") ? `/album/${SongContext.Id}`
+									: ""
+								)
+								trackTitleLink.textContent = SongDetails.Name
+
+								trackTitleLink.addEventListener("click", OpenSpotifyPage)
+								detailsMaid.Give(() => trackTitleLink.removeEventListener("click", OpenSpotifyPage))
+
+								trackTitle.appendChild(trackTitleLink)
+							}
+						} else {
 							const trackTitleLink = detailsMaid.Give(document.createElement("a"))
 							trackTitleLink.href = `/album/${SongDetails.Album.Id}`
 							trackTitleLink.textContent = SongDetails.Name
@@ -1544,24 +1572,51 @@ export default class PageView implements Giveable {
 							trackTitle.appendChild(trackTitleLink)
 						}
 
-						for (const [index, artist] of SongDetails.Artists.entries()) {
-							const artistElement = detailsMaid.Give(document.createElement("a"))
-							artistElement.href = `/artist/${artist.id}`
-							artistElement.textContent = artist.name
-
-							if (index > 0) {
-								const separator = detailsMaid.Give(document.createElement("span"))
-								separator.textContent = ", "
-								trackArtists.appendChild(separator)
+						if (SongDetails.Artists !== undefined) {
+							if (SongDetails.IsLocal) {
+								for (const [index, artistName] of SongDetails.Artists.entries()) {
+									const artistElement = detailsMaid.Give(document.createElement("span"))
+									artistElement.textContent = artistName
+		
+									if (index > 0) {
+										const separator = detailsMaid.Give(document.createElement("span"))
+										separator.textContent = ", "
+										trackArtists.appendChild(separator)
+									}
+		
+									trackArtists.appendChild(artistElement)
+								}
+							} else {
+								for (const [index, artist] of SongDetails.Artists.entries()) {
+									const artistElement = detailsMaid.Give(document.createElement("a"))
+									artistElement.href = `/artist/${artist.Id}`
+									artistElement.textContent = artist.Name
+		
+									if (index > 0) {
+										const separator = detailsMaid.Give(document.createElement("span"))
+										separator.textContent = ", "
+										trackArtists.appendChild(separator)
+									}
+		
+									artistElement.addEventListener("click", OpenSpotifyPage)
+									detailsMaid.Give(() => artistElement.removeEventListener("click", OpenSpotifyPage))
+		
+									trackArtists.appendChild(artistElement)
+								}
 							}
-
-							artistElement.addEventListener("click", OpenSpotifyPage)
-							detailsMaid.Give(() => artistElement.removeEventListener("click", OpenSpotifyPage))
-
-							trackArtists.appendChild(artistElement)
 						}
 
-						trackReleaseDate.textContent = SongDetails.ReleaseDate
+						if (SongDetails.IsLocal) {
+							trackReleaseDate.textContent = ""
+						} else {
+							trackReleaseDate.textContent = SongDetails.Album.ReleaseDate.year.toString()
+						}
+
+						if (SongDetails.IsLocal) {
+							trackReleaseDetailsSeparator.style.display = "none"
+						} else {
+							trackReleaseDetailsSeparator.style.display = ""
+						}
 					}
 				}
 				Update()
