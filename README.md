@@ -35,4 +35,4 @@ Never worry about Updating ever! **Beautiful Lyrics is ALWAYS Up-to-Date because
 [![GitHub Wiki Link](https://img.shields.io/badge/wiki-documentation-forestgreen)](https://github.com/surfbryce/beautiful-lyrics/wiki)
 
 ## Have an issue/idea? Go ahead and send them!
-[![GitHub Bug Issues Link](https://img.shields.io/github/issues/surfbryce/beautiful-lyrics/bug)](https://github.com/surfbryce/beautiful-lyrics/issues)
+[![GitHub Bug Issues Link](https://img.shields.io/github/issues/surfbryce/beautiful-lyrics?color=green)
