@@ -710,8 +710,8 @@ body:has(.BeautifulLyricsPage.Fullscreen) {
 							fill: #fff;
 	
 							position: absolute;
-							left: calc(50cqw - (var(--Height) / 2) + 0.525cqw); // 0.45
-							top: calc((var(--HitboxHeight) / 2) - (var(--Height) / 2) + 0.9cqh); // 1.75
+							left: calc(50cqw - (var(--Height) / 2) + 0.5cqw); // 0.45
+							top: calc((var(--HitboxHeight) / 2) - (var(--Height) / 2) + 1.6cqh); // 1.75
 						}
 
 						.Loading {
