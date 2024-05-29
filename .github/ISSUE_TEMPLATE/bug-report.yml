@@ -61,6 +61,8 @@ body:
       label: "Information Checklist"
       description: "Make *SURE* that you have all of the below, if not, your Bug Report will be **DELETED**."
       options:
+        - label: "**Spotify/Spicetify Information**"
+          required: true
         - label: "**Spotify HTML File**"
           required: true
         - label: "**Spotify CSS File**"
