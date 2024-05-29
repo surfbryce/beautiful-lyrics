@@ -1,14 +1,14 @@
-name: 'Extension Bug Report'
-description: 'Bugs related to the Extension itself. Use the Lyric templates for Lyric issues.'
-title: ''
-labels: ['Extension Bug']
+name: "Extension Bug Report"
+description: "Bugs related to the Extension itself. Use the Lyric templates for Lyric issues."
+title: ""
+labels: ["Extension Bug"]
 assignees: surfbryce
 
 body:
   - type: dropdown
     id: installation-type
     attributes:
-      label: How did you install Beautiful Lyrics?
+      label: "How did you install Beautiful Lyrics?"
       multiple: false
       options:
         - Marketplace
@@ -18,24 +18,24 @@ body:
   - type: textarea
     id: explanation
     attributes:
-      label: 'What is the Bug/Issue?'
-      description: 'How did you expect it to work? If applicable, provide screenshots of the Bug/Issue!'
+      label: "What is the Bug/Issue?"
+      description: "How did you expect it to work? If applicable, provide screenshots of the Bug/Issue!"
     validations:
       required: true
 
   - type: input
     id: country
     attributes:
-      label: 'What Country are you from?'
-      description: 'Spotify isn't allowed in certain Countries, but Beautiful Lyrics *should* work with a VPN, so this helps determine if it isn't.'
-      placeholder: 'United States'
+      label: "What Country are you from?"
+      description: "Spotify isn"t allowed in certain Countries, but Beautiful Lyrics *should* work with a VPN, so this helps determine if it isn't."
+      placeholder: "United States"
     validations:
       required: true
 
   - type: dropdown
     id: os
     attributes:
-      label: What Operating System are you using?
+      label: "What Operating System are you using?"
       multiple: false
       options:
         - Windows
@@ -47,25 +47,25 @@ body:
   - type: textarea
     id: local-information
     attributes:
-      label: 'Spotify/Spicetify Information'
-      description: 'To learn how to get this information, visit: https://github.com/surfbryce/beautiful-lyrics/wiki/How%E2%80%90To:-Extension-Bug-Report#getting-your-spotifyspicetify-information'
+      label: "Spotify/Spicetify Information"
+      description: "To learn how to get this information, visit: https://github.com/surfbryce/beautiful-lyrics/wiki/Extension-Bug-Reporting#getting-your-spotifyspicetify-information"
     validations:
       required: true
   - type: textarea
     id: extension-information
     attributes:
-      label: 'Spotify HTML/CSS and Console Screenshots'
-      description: 'To learn how to get this information, visit: https://github.com/surfbryce/beautiful-lyrics/wiki/How%E2%80%90To:-Extension-Bug-Report#getting-your-spotify-htmlcss-files'
+      label: "Spotify HTML/CSS and Console Screenshots"
+      description: "To learn how to get this information, visit: https://github.com/surfbryce/beautiful-lyrics/wiki/Extension-Bug-Reporting#getting-your-spotify-htmlcss-files"
     validations:
       required: true
   - type: checkboxes
       id: extension-information-checklist
       attributes:
-        description: 'Make *SURE* that you have all of the below, if not, your Bug Report will be **DELETED**.'
+        description: "Make *SURE* that you have all of the below, if not, your Bug Report will be **DELETED**."
         options:
-          - label: '**Spotify HTML File**'
+          - label: "**Spotify HTML File**"
             required: true
-          - label: '**Spotify CSS File**'
+          - label: "**Spotify CSS File**"
             required: true
-          - label: '**Screenshots of Developer Tools Console Tab**'
+          - label: "**Screenshots of Developer Tools Console Tab**"
             required: true
