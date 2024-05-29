@@ -6,7 +6,7 @@ assignees: surfbryce
 
 body:
   - type: dropdown
-    id: installation-type
+    id: "installation-type"
     attributes:
       label: "How did you install Beautiful Lyrics?"
       multiple: false
