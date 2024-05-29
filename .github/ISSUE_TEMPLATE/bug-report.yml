@@ -16,14 +16,14 @@ body:
     validations:
       required: true
   - type: textarea
-    id: explanation
+    id: "explanation"
     attributes:
       label: "What is the Bug/Issue?"
       description: "How did you expect it to work? If applicable, provide screenshots of the Bug/Issue!"
     validations:
       required: true
   - type: input
-    id: country
+    id: "country"
     attributes:
       label: "What Country are you from?"
       description: "Spotify isn"t allowed in certain Countries, but Beautiful Lyrics *should* work with a VPN, so this helps determine if it isn't."
@@ -31,7 +31,7 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: os
+    id: "os"
     attributes:
       label: "What Operating System are you using?"
       multiple: false
@@ -42,21 +42,21 @@ body:
     validations:
       required: true
   - type: textarea
-    id: local-information
+    id: "local-information"
     attributes:
       label: "Spotify/Spicetify Information"
       description: "To learn how to get this information, visit: https://github.com/surfbryce/beautiful-lyrics/wiki/Extension-Bug-Reporting#getting-your-spotifyspicetify-information"
     validations:
       required: true
   - type: textarea
-    id: extension-information
+    id: "extension-information"
     attributes:
       label: "Spotify HTML/CSS and Console Screenshots"
       description: "To learn how to get this information, visit: https://github.com/surfbryce/beautiful-lyrics/wiki/Extension-Bug-Reporting#getting-your-spotify-htmlcss-files"
     validations:
-      required: true
+      required: trues
   - type: checkboxes
-      id: extension-information-checklist
+      id: "extension-information-checklist"
       attributes:
         description: "Make *SURE* that you have all of the below, if not, your Bug Report will be **DELETED**."
         options:
