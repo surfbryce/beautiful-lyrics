@@ -9,5 +9,12 @@
 			"ESNext",
 			"DOM", "DOM.Iterable"
 		]
+	},
+
+	"imports": {
+		"@socali/Spices/Player": "jsr:@socali/spices/Spicetify/Services/Player",
+		"@socali/Spices/Player_TESTING": "../../Spices/Spicetify/Services/Player/mod.ts",
+		"@socali/Spices/Session": "jsr:@socali/spices/Spicetify/Services/Session",
+		"@socali/Spices/Session_TESTING": "../../Spices/Spicetify/Services/Session.ts"
 	}
 }
