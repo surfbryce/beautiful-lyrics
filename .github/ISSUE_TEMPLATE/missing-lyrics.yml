@@ -2,6 +2,7 @@ name: "Missing Lyric"
 description: "Lyrics that are Missing for a Song."
 title: "First Songs" Name // Artists"
 labels: ["Missing Lyrics"]
+assignees: surfbryce
 
 body:
   - type: checkboxes

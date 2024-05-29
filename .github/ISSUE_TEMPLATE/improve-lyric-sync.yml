@@ -2,6 +2,7 @@ name: "Improve Lyrics Sync-Type"
 description: "Lyrics that don"t have the best Sync-Type. Ex., having Line lyrics when they should be Karaoke."
 title: "First Songs" Name // Artists"
 labels: ["Improve Lyric Sync"]
+assignees: surfbryce
 
 body:
   - type: checkboxes

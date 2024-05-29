@@ -22,7 +22,6 @@ body:
       description: "How did you expect it to work? If applicable, provide screenshots of the Bug/Issue!"
     validations:
       required: true
-
   - type: input
     id: country
     attributes:
@@ -31,7 +30,6 @@ body:
       placeholder: "United States"
     validations:
       required: true
-
   - type: dropdown
     id: os
     attributes:
@@ -43,7 +41,6 @@ body:
         - Linux
     validations:
       required: true
-
   - type: textarea
     id: local-information
     attributes:
