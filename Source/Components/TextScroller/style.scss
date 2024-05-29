@@ -10,7 +10,7 @@
 
 	--TextScrollShift: 0cqw;
 
-	span {
+	&> span {
 		display: block;
 		transform: translateX(calc(-1 * var(--TextScrollShift)));
 	}
@@ -34,7 +34,7 @@
 			width: calc(var(--TextScrollGradientStartMargin) + var(--TextScrollGradientEndMargin));
 		}
 
-		span {
+		&> span {
 			transform: translateX(calc(var(--TextScrollGradientStartMargin) + (-1 * var(--TextScrollShift))));
 		}
 	}
