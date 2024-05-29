@@ -26,7 +26,7 @@ body:
     id: "country"
     attributes:
       label: "What Country are you from?"
-      description: "Spotify isn"t allowed in certain Countries, but Beautiful Lyrics *should* work with a VPN, so this helps determine if it isn't."
+      description: "Spotify isn't allowed in certain Countries, but Beautiful Lyrics *should* work with a VPN, so this helps determine if it isn't."
       placeholder: "United States"
     validations:
       required: true
