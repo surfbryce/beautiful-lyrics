@@ -56,13 +56,13 @@ body:
     validations:
       required: trues
   - type: checkboxes
-      id: "extension-information-checklist"
-      attributes:
-        description: "Make *SURE* that you have all of the below, if not, your Bug Report will be **DELETED**."
-        options:
-        - label: "**Spotify HTML File**"
-          required: true
-        - label: "**Spotify CSS File**"
-          required: true
-        - label: "**Screenshots of Developer Tools Console Tab**"
-          required: true
+    id: "extension-information-checklist"
+    attributes:
+      description: "Make *SURE* that you have all of the below, if not, your Bug Report will be **DELETED**."
+      options:
+      - label: "**Spotify HTML File**"
+        required: true
+      - label: "**Spotify CSS File**"
+        required: true
+      - label: "**Screenshots of Developer Tools Console Tab**"
+        required: true
