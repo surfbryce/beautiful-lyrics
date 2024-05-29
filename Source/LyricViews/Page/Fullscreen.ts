@@ -1,6 +1,12 @@
 // Styles
 import "./style.scss"
 
+// NPM Packages
+import {
+	bindKey, unbindKey,
+	type KeyEvent, type BrowserKeyEventProps
+} from "npm:@rwh/keystrokes"
+
 // Web-Modules
 import { Maid, Giveable } from "jsr:@socali/modules/Maid"
 import Spring from "jsr:@socali/modules/Spring"
@@ -1058,14 +1064,14 @@ export default class PageView implements Giveable {
 					)
 
 					// Listen for escape-key functionality
-					const OnEscapePress = (event: KeyboardEvent) => {
-						if (event.key === "Escape") {
+					const OnEscape = {
+						onReleased: (event: KeyEvent<KeyboardEvent, BrowserKeyEventProps>) => {
 							event.preventDefault()
 							this.Close()
 						}
 					}
-					document.addEventListener("keydown", OnEscapePress)
-					this.Maid.Give(() => document.removeEventListener("keydown", OnEscapePress))
+					bindKey("escape", OnEscape)
+					this.Maid.Give(() => unbindKey("escape", OnEscape))
 
 					// Watch for when our fullscreen state changes (determines if we close ourselves or not)
 					const OnFullscreenChange = () => {

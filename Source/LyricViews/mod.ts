@@ -5,7 +5,10 @@ import "../Stylings/Views.scss"
 // Imported Types
 import Spicetify from "jsr:@socali/spices/Spicetify/Types/App/Spicetify"
 
-// Packages
+// NPM Packages
+import { checkKey } from "npm:@rwh/keystrokes"
+
+// Web Modules
 import { Maid } from "jsr:@socali/modules/Maid"
 import { Defer, Timeout } from "jsr:@socali/modules/Scheduler"
 
@@ -17,8 +20,7 @@ import {
 } from "@socali/Spices/Session"
 import {
 	Song, SongChanged,
-	SongLyrics, SongLyricsLoaded, HaveSongLyricsLoaded,
-  SongDetails
+	SongLyrics, SongLyricsLoaded, HaveSongLyricsLoaded
 } from "@socali/Spices/Player"
 
 // Components
@@ -57,28 +59,12 @@ OnSpotifyReady
 
 		// Lyrics Button
 		{
-			let isPressingShift = false
-			const keyDownHandler = (event: KeyboardEvent) => {
-				if (event.key === "Shift") {
-					isPressingShift = true
-				}
-			}
-			const keyUpHandler = (event: KeyboardEvent) => {
-				if (event.key === "Shift") {
-					isPressingShift = false
-				}
-			}
-			document.addEventListener("keydown", keyDownHandler)
-			document.addEventListener("keyup", keyUpHandler)
-			ViewMaid.Give(() => document.removeEventListener("keydown", keyDownHandler))
-			ViewMaid.Give(() => document.removeEventListener("keyup", keyUpHandler))
-
 			lyricsButton = new SpotifyPlaybar.Button(
 				"Lyrics Page",
 				Icons.LyricsPage,
 				() => {
 					if (ActivePageView === undefined) {
-						SpotifyHistory.push(`/BeautifulLyrics/${isPressingShift ? "Fullscreen" : "Page"}`)
+						SpotifyHistory.push(`/BeautifulLyrics/${checkKey("shift") ? "Fullscreen" : "Page"}`)
 					} else {
 						ActivePageView.Close()
 						ActivePageView = undefined
