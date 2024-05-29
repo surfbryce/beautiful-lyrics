@@ -1,6 +1,6 @@
 name: "Extension Bug Report"
 description: "Bugs related to the Extension itself. Use the Lyric templates for Lyric issues."
-title: "..."
+title: "Summarize the Bug/Issue Here"
 labels: ["Extension Bug"]
 assignees: surfbryce
 
