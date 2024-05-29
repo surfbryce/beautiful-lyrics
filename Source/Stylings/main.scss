@@ -15,13 +15,27 @@ body:has(.SliderBar.Active) {
 		background: transparent;
 	}
 
-	.lyrics-background .main-trackInfo-artists {
+	.BeautifulLyricsBackground div[data-overlayscrollbars-viewport] {
+		background: transparent !important;
+	}
+
+	.BeautifulLyricsBackground div:has(> video) {
+		mask: linear-gradient(
+			180deg,
+			transparent 0,
+			transparent 0px, black 0px,
+			black 70%, transparent 100%,
+			transparent
+		);
+	}
+
+	.BeautifulLyricsBackground .main-trackInfo-artists {
 		opacity: 0.75;
 		filter: brightness(1.15);
 	}
 
 	.main-nowPlayingView-coverArt {
-		opacity: 0.85;
+		opacity: 0.95;
 		box-shadow: #00000045 0 9px 20px 0px;
 	}
 
@@ -42,9 +56,9 @@ body:has(.SliderBar.Active) {
 
 
 // Improves scroll-bar
-.os-host:has(.lyrics-background),
+.os-host:has(.BeautifulLyricsBackground),
 #lyrics-cinema,
-.Root__main-view:has(.lyrics-background) {
+.Root__main-view:has(.BeautifulLyricsBackground) {
 	.os-scrollbar {
 		padding: 5px;
 
@@ -56,10 +70,10 @@ body:has(.SliderBar.Active) {
 }
 
 // This is the entire lyrics configuration used to create the gradient backgrounds
-.lyrics-background {
+.BeautifulLyricsBackground {
 	// This is the overarching container, the parent of the container class
 	overflow: hidden;
-	position: static;
+	position: relative;
 
 	// This is needed so that the gradient-background can be visible
 	&.main-nowPlayingView-sectionHeaderSpacing.main-nowPlayingView-lyricsGradient, .main-buddyFeed-content {
@@ -67,7 +81,7 @@ body:has(.SliderBar.Active) {
 	}
 
 	// These are full-screen background specific classes to make the gradient-background work/show properly
-	.BeautifulLyricsPage &-container {
+	&.BeautifulLyricsPage &-Container {
 		max-width: 35%;
 		max-height: 55%;
 
@@ -77,16 +91,15 @@ body:has(.SliderBar.Active) {
 		filter: saturate(2.5) brightness(0.65); // Blur-related
 	}
 
-	.BeautifulLyricsPage.Fullscreen &-container {
+	&.BeautifulLyricsPage.Fullscreen &-Container {
 		max-width: 20%;
 		max-height: 60%;
 
-		scale: 500% 170%
+		scale: 500% 170%;
 	}
 
 	// These are right-side card background specific classes to adjust for contrast issues
-	&.Root__right-sidebar:has(.main-nowPlayingView-content) &-container {
-		border-radius: 8px;
+	&:is(aside) &-Container {
 		filter: saturate(2) brightness(0.7); // Blur-related
 	}
 
@@ -104,7 +117,7 @@ body:has(.SliderBar.Active) {
 	*/
 
 	// As the name suggests, this contains the color/back images - which make up the gradient itself
-	&-container {
+	&-Container {
 		position: absolute;
 		top: 0;
 		left: 0;
@@ -114,73 +127,62 @@ body:has(.SliderBar.Active) {
 		overflow: hidden;
 
 		filter: saturate(1.5) brightness(0.8); // Blur-related
-	}
 
-	// Sharable properties
-	&-color,
-	&-back,
-	&-back-center {
-		/* This is to align our img element */
-		position: absolute;
-		width: 200%;
-		/*aspect-ratio: 1/1;*/
-		animation: rotate 35s linear infinite;
-
-		/* Align our image to the center of our div */
-		/*img, canvas {
+		// Sharable properties
+		.Front,
+		.Back,
+		.BackCenter {
+			/* This is to align our img element */
 			position: absolute;
-			top: 50%;
-			left: 50%;
-			translate: -50% -50%;
-		}*/
+			width: 200%;
+			/*aspect-ratio: 1/1;*/
+			animation: rotate 35s linear infinite;
 
-		filter: blur(40px); // Blur-related
-		border-radius: 100em; // Blur-related
-	}
+			/* Align our image to the center of our div */
+			/*img, canvas {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				translate: -50% -50%;
+			}*/
 
-	// The primary image which gives the blending effect it's illusional property
-	&-color {
-		right: 0;
-		top: 0;
-		z-index: 10;
+			filter: hue-rotate(var(--PlaceholderHueShift)) blur(40px); // Blur-related
+			border-radius: 100em; // Blur-related
+		}
 
-		/*mix-blend-mode: soft-light;*/
-	}
+		// The primary image which gives the blending effect it's illusional property
+		.Front {
+			right: 0;
+			top: 0;
+			z-index: 10;
 
-	// Additional image to cover space that the primary image doesn't cover (and to develop blob-blending)
-	&-back {
-		left: 0;
-		bottom: 0;
-		z-index: 1;
-		animation-direction: reverse;
-	}
+			/*mix-blend-mode: soft-light;*/
+		}
 
-	// Final image to cover the center
-	&-back-center {
-		z-index: 0;
+		// Additional image to cover space that the primary image doesn't cover (and to develop blob-blending)
+		.Back {
+			left: 0;
+			bottom: 0;
+			z-index: 1;
+			animation-direction: reverse;
+		}
 
-		width: 300%;
-		right: -50%;
-		top: -20%;
+		// Final image to cover the center
+		.BackCenter {
+			z-index: 0;
 
-		animation-direction: reverse;
-	}
-}
+			width: 300%;
+			right: -50%;
+			top: -20%;
 
-@keyframes rotate {
-	0% {
-		transform: rotate(0deg);
-	}
-
-	100% {
-		transform: rotate(360deg);
+			animation-direction: reverse;
+		}
 	}
 }
 
 :root {
 	--beautiful-lyrics-random-degree: 258deg;
 }
-
 @keyframes rotate {
 	0% {
 		transform: rotate(var(--beautiful-lyrics-random-degree));

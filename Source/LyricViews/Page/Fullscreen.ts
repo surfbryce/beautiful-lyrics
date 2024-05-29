@@ -1,6 +1,12 @@
 // Styles
 import "./style.scss"
 
+// NPM Packages
+import {
+	bindKey, unbindKey,
+	type KeyEvent, type BrowserKeyEventProps
+} from "npm:@rwh/keystrokes"
+
 // Web-Modules
 import { Maid, Giveable } from "jsr:@socali/modules/Maid"
 import Spring from "jsr:@socali/modules/Spring"
@@ -13,7 +19,7 @@ import type PlaylistItemMetadata from "jsr:@socali/spices/Spicetify/Types/App/Pl
 import {
 	Spotify,
 	SpotifyHistory, SpotifyPlayer
-} from "jsr:@socali/spices/Spicetify/Services/Session"
+} from "@socali/Spices/Session"
 import {
 	IsPlaying, IsPlayingChanged, SetIsPlaying,
 	Timestamp, TimeStepped, SeekTo, GetTimestampString,
@@ -23,8 +29,9 @@ import {
 	Song, SongChanged, GetDurationString,
 	IsLiked, IsLikedChanged, SetIsLiked,
 
-	SongDetails, SongDetailsLoaded, HaveSongDetailsLoaded
-} from "jsr:@socali/spices/Spicetify/Services/Player"
+	SongDetails, SongDetailsLoaded, HaveSongDetailsLoaded,
+  SongContext
+} from "@socali/Spices/Player"
 import {
 	GetPlaylistsAndFolders,
 	GetPlaylistDetails, GetPlaylistContents,
@@ -40,7 +47,7 @@ import Button from "../../Components/Button.ts"
 
 // Our Modules
 import { CreateLyricsRenderer, SetupRomanizationButton } from "./Shared.ts"
-import { CreateElement } from "../Shared.ts"
+import { CreateElement, GetCoverArtForSong, ApplyDynamicBackground } from "../Shared.ts"
 import LyricViewIcons from "../Icons.ts"
 import Icons from "./Icons.ts"
 import { RunAnimation } from "./Animator.ts"
@@ -206,6 +213,9 @@ export default class PageView implements Giveable {
 		// Create our container
 		const container = this.Maid.Give(CreateElement<HTMLDivElement>(Container))
 
+		// Apply our dynamic background
+		ApplyDynamicBackground(container, this.Maid)
+
 		// Handle lyric-rendering changes
 		const content = container.querySelector<HTMLDivElement>(".Content")!
 		const UpdateLyricsRenderer = CreateLyricsRenderer(content, this.Maid)
@@ -239,6 +249,7 @@ export default class PageView implements Giveable {
 			const trackTitleContainer = trackDetailsSpace.querySelector<HTMLDivElement>(".Title")!
 			const trackTitle = trackTitleContainer.querySelector<HTMLSpanElement>("span")!
 			const trackReleaseDate = trackDetailsSpace.querySelector<HTMLSpanElement>(".Date")!
+			const trackReleaseDetailsSeparator = trackDetailsSpace.querySelector<HTMLDivElement>(".Separator")!
 			const trackArtistsContainer = trackDetailsSpace.querySelector<HTMLDivElement>(".Artists")!
 			const trackArtists = trackArtistsContainer.querySelector<HTMLSpanElement>("span")!
 
@@ -955,27 +966,8 @@ export default class PageView implements Giveable {
 					)
 				}
 
-				// Handle our close button
-				{
-					const closeTooltip = Spotify.Tippy(
-						closeButton,
-						{
-							...Spotify.TippyProps,
-							content: (
-								makeSpotifyFullscreen ? "Exit Fullscreen"
-								: "Close Cinema"
-							)
-						}
-					)
-					this.Maid.Give(() => closeTooltip.destroy())
-
-					closeButton.addEventListener(
-						"click",
-						() => this.Close()
-					)
-				}
-
 				// Handle our view changing
+				let exitedFullscreenFromButton: (true | undefined)
 				{
 					// Setup our tooltips
 					const smallViewTooltip = Spotify.Tippy(
@@ -1000,15 +992,16 @@ export default class PageView implements Giveable {
 
 						// Switch the inner content of our small-view button
 						smallViewTooltip.setContent(
-							notFullscreen ? "Exit Cinema"
-							: "Exit Fullscreen"
+							notFullscreen ? "__WAITING__"
+							: "Back to Cinema"
 						)
 						smallViewButton.innerHTML = (
-							notFullscreen ? Icons.SmallerView
+							notFullscreen ? ""
 							: Icons.FullscreenClose
 						)
 
 						// Hide our fullscreen button (since we're already in fullscreen!)
+						smallViewButton.style.display = (notFullscreen ? "none" : "")
 						fullscreenButton.style.display = (
 							notFullscreen ? ""
 							: "none"
@@ -1031,11 +1024,14 @@ export default class PageView implements Giveable {
 						const SetToFullscreen = () => RequestFullscreenState(true)
 						fullscreenButton.addEventListener("click", SetToFullscreen)
 
-						const SetToSmallView = () => (
-							(document.fullscreenElement === null)
-							? SpotifyHistory.push("/BeautifulLyrics/Page")
-							: RequestFullscreenState(false)
-						)
+						const SetToSmallView = () => {
+							if (document.fullscreenElement === null) {
+								SpotifyHistory.push("/BeautifulLyrics/Page")
+							} else {
+								exitedFullscreenFromButton = true
+								RequestFullscreenState(false)
+							}
+						}
 						smallViewButton.addEventListener("click", SetToSmallView)
 
 						this.Maid.GiveItems(
@@ -1049,6 +1045,46 @@ export default class PageView implements Giveable {
 					UpdateToFullscreenState()
 					document.addEventListener("fullscreenchange", UpdateToFullscreenState)
 					this.Maid.Give(() => document.removeEventListener("fullscreenchange", UpdateToFullscreenState))
+				}
+
+				// Handle our close button
+				{
+					const closeTooltip = Spotify.Tippy(
+						closeButton,
+						{
+							...Spotify.TippyProps,
+							content: "Close"
+						}
+					)
+					this.Maid.Give(() => closeTooltip.destroy())
+
+					closeButton.addEventListener(
+						"click",
+						() => this.Close()
+					)
+
+					// Listen for escape-key functionality
+					const OnEscape = {
+						onReleased: (event: KeyEvent<KeyboardEvent, BrowserKeyEventProps>) => {
+							event.preventDefault()
+							this.Close()
+						}
+					}
+					bindKey("escape", OnEscape)
+					this.Maid.Give(() => unbindKey("escape", OnEscape))
+
+					// Watch for when our fullscreen state changes (determines if we close ourselves or not)
+					const OnFullscreenChange = () => {
+						if (
+							(document.fullscreenElement === null)
+							&& makeSpotifyFullscreen
+							&& (exitedFullscreenFromButton === undefined)
+						) {
+							this.Close()
+						}
+					}
+					document.addEventListener("fullscreenchange", OnFullscreenChange)
+					this.Maid.Give(() => document.removeEventListener("fullscreenchange", OnFullscreenChange))
 				}
 
 				// Handle our toggle-details button
@@ -1483,6 +1519,9 @@ export default class PageView implements Giveable {
 
 					// Determine if we should show that we're loading
 					if (HaveSongDetailsLoaded === false) {
+						coverArt.style.setProperty("--CoverArtHueShift", "0deg")
+						coverArt.style.backgroundColor = ""
+
 						mediaSpace.classList.toggle("Loading", true)
 						trackTitleContainer.classList.toggle("Loading", true)
 						trackArtistsContainer.classList.toggle("Loading", true)
@@ -1503,9 +1542,32 @@ export default class PageView implements Giveable {
 
 					// Determine if we need to show a custom message or just show the details
 					if (SongDetails !== undefined) {
-						coverArt.src = Song!.CoverArt.Big
+						const [coverArtUrl, placeholderHueShift] = GetCoverArtForSong()
+						coverArt.style.backgroundColor = (placeholderHueShift === undefined) ? "" : "white"
+						coverArt.style.setProperty("--CoverArtHueShift", `${placeholderHueShift ?? 0}deg`)
+						coverArt.src = coverArtUrl
 
-						{
+						if (SongDetails.IsLocal) {
+							if ((SongContext === undefined) || (SongContext.Type === "Other")) {
+								const trackTitleLink = detailsMaid.Give(document.createElement("span"))
+								trackTitleLink.textContent = SongDetails.Name
+								trackTitle.appendChild(trackTitleLink)
+							} else {
+								const trackTitleLink = detailsMaid.Give(document.createElement("a"))
+								trackTitleLink.href = (
+									(SongContext.Type === "LocalFiles") ? "/collection/local-files"
+									: (SongContext.Type === "Playlist") ? `/playlist/${SongContext.Id}`
+									: (SongContext.Type === "Album") ? `/album/${SongContext.Id}`
+									: ""
+								)
+								trackTitleLink.textContent = SongDetails.Name
+
+								trackTitleLink.addEventListener("click", OpenSpotifyPage)
+								detailsMaid.Give(() => trackTitleLink.removeEventListener("click", OpenSpotifyPage))
+
+								trackTitle.appendChild(trackTitleLink)
+							}
+						} else {
 							const trackTitleLink = detailsMaid.Give(document.createElement("a"))
 							trackTitleLink.href = `/album/${SongDetails.Album.Id}`
 							trackTitleLink.textContent = SongDetails.Name
@@ -1516,24 +1578,51 @@ export default class PageView implements Giveable {
 							trackTitle.appendChild(trackTitleLink)
 						}
 
-						for (const [index, artist] of SongDetails.Artists.entries()) {
-							const artistElement = detailsMaid.Give(document.createElement("a"))
-							artistElement.href = `/artist/${artist.id}`
-							artistElement.textContent = artist.name
-
-							if (index > 0) {
-								const separator = detailsMaid.Give(document.createElement("span"))
-								separator.textContent = ", "
-								trackArtists.appendChild(separator)
+						if (SongDetails.Artists !== undefined) {
+							if (SongDetails.IsLocal) {
+								for (const [index, artistName] of SongDetails.Artists.entries()) {
+									const artistElement = detailsMaid.Give(document.createElement("span"))
+									artistElement.textContent = artistName
+		
+									if (index > 0) {
+										const separator = detailsMaid.Give(document.createElement("span"))
+										separator.textContent = ", "
+										trackArtists.appendChild(separator)
+									}
+		
+									trackArtists.appendChild(artistElement)
+								}
+							} else {
+								for (const [index, artist] of SongDetails.Artists.entries()) {
+									const artistElement = detailsMaid.Give(document.createElement("a"))
+									artistElement.href = `/artist/${artist.Id}`
+									artistElement.textContent = artist.Name
+		
+									if (index > 0) {
+										const separator = detailsMaid.Give(document.createElement("span"))
+										separator.textContent = ", "
+										trackArtists.appendChild(separator)
+									}
+		
+									artistElement.addEventListener("click", OpenSpotifyPage)
+									detailsMaid.Give(() => artistElement.removeEventListener("click", OpenSpotifyPage))
+		
+									trackArtists.appendChild(artistElement)
+								}
 							}
-
-							artistElement.addEventListener("click", OpenSpotifyPage)
-							detailsMaid.Give(() => artistElement.removeEventListener("click", OpenSpotifyPage))
-
-							trackArtists.appendChild(artistElement)
 						}
 
-						trackReleaseDate.textContent = SongDetails.ReleaseDate
+						if (SongDetails.IsLocal) {
+							trackReleaseDate.textContent = ""
+						} else {
+							trackReleaseDate.textContent = SongDetails.Album.ReleaseDate.year.toString()
+						}
+
+						if (SongDetails.IsLocal) {
+							trackReleaseDetailsSeparator.style.display = "none"
+						} else {
+							trackReleaseDetailsSeparator.style.display = ""
+						}
 					}
 				}
 				Update()

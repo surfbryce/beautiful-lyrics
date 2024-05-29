@@ -9,12 +9,12 @@ import { Timeout } from "jsr:@socali/modules/Scheduler"
 import {
 	Spotify,
 	SpotifyHistory
-} from "jsr:@socali/spices/Spicetify/Services/Session"
-import { Song, SongChanged } from "jsr:@socali/spices/Spicetify/Services/Player"
+} from "@socali/Spices/Session"
+import { Song, SongChanged } from "@socali/Spices/Player"
 
 // Our Modules
 import { CreateLyricsRenderer, SetupRomanizationButton } from "./Shared.ts"
-import { CreateElement } from "../Shared.ts"
+import { CreateElement, ApplyDynamicBackground } from "../Shared.ts"
 
 // Templates
 const Container = `
@@ -40,7 +40,7 @@ const Header = `
 const NoLyrics = `<span class="NoLyrics">This song doesn't have any Lyrics!</span>`
 
 // Query Constants
-const HeaderQuery = ".main-view-container__scroll-node-child-spacer"
+const HeaderQuery = ".main-view-container__scroll-node-child-spacer, .main-view-container__scroll-node-child"
 
 // Store where we last were before a Page opened
 let LastPageLocation: (string | undefined)
@@ -54,7 +54,7 @@ export default class PageView implements Giveable {
 	public readonly Closed = this.Maid.Destroyed
 
 	// Constructor
-	constructor(page: HTMLDivElement) {
+	constructor(page: HTMLDivElement, isLegacy: boolean) {
 		// Determine our last-page
 		const lastPage = SpotifyHistory.entries[SpotifyHistory.entries.length - 2]
 		if ((lastPage !== undefined) && (lastPage.pathname.startsWith("/BeautifulLyrics") === false)) {
@@ -64,6 +64,9 @@ export default class PageView implements Giveable {
 		// Create our container/header
 		const container = this.Maid.Give(CreateElement<HTMLDivElement>(Container))
 		const header = this.Maid.Give(CreateElement<HTMLDivElement>(Header))
+
+		// Apply our dynamic background
+		ApplyDynamicBackground(container, this.Maid)
 
 		// Handle lyric-rendering changes
 		const content = container.querySelector<HTMLDivElement>(".Content")!
@@ -115,7 +118,12 @@ export default class PageView implements Giveable {
 		}
 
 		// Now parent our container/header
-		page.querySelector<HTMLDivElement>(HeaderQuery)!.appendChild(header)
+		const headerContainer = page.querySelector<HTMLDivElement>(HeaderQuery)!
+		if (isLegacy) {
+			page.style.containerType = "inline-size"
+			this.Maid.Give(() => page.style.containerType = "")
+		}
+		headerContainer.appendChild(header)
 		page.appendChild(container)
 
 		// Handle watching for no-songs

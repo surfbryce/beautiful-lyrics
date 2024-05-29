@@ -1,236 +1,103 @@
+// Stylings
+import './Stylings/main.scss'
+
+// NPM Packages
+import { bindKeyCombo, unbindKeyCombo } from "npm:@rwh/keystrokes"
+
 // Build Spices
 import { UpdateNoticeConfiguration } from "jsr:@socali/spices/AutoUpdate/UpdateNotice"
 
 // Spices
-import { GlobalMaid, OnSpotifyReady } from "jsr:@socali/spices/Spicetify/Services/Session"
+import {
+	GlobalMaid,
+	OnSpotifyReady, Spotify,
+	SpotifyPlatform, SpotifyInternalFetch,
+	ShowNotification
+} from "@socali/Spices/Session"
 import { GetInstantStore } from "jsr:@socali/spices/Spicetify/Services/Cache"
 
 // Web-Modules
-import { Maid } from 'jsr:@socali/modules/Maid'
 import { Timeout } from 'jsr:@socali/modules/Scheduler'
 
-// Our Services
-import {
-	CoverArtContainer,
-	CoverArtUpdated, CurrentCoverArt,
-	GetBlurredCoverArt, GenerateBlurredCoverArt
-} from './Services/CoverArt.ts'
+// Singletons
 import "./LyricViews/mod.ts"
 
-// Stylings
-import './Stylings/main.scss'
-
-// Live Background Management
-let CheckForLiveBackgrounds: (() => void)
-{
-	// Version Switching
-	const UsePreBlurredApproach = false
-
-	// Define our queries for each background-container
-	const BackgroundQuerys: Map<CoverArtContainer, string> = new Map()
-	BackgroundQuerys.set('Page', '.BeautifulLyricsPage')
-	BackgroundQuerys.set('SidePanel', '.Root__right-sidebar:has(.main-buddyFeed-content) .main-buddyFeed-container')
-
-	// Define our images to create
-	const BackgroundSizeScales = [2, 3]
-	const BackgroundElements = ["lyrics-background-color", "lyrics-background-back", "lyrics-background-back-center"]
-	const ElementSizeScaleIndices = [0, 0, 1]
-	const BackgroundContainerResizeStabilizationTime = 0.25
-
-	// Create our maid to manage our background-containers
-	const BackgroundMaids = GlobalMaid.Give(new Maid(), "LiveBackgrounds")
-
-	// Handle managing our background-containers
-	const ManageLiveBackground = (containerType: CoverArtContainer, container: HTMLDivElement) => {
-		// Create our maid
-		const backgroundMaid = BackgroundMaids.Give(new Maid(), containerType)
-
-		// Create our container and child-images
-		const backgroundContainer = backgroundMaid.Give(document.createElement('div'))
-		backgroundContainer.classList.add('lyrics-background-container')
-
-		// Create all our elements
-		const elements: HTMLImageElement[] = []
-		for (const elementClass of BackgroundElements) {
-			// Create our image
-			const image = backgroundMaid.Give(document.createElement('img'))
-			image.classList.add(elementClass)
-			backgroundContainer.appendChild(image)
-
-			// Now store our element
-			elements.push(image)
-		}
-
-		// Handle version-switching
-		let UpdateCoverArt: (() => void)
-
-		if (UsePreBlurredApproach) {
-			// Store our current sizes
-			let currentSizes: number[] = []
-
-			// Now handle updating our cover-art
-			const SetCoverArt = (blurredCoverArt?: Map<number, string>) => {
-				for (const [index, element] of elements.entries()) {
-					element.src = (
-						blurredCoverArt
-							? (blurredCoverArt.get(currentSizes[ElementSizeScaleIndices[index]]) ?? 'MISSING')
-							: ''
-					)
-				}
-			}
-
-			UpdateCoverArt = () => {
-				// Grab our cover-art
-				const coverArtAtUpdate = CurrentCoverArt
-				if (coverArtAtUpdate === undefined) {
-					return SetCoverArt()
-				}
-
-				for(const element of elements) {
-					element.src = coverArtAtUpdate.Default
-				}
-
-				// Now determine if we already have this or not
-				const cachedCoverArtSizes = GetBlurredCoverArt(coverArtAtUpdate, containerType, currentSizes)
-
-				// If we have it we can then update immediately, otherwise we need to generate it
-				if (cachedCoverArtSizes === undefined) {
-					GenerateBlurredCoverArt(coverArtAtUpdate, containerType, currentSizes)
-						.then(
-							(coverArtSizes) => {
-								// Make sure we are seeing the same cover-art
-								if (coverArtAtUpdate === CurrentCoverArt) {
-									SetCoverArt(coverArtSizes)
-								}
-							}
-						)
-				} else {
-					SetCoverArt(cachedCoverArtSizes)
-				}
-			}
-
-			// Now handle updating our sizes
-			{
-				const UpdateSizes = () => {
-					// Calculate our existing width
-					const backgroundContainerWidth = backgroundContainer.offsetWidth
-					
-					// Calculate our new sizes
-					const newSizes = []
-					for(const scale of BackgroundSizeScales) {
-						newSizes.push(Math.floor(backgroundContainerWidth * scale))
-					}
-
-					// Now set our sizes
-					currentSizes = newSizes
-
-					// Trigger cover-art update
-					UpdateCoverArt()
-				}
-
-				// Watch for size-updates
-				const observer = backgroundMaid.Give(
-					new ResizeObserver(
-						() => {
-							// Set a timeout to update our sizes (once we stabilize it will properly run)
-							backgroundMaid.Give(
-								Timeout(BackgroundContainerResizeStabilizationTime, UpdateSizes),
-								"ContainerResize"
-							)
-						}
-					)
-				)
-				observer.observe(backgroundContainer)
-
-				// Immediately update our sizes
-				UpdateSizes()
-			}
-		} else {
-			UpdateCoverArt = () => {
-				const coverArt = (CurrentCoverArt?.Default ?? '')
-				for (const element of elements) {
-					element.src = coverArt
-				}
-			}
-		}
-
-		// Immediately update ourselves and handle updating automatically
-		backgroundMaid.Give(CoverArtUpdated.Connect(UpdateCoverArt))
-		UpdateCoverArt()
-
-		// Handle applying our background-class (sometimes it can be removed so we need to readd it again)
-		{
-			const CheckClass = () => {
-				if (container.classList.contains('lyrics-background')) {
-					return
-				}
-
-				container.classList.add('lyrics-background')
-			}
-
-			// Immediately check our class and watch for changes
-			CheckClass()
-
-			const observer = backgroundMaid.Give(new MutationObserver(CheckClass))
-			observer.observe(
-				container,
-				{ attributes: true, attributeFilter: ['class'], childList: false, subtree: false }
-			)
-		}
-
-		// Add our container to the background
-		container.prepend(backgroundContainer)
-
-		// Handle removing our class
-		backgroundMaid.Give(() => container.classList.remove('lyrics-background'))
-	}
-
-	// Handle checking for background existence updates
-	const ExistingContainers: Map<CoverArtContainer, Element> = new Map()
-	CheckForLiveBackgrounds = () => {
-		// Go through each background-container and check if it exists
-		for (const [containerType, query] of BackgroundQuerys) {
-			// Grab our container
-			const container = document.body.querySelector(query)
-
-			// Make sure our container has changed existence state
-			if (ExistingContainers.get(containerType) === container) {
-				continue
-			}
-
-			// If it exists then manage it - otherwise - just clean out our Maid item
-			if (container === null) {
-				ExistingContainers.delete(containerType)
-				BackgroundMaids.Clean(containerType)
-			} else {
-				ExistingContainers.set(containerType, container)
-				ManageLiveBackground(containerType, (container as HTMLDivElement))
-			}
-		}
-	}
-}
+// Shared Methods
+import { CreateElement } from "./LyricViews/Shared.ts"
 
 // Wait for Spotify THEN start our services
 OnSpotifyReady
-.then(
+.then( // Handle our Debugging (gives Linux an opportunity to get this information)
 	_ => {
-		/*
-			Now watch for DOM changes to determine if we need to update.
+		const OnGetSpotifyAndSpicetifyInformation = () => {
+			SpotifyInternalFetch.get("sp://desktop/v1/version")
+			.catch(
+				(error) => ShowNotification(`Failed to Copy Spotify/Spicetify Information (${error})`, "error", 10)
+			)
+			.then(
+				(
+					response: {
+						buildSystemID: string;
+						buildType: string;
+						cefRuntime: string;
+						cefVersion: string;
+						platform: string;
+						version: string;
+					}
+				) => {
+					const informationFormat = `
+						Spotify Version: ${response.version}
+						Spotify Runtime: ${response.cefVersion}
+						Spicetify Version: ${Spotify.Config.version}
+						Spicetify Theme: ${Spotify.Config.current_theme}${
+							(Spotify.Config.color_scheme.length === 0) ? "" : ` / ${Spotify.Config.color_scheme}`
+						}
+						Spicetify Extensions: [${Spotify.Config.extensions.join(", ")}]
+						Spicetify Custom Apps: [${Spotify.Config.custom_apps.join(", ")}]
+					`.trim().replace(/\t/g, "")
+					{
+						navigator.clipboard.writeText(informationFormat)
+						.catch(
+							(error) => ShowNotification(`Failed to Copy Spotify/Spicetify Information (${error})`, "error", 10)
+						)
+						.then(
+							() => ShowNotification("Copied Spotify/Spicetify Information", "success", 5)
+						)
+					}
+				}
+			)
+			
+		}
+		bindKeyCombo("shift+b+l>i", OnGetSpotifyAndSpicetifyInformation)
+		GlobalMaid.Give(() => unbindKeyCombo("shift+b+l>i", OnGetSpotifyAndSpicetifyInformation))
+	
+		// Create our reusable link element (for saving)
+		const linkElement = CreateElement<HTMLLinkElement & { download: string }>(`<a></a>`)
+		const SaveContentToFile = (downloadName: string, content: string, contentType: string) => {
+			const jsonBlob = new Blob([content], { type: contentType })
+			const url = URL.createObjectURL(jsonBlob)
+			linkElement.download = downloadName
+			linkElement.href = url
+			linkElement.click()
+			URL.revokeObjectURL(url)
+		}
 
-			We don't store a reference to the observer because we expect it to run for the entire duration that
-			Spotify is open for. The reason is because any of these elements can be removed/added dynamically
-			and we could have larger cover-art elements come in at any time as well. We want to use those
-			larger cover-art versions since they have higher-resolution image. It also comes with the benefit
-			that hot-reloading what elements we are using is easier.
-		*/
-		const observer = GlobalMaid.Give(new MutationObserver(CheckForLiveBackgrounds))
-		observer.observe(
-			document.body,
-			{ attributes: false, childList: true, subtree: true }
+		// Handle file-saving
+		const OnSaveSpotifyHTML = () => SaveContentToFile("Spotify.html", document.documentElement.innerHTML, "text/html")
+		const OnSaveSpotifyCSS = () => (
+			fetch("xpui.css")
+			.then((response) => response.text())
+			.then(text => SaveContentToFile("Spotify.css", text, "text/css"))
+			.catch((error) => ShowNotification(`Failed to Save Spotify CSS (${error})`, "error", 10))
+		)
+		bindKeyCombo("shift+b+l>h", OnSaveSpotifyHTML)
+		bindKeyCombo("shift+b+l>c", OnSaveSpotifyCSS)
+		GlobalMaid.GiveItems(
+			() => unbindKeyCombo("shift+b+l>h", OnSaveSpotifyHTML),
+			() => unbindKeyCombo("shift+b+l>c", OnSaveSpotifyCSS)
 		)
 	}
 )
-.then(CheckForLiveBackgrounds)
 .then(
 	_ => {
 		/*

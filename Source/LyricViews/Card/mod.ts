@@ -8,8 +8,8 @@ import { Maid, Giveable } from "jsr:@socali/modules/Maid"
 import {
 	Spotify,
 	SpotifyHistory
-} from "jsr:@socali/spices/Spicetify/Services/Session"
-import { SongLyrics } from "jsr:@socali/spices/Spicetify/Services/Player"
+} from "@socali/Spices/Session"
+import { SongLyrics } from "@socali/Spices/Player"
 
 // Our Modules
 import LyricsRenderer from "../../Modules/LyricsRenderer.ts"
