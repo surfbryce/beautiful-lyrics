@@ -1,21 +1,103 @@
+// Stylings
+import './Stylings/main.scss'
+
+// NPM Packages
+import { bindKeyCombo, unbindKeyCombo } from "npm:@rwh/keystrokes"
+
 // Build Spices
 import { UpdateNoticeConfiguration } from "jsr:@socali/spices/AutoUpdate/UpdateNotice"
 
 // Spices
-import { GlobalMaid, OnSpotifyReady } from "@socali/Spices/Session"
+import {
+	GlobalMaid,
+	OnSpotifyReady, Spotify,
+	SpotifyPlatform, SpotifyInternalFetch,
+	ShowNotification
+} from "@socali/Spices/Session"
 import { GetInstantStore } from "jsr:@socali/spices/Spicetify/Services/Cache"
 
 // Web-Modules
 import { Timeout } from 'jsr:@socali/modules/Scheduler'
 
-// Our Services
+// Singletons
 import "./LyricViews/mod.ts"
 
-// Stylings
-import './Stylings/main.scss'
+// Shared Methods
+import { CreateElement } from "./LyricViews/Shared.ts"
 
 // Wait for Spotify THEN start our services
 OnSpotifyReady
+.then( // Handle our Debugging (gives Linux an opportunity to get this information)
+	_ => {
+		const OnGetSpotifyAndSpicetifyInformation = () => {
+			SpotifyInternalFetch.get("sp://desktop/v1/version")
+			.catch(
+				(error) => ShowNotification(`Failed to Copy Spotify/Spicetify Information (${error})`, "error", 10)
+			)
+			.then(
+				(
+					response: {
+						buildSystemID: string;
+						buildType: string;
+						cefRuntime: string;
+						cefVersion: string;
+						platform: string;
+						version: string;
+					}
+				) => {
+					const informationFormat = `
+						Spotify Version: ${response.version}
+						Spotify Runtime: ${response.cefVersion}
+						Spicetify Version: ${Spotify.Config.version}
+						Spicetify Theme: ${Spotify.Config.current_theme}${
+							(Spotify.Config.color_scheme.length === 0) ? "" : ` / ${Spotify.Config.color_scheme}`
+						}
+						Spicetify Extensions: [${Spotify.Config.extensions.join(", ")}]
+						Spicetify Custom Apps: [${Spotify.Config.custom_apps.join(", ")}]
+					`.trim().replace(/\t/g, "")
+					{
+						navigator.clipboard.writeText(informationFormat)
+						.catch(
+							(error) => ShowNotification(`Failed to Copy Spotify/Spicetify Information (${error})`, "error", 10)
+						)
+						.then(
+							() => ShowNotification("Copied Spotify/Spicetify Information", "success", 5)
+						)
+					}
+				}
+			)
+			
+		}
+		bindKeyCombo("shift+b+l>i", OnGetSpotifyAndSpicetifyInformation)
+		GlobalMaid.Give(() => unbindKeyCombo("shift+b+l>i", OnGetSpotifyAndSpicetifyInformation))
+	
+		// Create our reusable link element (for saving)
+		const linkElement = CreateElement<HTMLLinkElement & { download: string }>(`<a></a>`)
+		const SaveContentToFile = (downloadName: string, content: string, contentType: string) => {
+			const jsonBlob = new Blob([content], { type: contentType })
+			const url = URL.createObjectURL(jsonBlob)
+			linkElement.download = downloadName
+			linkElement.href = url
+			linkElement.click()
+			URL.revokeObjectURL(url)
+		}
+
+		// Handle file-saving
+		const OnSaveSpotifyHTML = () => SaveContentToFile("Spotify.html", document.documentElement.innerHTML, "text/html")
+		const OnSaveSpotifyCSS = () => (
+			fetch("xpui.css")
+			.then((response) => response.text())
+			.then(text => SaveContentToFile("Spotify.css", text, "text/css"))
+			.catch((error) => ShowNotification(`Failed to Save Spotify CSS (${error})`, "error", 10))
+		)
+		bindKeyCombo("shift+b+l>h", OnSaveSpotifyHTML)
+		bindKeyCombo("shift+b+l>c", OnSaveSpotifyCSS)
+		GlobalMaid.GiveItems(
+			() => unbindKeyCombo("shift+b+l>h", OnSaveSpotifyHTML),
+			() => unbindKeyCombo("shift+b+l>c", OnSaveSpotifyCSS)
+		)
+	}
+)
 .then(
 	_ => {
 		/*
