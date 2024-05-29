@@ -1,23 +1,23 @@
 name: "Incorrect Lyrics"
 description: "Lyrics are incorrect."
-title: "First Songs" Name/Artists"
+title: "First Songs' Name/Artists"
 labels: ["Incorrect Lyrics"]
 assignees: surfbryce
 
 body:
   - type: checkboxes
-      id: pre-checklist
-      attributes:
-        label: "Before you list your Songs:"
-        options:
-          - label: "IF you have multiple songs you want to report, have the title mention after the first Songs' Name/Artists that there are multiple, adding \", ...\" is good enough."
-            required: true
-          - label: "For every song you want to report, check Musixmatch or Apple Music and check to see if the Lyrics are any Different than what Beautiful Lyrics has."
-            required: true
-          - label: "For every song you want to report, point out the Incorrect Lyrics and what the correct ones are (ONLY IF the Lyrics aren"t entirely incorrect)."
-            required: true
+    id: "pre-checklist"
+    attributes:
+      label: "Before you list your Songs:"
+      options:
+        - label: "IF you have multiple songs you want to report, have the title mention after the first Songs' Name/Artists that there are multiple, adding \", ...\" is good enough."
+          required: true
+        - label: "For every song you want to report, check Musixmatch or Apple Music and check to see if the Lyrics are any Different than what Beautiful Lyrics has."
+          required: true
+        - label: "For every song you want to report, point out the Incorrect Lyrics and what the correct ones are (ONLY IF the Lyrics aren't entirely incorrect)."
+          required: true
   - type: textarea
-    id: song-links
+    id: "song-links"
     attributes:
       label: "List Song Links"
       description: "For each song, copy its link, and then list each one numerically."

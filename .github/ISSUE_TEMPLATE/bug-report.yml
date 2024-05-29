@@ -1,6 +1,6 @@
 name: "Extension Bug Report"
 description: "Bugs related to the Extension itself. Use the Lyric templates for Lyric issues."
-title: ""
+title: "..."
 labels: ["Extension Bug"]
 assignees: surfbryce
 
@@ -54,15 +54,16 @@ body:
       label: "Spotify HTML/CSS and Console Screenshots"
       description: "To learn how to get this information, visit: https://github.com/surfbryce/beautiful-lyrics/wiki/Extension-Bug-Reporting#getting-your-spotify-htmlcss-files"
     validations:
-      required: trues
+      required: true
   - type: checkboxes
     id: "extension-information-checklist"
     attributes:
+      label: "Information Checklist"
       description: "Make *SURE* that you have all of the below, if not, your Bug Report will be **DELETED**."
       options:
-      - label: "**Spotify HTML File**"
-        required: true
-      - label: "**Spotify CSS File**"
-        required: true
-      - label: "**Screenshots of Developer Tools Console Tab**"
-        required: true
+        - label: "**Spotify HTML File**"
+          required: true
+        - label: "**Spotify CSS File**"
+          required: true
+        - label: "**Screenshots of Developer Tools Console Tab**"
+          required: true
