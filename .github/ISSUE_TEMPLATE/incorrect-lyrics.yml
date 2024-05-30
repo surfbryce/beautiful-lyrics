@@ -10,7 +10,7 @@ body:
     attributes:
       label: "Before you list your Songs:"
       options:
-        - label: "IF you have multiple songs you want to report, have the title mention after the first Songs' Name/Artists that there are multiple, adding \", ...\" is good enough."
+        - label: "IF you are reporting multiple songs, add \", ...\" to the end of your title."
           required: true
         - label: "For every song you want to report, check Musixmatch or Apple Music and check to see if the Lyrics are any Different than what Beautiful Lyrics has."
           required: true
