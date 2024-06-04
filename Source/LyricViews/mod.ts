@@ -143,7 +143,7 @@ OnSpotifyReady
 			nowPlayingViewMaid.CleanUp()
 
 			// Now check to see if we have our card anchor
-			const cardAnchor = sidebar.querySelector<HTMLDivElement>(CardInsertAnchor)
+			const cardAnchor = contentsContainer!.querySelector<HTMLDivElement>(CardInsertAnchor)
 			if (cardAnchor === null) {
 				return
 			}
@@ -157,10 +157,7 @@ OnSpotifyReady
 					backgroundApplied = false
 				} else if (backgroundApplied === false) {
 					backgroundApplied = true
-					ApplyDynamicBackground(
-						sidebar.querySelector<HTMLDivElement>("aside")!,
-						backgroundMaid
-					)
+					ApplyDynamicBackground(contentsContainer!, backgroundMaid)
 				}
 			}
 			CheckDynamicBackground()
@@ -199,7 +196,6 @@ OnSpotifyReady
 			}
 			ShouldCreateCard()
 			nowPlayingViewMaid.GiveItems(
-				SongChanged.Connect(ShouldCreateCard),
 				SongLyricsLoaded.Connect(ShouldCreateCard),
 				SpotifyHistory.listen(ShouldCreateCard)
 			)
@@ -217,14 +213,10 @@ OnSpotifyReady
 				return
 			}
 
-			// Create our observer
-			const contentsObserver = contentsContainerMaid.Give(new MutationObserver(DeferCheckForNowPlaying))
-
 			// Check if there's anything we can do immediately
 			CheckForNowPlaying()
 
 			// Handle when we should check
-			contentsObserver.observe(contentsContainer, { childList: true })
 			contentsContainerMaid.Give(SongChanged.Connect(DeferCheckForNowPlaying))
 
 		}
