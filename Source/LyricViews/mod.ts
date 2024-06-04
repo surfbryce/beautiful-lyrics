@@ -132,105 +132,129 @@ OnSpotifyReady
 )
 .then( // Right Side-bar/Card View
 	() => {
-		// Wait for our sidebar to load in (this allows us to detect changes ONLY in the sidebar)
-		const CheckForSidebar = () => {
-			const sidebar = document.querySelector<HTMLDivElement>(RightSidebar)
-			if (sidebar === null) {
-				ViewMaid.Give(Defer(CheckForSidebar))
+		// Store our state
+		let sidebar: HTMLDivElement, contentsContainer: (HTMLDivElement | undefined)
+		const contentsContainerMaid = ViewMaid.Give(new Maid())
+		const nowPlayingViewMaid = ViewMaid.Give(new Maid())
+
+		// Each check method
+		const CheckForNowPlaying = () => {
+			// Clean-up when we are called
+			nowPlayingViewMaid.CleanUp()
+
+			// Now check to see if we have our card anchor
+			const cardAnchor = sidebar.querySelector<HTMLDivElement>(CardInsertAnchor)
+			if (cardAnchor === null) {
 				return
 			}
 
-			// Handle checking to see if the NowPlaying view is open
-			const CheckForNowPlaying = () => {
-				// First check to see if we have multiple elements or not (should only be one when not in use)
+			// Immediately add our class to the top container
+			const backgroundMaid = nowPlayingViewMaid.Give(new Maid())
+			let backgroundApplied = false
+			const CheckDynamicBackground = () => {
+				if (SpotifyHistory.location.pathname === "/BeautifulLyrics/Fullscreen") {
+					backgroundMaid.CleanUp()
+					backgroundApplied = false
+				} else if (backgroundApplied === false) {
+					backgroundApplied = true
+					ApplyDynamicBackground(
+						sidebar.querySelector<HTMLDivElement>("aside")!,
+						backgroundMaid
+					)
+				}
+			}
+			CheckDynamicBackground()
+			nowPlayingViewMaid.Give(SpotifyHistory.listen(CheckDynamicBackground))
+
+			// Now we can monitor for Spotifys lyrics card (and hide it)
+			const cardContainer = cardAnchor.parentElement!
+			const CheckForLyricsCard = () => {
+				const cardView = cardContainer.querySelector<HTMLDivElement>(SpotifyCardViewQuery)
+				if (cardView !== null) {
+					cardView.style.display = "none"
+				}
+			}
+			CheckForLyricsCard()
+			const containerObserver = nowPlayingViewMaid.Give(new MutationObserver(CheckForLyricsCard))
+			containerObserver.observe(cardContainer, { childList: true })
+
+			// Also handle our own card
+			const ShouldCreateCard = () => {
 				if (
-					(sidebar.querySelector("aside") === null)
-					&& (sidebar.children.length === 1)
+					// We shouldn't be rendering the card-view when we have another of our views open
+					SpotifyHistory.location.pathname.startsWith("/BeautifulLyrics")
+					|| (Song === undefined)
+					|| (HaveSongLyricsLoaded && (SongLyrics === undefined))
 				) {
-					ViewMaid.Clean("NowPlayingView")
+					nowPlayingViewMaid.Clean("Card")
+					return
+				} else if (HaveSongLyricsLoaded === false) { // Render a template if we're still loading our lyrics
+					const card = nowPlayingViewMaid.Give(CreateElement<HTMLDivElement>(LoadingLyricsCard), "Card")
+					cardAnchor.after(card)
+
 					return
 				}
 
-				// Now check to see if we have our card anchor
-				const cardAnchor = sidebar.querySelector<HTMLDivElement>(CardInsertAnchor)
-				if (cardAnchor === null) {
-					ViewMaid.Clean("NowPlayingView")
-					return
-				}
+				nowPlayingViewMaid.Give(new CardView(cardAnchor), "Card")
+			}
+			ShouldCreateCard()
+			nowPlayingViewMaid.GiveItems(
+				SongChanged.Connect(ShouldCreateCard),
+				SongLyricsLoaded.Connect(ShouldCreateCard),
+				SpotifyHistory.listen(ShouldCreateCard)
+			)
+		}
+		const DeferCheckForNowPlaying = () => ViewMaid.Give(Defer(CheckForNowPlaying), "CheckForNowPlaying")
 
-				// Make sure we don't overwrite this twice
-				if (ViewMaid.Has("NowPlayingView")) {
-					return
-				}
+		const CheckForContentsContainer = () => {
+			// Clean-up when we are called
+			contentsContainerMaid.CleanUp()
+			nowPlayingViewMaid.CleanUp()
 
-				// Create our maid
-				const nowPlayingMaid = ViewMaid.Give(new Maid(), "NowPlayingView")
-
-				// Immediately add our class to the top container
-				const backgroundMaid = nowPlayingMaid.Give(new Maid())
-				let backgroundApplied = false
-				const CheckDynamicBackground = () => {
-					if (SpotifyHistory.location.pathname === "/BeautifulLyrics/Fullscreen") {
-						backgroundMaid.CleanUp()
-						backgroundApplied = false
-					} else if (backgroundApplied === false) {
-						backgroundApplied = true
-						ApplyDynamicBackground(
-							sidebar.querySelector<HTMLDivElement>("aside")!,
-							backgroundMaid
-						)
-					}
-				}
-				CheckDynamicBackground()
-				nowPlayingMaid.Give(SpotifyHistory.listen(CheckDynamicBackground))
-
-				// Now we can monitor for Spotifys lyrics card (and hide it)
-				const cardContainer = cardAnchor.parentElement!
-				const CheckForLyricsCard = () => {
-					const cardView = cardContainer.querySelector<HTMLDivElement>(SpotifyCardViewQuery)
-					if (cardView !== null) {
-						cardView.style.display = "none"
-					}
-				}
-				CheckForLyricsCard()
-				const containerObserver = nowPlayingMaid.Give(new MutationObserver(CheckForLyricsCard))
-				containerObserver.observe(cardContainer, { childList: true })
-
-				// Also handle our own card
-				const ShouldCreateCard = () => {
-					if (
-						// We shouldn't be rendering the card-view when we have another of our views open
-						SpotifyHistory.location.pathname.startsWith("/BeautifulLyrics")
-						|| (Song === undefined)
-						|| (HaveSongLyricsLoaded && (SongLyrics === undefined))
-					) {
-						nowPlayingMaid.Clean("Card")
-						return
-					} else if (HaveSongLyricsLoaded === false) { // Render a template if we're still loading our lyrics
-						const card = nowPlayingMaid.Give(CreateElement<HTMLDivElement>(LoadingLyricsCard), "Card")
-						cardAnchor.after(card)
-
-						return
-					}
-
-					nowPlayingMaid.Give(new CardView(cardAnchor), "Card")
-				}
-				ShouldCreateCard()
-				nowPlayingMaid.GiveItems(
-					SongChanged.Connect(ShouldCreateCard),
-					SongLyricsLoaded.Connect(ShouldCreateCard),
-					SpotifyHistory.listen(ShouldCreateCard)
-				)
+			// Determine if our contents-container even exists
+			contentsContainer = (sidebar.querySelector<HTMLDivElement>("aside") ?? undefined)
+			if (contentsContainer === undefined) {
+				return
 			}
 
-			// Now we can create an observer for just the direct children of the sidebar (determines when visible or not)
-			const deferSidebarObserverChange = () => ViewMaid.Give(Defer(CheckForNowPlaying), "SidebarObserver")
-			const sidebarChildObserver = ViewMaid.Give(new MutationObserver(deferSidebarObserverChange))
-			CheckForNowPlaying()
-			sidebarChildObserver.observe(sidebar, { childList: true })
+			// Create our observer
+			const contentsObserver = contentsContainerMaid.Give(new MutationObserver(DeferCheckForNowPlaying))
 
-			// We also watch for song changes since our cardAnchor could change in place
-			ViewMaid.Give(SongChanged.Connect(deferSidebarObserverChange))
+			// Check if there's anything we can do immediately
+			CheckForNowPlaying()
+
+			// Handle when we should check
+			contentsObserver.observe(contentsContainer, { childList: true })
+			contentsContainerMaid.Give(SongChanged.Connect(DeferCheckForNowPlaying))
+
+		}
+		const DeferCheckForContentsContainer = () => ViewMaid.Give(Defer(CheckForContentsContainer), "CheckForContentsContainer")
+
+		const CheckForSidebar = () => {
+			// Check for our sidebar existing
+			const newSidebar = document.querySelector<HTMLDivElement>(RightSidebar)
+			if (newSidebar === null) {
+				ViewMaid.Give(Defer(CheckForSidebar), "CheckForSidebar")
+				return
+			}
+			sidebar = newSidebar
+
+			// Create our observer
+			const sidebarChildObserver = ViewMaid.Give(new MutationObserver(DeferCheckForContentsContainer))
+
+			// Check if there's anything we can do immediately
+			CheckForContentsContainer()
+
+			// Observe our elements
+			sidebarChildObserver.observe(sidebar, { childList: true })
+			for (const element of sidebar.children) {
+				if (
+					(element instanceof HTMLDivElement)
+					&& ((element.children.length === 0) || (element.querySelector("aside") !== null))
+				) {
+					sidebarChildObserver.observe(element, { childList: true })
+				}
+			}
 		}
 		CheckForSidebar()
 	}
@@ -292,6 +316,7 @@ OnSpotifyReady
 							element.innerHTML.includes("0v1.018l2.72-2.72a.75.75 0 0 1 1.06 0zm2.94-2.94a.75.75")
 							|| element.innerHTML.includes("2H14V4.757a1 1 0 1 1 2 0v1.829l4.293-4.293a1")
 							|| element.innerHTML.includes("M6.53 9.47a.75.75 0 0 1 0 1.06l-2.72 2.72h1.018a.75.75")
+							|| element.innerHTML.includes("M6.53 9.47a.75.75 0 010 1.06l-2.72 2.72h1.018a.75.75")
 						)
 						&& (element.id !== "BeautifulLyricsFullscreenButton")
 					) {
