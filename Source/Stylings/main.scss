@@ -15,8 +15,10 @@ body:has(.SliderBar.Active) {
 		background: transparent;
 	}
 
-	.BeautifulLyricsBackground div[data-overlayscrollbars-viewport] {
-		background: transparent !important;
+	.BeautifulLyricsBackground {
+		div[data-overlayscrollbars-viewport], div[data-overlayscrollbars-viewport] > div {
+			background: transparent !important;
+		}
 	}
 
 	.BeautifulLyricsBackground div:has(> video) {

@@ -157,7 +157,7 @@ let cameFromReload = false
 		.catch(() => setTimeout(GetLatestVersion, 1000))
 	)
 	GetLatestVersion()
-	setInterval(GetLatestVersion, (1000 * 60 * 0.5))
+	setInterval(GetLatestVersion, (1000 * 60 * 15))
 
 	if ((cameFromReload === false) && (ForceToVersion !== undefined)) {
 		setTimeout(() => UpdateVersion(ForceToVersion), (1000 * 10))

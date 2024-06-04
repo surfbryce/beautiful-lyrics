@@ -11,7 +11,7 @@ import { UpdateNoticeConfiguration } from "jsr:@socali/spices/AutoUpdate/UpdateN
 import {
 	GlobalMaid,
 	OnSpotifyReady, Spotify,
-	SpotifyPlatform, SpotifyInternalFetch,
+	SpotifyInternalFetch,
 	ShowNotification
 } from "@socali/Spices/Session"
 import { GetInstantStore } from "jsr:@socali/spices/Spicetify/Services/Cache"

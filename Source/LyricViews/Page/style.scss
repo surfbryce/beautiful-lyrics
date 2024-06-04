@@ -513,7 +513,7 @@ body:has(.BeautifulLyricsPage.Fullscreen) {
 							}
 
 							span {
-								text-wrap: nowrap;
+								white-space: nowrap;
 							}
 
 							--CoverToDetailsGap: 5cqw;
@@ -1158,7 +1158,7 @@ body:has(.BeautifulLyricsPage.Fullscreen) {
 						font-size: var(--TitleHeight);
 						line-height: var(--TitleHeight);
 						font-weight: 700;
-						text-wrap: nowrap;
+						white-space: nowrap;
 
 						&:not(.TextScroll) {
 							justify-content: center;
@@ -1188,7 +1188,7 @@ body:has(.BeautifulLyricsPage.Fullscreen) {
 						justify-content: center;
 						align-items: center;
 
-						text-wrap: nowrap;
+						white-space: nowrap;
 						overflow: hidden;
 
 						.Date {
