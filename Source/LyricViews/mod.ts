@@ -43,7 +43,7 @@ const CurrentMainPage = ".Root__main-view .main-view-container div[data-overlays
 const LegacyMainPage = ".Root__main-view .main-view-container .os-host"
 const RightSidebar = ".Root__right-sidebar"
 const ContentsContainer = "aside, section.main-buddyFeed-container"
-const CardInsertAnchor = ".main-nowPlayingView-nowPlayingWidget"
+const CardInsertAnchor = ".main-nowPlayingView-nowPlayingWidget, canvas"
 const SpotifyCardViewQuery = ".main-nowPlayingView-section:not(:is(#BeautifulLyrics-CardView)):has(.main-nowPlayingView-lyricsTitle)"
 
 // Store our internal utilities

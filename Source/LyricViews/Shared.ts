@@ -230,8 +230,13 @@ const BackgroundClassName = "BeautifulLyricsBackground"
 const BackgroundElements = ["Front", "Back", "BackCenter"]
 
 export const GetCoverArtForSong = (): [string, (number | undefined)] => {
+	// DJ is ALWAYS guaranteed to have a cover-art
+	if (Song?.Type === "DJ") {
+		return [Song.CoverArt.Big, undefined]
+	}
+
 	const coverArt = (
-		Song?.IsLocal
+		(Song?.Type === "Local")
 		? (
 			Song?.CoverArt
 			?? (

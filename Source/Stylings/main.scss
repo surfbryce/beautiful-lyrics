@@ -2,7 +2,7 @@ body:has(.SliderBar.Active) {
 	cursor: pointer;
 }
 
-.Root__right-sidebar:has(.main-nowPlayingView-section) {
+.Root__right-sidebar:has(.main-nowPlayingView-section, canvas) {
 	--background-tint: color-mix(
 		in srgb,
 		rgb(var(--spice-rgb-selected-row)) 7%,

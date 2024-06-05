@@ -12,9 +12,9 @@
 	},
 
 	"imports": {
-		"@socali/Spices/Player": "jsr:@socali/spices@3.1.0/Spicetify/Services/Player",
+		"@socali/Spices/Player": "jsr:@socali/spices@4.0.0/Spicetify/Services/Player",
 		"@socali/Spices/Player_TESTING": "../../Spices/Spicetify/Services/Player/mod.ts",
-		"@socali/Spices/Session": "jsr:@socali/spices@3.1.0/Spicetify/Services/Session",
+		"@socali/Spices/Session": "jsr:@socali/spices@4.0.0/Spicetify/Services/Session",
 		"@socali/Spices/Session_TESTING": "../../Spices/Spicetify/Services/Session.ts"
 	}
 }
