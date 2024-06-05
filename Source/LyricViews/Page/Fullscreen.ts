@@ -964,6 +964,11 @@ export default class PageView implements Giveable {
 						"click",
 						() => SetAddToPlaylistCoverOpenState(true)
 					)
+
+					// Hide our button when we go into DJ
+					const CheckForDJ = () => addToPlaylistButton.style.display = (Song?.Type === "DJ" ? "none" : "")
+					CheckForDJ()
+					this.Maid.Give(SongChanged.Connect(CheckForDJ))
 				}
 
 				// Handle our view changing
@@ -1436,10 +1441,15 @@ export default class PageView implements Giveable {
 			// Handle our timeline
 			const timelineSlider = this.Maid.Give(new Slider(timelineBar, undefined, 1))
 			{
+				// Handle hiding our timeline when we're in DJ mode
+				const CheckForDJ = () => timelineBar.style.display = (Song?.Type === "DJ" ? "none" : "")
+				CheckForDJ()
+				this.Maid.Give(SongChanged.Connect(CheckForDJ))
+
 				// Handle updating our slider timestamp to its active position
 				timelineSlider.ProgressChanged.Connect(
 					(progress, changedByUser) => {
-						if (changedByUser) {
+						if (changedByUser && (Song!.Type !== "DJ")) {
 							const minutes = Math.floor(progress / 60)
 							const seconds = Math.floor(progress % 60)
 							timelineTimestamp.textContent = `${
@@ -1469,7 +1479,7 @@ export default class PageView implements Giveable {
 					this.Maid.Clean("TimelineUpdater")
 	
 					// Determine our new functionality
-					if (Song !== undefined) {
+					if ((Song !== undefined) && (Song.Type !== "DJ")) {
 						// Reset our seek-point
 						newSeekTimestamp = undefined
 						seekApprovedDeltaDirection = undefined
@@ -1541,9 +1551,25 @@ export default class PageView implements Giveable {
 					trackReleaseDate.classList.toggle("Loading", false)
 
 					// Determine if we need to show a custom message or just show the details
-					if (SongDetails !== undefined) {
+					if (Song?.Type === "DJ") {
 						const [coverArtUrl, placeholderHueShift] = GetCoverArtForSong()
-						coverArt.style.backgroundColor = (placeholderHueShift === undefined) ? "" : "white"
+						coverArt.style.backgroundColor = ((placeholderHueShift === undefined) ? "" : "white")
+						coverArt.style.setProperty("--CoverArtHueShift", `${placeholderHueShift ?? 0}deg`)
+						coverArt.src = coverArtUrl
+
+						const trackTitleLink = detailsMaid.Give(document.createElement("span"))
+						trackTitleLink.textContent = Song.Action
+						trackTitle.appendChild(trackTitleLink)
+
+						const artistElement = detailsMaid.Give(document.createElement("span"))
+						artistElement.textContent = "DJ"
+						trackArtists.appendChild(artistElement)
+
+						trackReleaseDate.textContent = ""
+						trackReleaseDetailsSeparator.style.display = "none"
+					} else if (SongDetails !== undefined) {
+						const [coverArtUrl, placeholderHueShift] = GetCoverArtForSong()
+						coverArt.style.backgroundColor = ((placeholderHueShift === undefined) ? "" : "white")
 						coverArt.style.setProperty("--CoverArtHueShift", `${placeholderHueShift ?? 0}deg`)
 						coverArt.src = coverArtUrl
 
