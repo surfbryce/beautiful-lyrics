@@ -42,6 +42,7 @@ const LoadingLyricsCard = `<div class="LoadingLyricsCard Loading"></div>`
 const CurrentMainPage = ".Root__main-view .main-view-container div[data-overlayscrollbars-viewport]"
 const LegacyMainPage = ".Root__main-view .main-view-container .os-host"
 const RightSidebar = ".Root__right-sidebar"
+const ContentsContainer = "aside, section.main-buddyFeed-container"
 const CardInsertAnchor = ".main-nowPlayingView-nowPlayingWidget"
 const SpotifyCardViewQuery = ".main-nowPlayingView-section:not(:is(#BeautifulLyrics-CardView)):has(.main-nowPlayingView-lyricsTitle)"
 
@@ -208,7 +209,7 @@ OnSpotifyReady
 			nowPlayingViewMaid.CleanUp()
 
 			// Determine if our contents-container even exists
-			contentsContainer = (sidebar.querySelector<HTMLDivElement>("aside") ?? undefined)
+			contentsContainer = (sidebar.querySelector<HTMLDivElement>(ContentsContainer) ?? undefined)
 			if (contentsContainer === undefined) {
 				return
 			}
@@ -242,7 +243,7 @@ OnSpotifyReady
 			for (const element of sidebar.children) {
 				if (
 					(element instanceof HTMLDivElement)
-					&& ((element.children.length === 0) || (element.querySelector("aside") !== null))
+					&& ((element.children.length === 0) || (element.querySelector(ContentsContainer) !== null))
 				) {
 					sidebarChildObserver.observe(element, { childList: true })
 				}
