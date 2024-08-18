@@ -1271,12 +1271,16 @@ body:has(.BeautifulLyricsPage.Fullscreen) {
 }
 
 // External Container View Support
-div[class=""], div.os-host {
+.Root__main-view, div.os-host {
 	&:has(.BeautifulLyricsPage) {
 		container-type: size;
 
 		main {
 			display: none;
+		}
+
+		.main-view-container__scroll-node-child {
+			pointer-events: none;
 		}
 
 		.main-view-container__scroll-node-child-spacer, .main-view-container__scroll-node-child {
@@ -1296,12 +1300,16 @@ div[class=""], div.os-host {
 				gap: 8px;
 
 				margin: auto;
-				padding-top: 3cqh;
+				padding-top: 5cqh;
 
 				opacity: 0;
 				transition: opacity .2s;
 
 				--ViewControlSize: 4.25cqh;
+
+				button {
+					cursor: pointer;
+				}
 
 				#Cinema svg {
 					height: calc(var(--ViewControlSize) * 0.45);
@@ -1312,13 +1320,13 @@ div[class=""], div.os-host {
 
 			&:hover {
 				.ViewControls {
-					opacity: 1;
+					opacity: 1 !important;
 				}
 			}
 		}
 	}
 
-	&:has(.BeautifulLyricsPage.Contained:hover) {
+	&:has(.BeautifulLyricsPage.Contained):hover {
 		.ViewControls {
 			opacity: 0.3;
 		}
