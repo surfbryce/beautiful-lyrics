@@ -15,6 +15,10 @@ body:has(.SliderBar.Active) {
 		background: transparent;
 	}
 
+	.main-nowPlayingView-contextItemInfo::before {
+		display: none;
+	}
+
 	.BeautifulLyricsBackground {
 		div[data-overlayscrollbars-viewport], div[data-overlayscrollbars-viewport] > div {
 			background: transparent !important;
@@ -29,6 +33,16 @@ body:has(.SliderBar.Active) {
 			black 70%, transparent 100%,
 			transparent
 		);
+
+		video {
+			filter: opacity(0.75) brightness(0.5);
+		}
+	}
+
+	.BeautifulLyricsBackground .main-nowPlayingView-coverArtContainer div:has(video) {
+		&::after, &::before {
+			display: none;
+		}
 	}
 
 	.BeautifulLyricsBackground .main-trackInfo-artists {
