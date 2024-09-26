@@ -11,7 +11,7 @@ import { GetSpline, Clamp } from '../SharedMethods.ts';
 
 // Imported Types
 import { LiveText, LyricState, SyncedVocals } from '../Types.d.ts'
-import { SyllableList, SyllableMetadata } from "../../../../../Shared/Lyrics.ts";
+import { SyllableList, SyllableMetadata } from "jsr:@socali/beautiful-lyrics/Types/Lyrics"
 
 // Types
 type AnimatedLetter = { // Time is relative to the Syllable
