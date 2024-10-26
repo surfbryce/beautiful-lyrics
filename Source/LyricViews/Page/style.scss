@@ -965,6 +965,7 @@ body:has(.BeautifulLyricsPage.Fullscreen) {
 				}
 
 				&.ControlsVisible {
+					position: relative;
 					--AddToPlaylistOpacity: 1;
 					--ViewControlsOpacity: 1;
 					--LikeStateOpacity: 0.9;
@@ -972,7 +973,6 @@ body:has(.BeautifulLyricsPage.Fullscreen) {
 					--VolumeControlOpacity: 0.85;
 					--ImageDarkness: 0.5;
 					--ImageTransparency: 0.25;
-
 					--AddToPlaylistOpenProgress: 0;
 					--HoverMultiplier: calc(
 						0.5
@@ -1090,7 +1090,7 @@ body:has(.BeautifulLyricsPage.Fullscreen) {
 				--TraveledColor: rgb(255 255 255 / 90%);
 				--RemainingColor: rgb(255 255 255 / 38%);
 				--SliderProgress: 0.6;
-
+				position: relative;
 				width: auto;
 				flex-grow: 1;
 				border-radius: 100cqw;
@@ -1099,7 +1099,6 @@ body:has(.BeautifulLyricsPage.Fullscreen) {
 					var(--TraveledColor) 0px, var(--TraveledColor) calc(100% * var(--SliderProgress)),
 					var(--RemainingColor) calc(100% * var(--SliderProgress)), var(--RemainingColor)
 				);
-				
 				container-type: size;
 
 				.Hitbox {
