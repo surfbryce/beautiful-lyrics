@@ -305,15 +305,10 @@ OnSpotifyReady
 			} else {
 				for (const element of controlsContainer.children) {
 					if (
-						(
-							element.innerHTML.includes("0v1.018l2.72-2.72a.75.75 0 0 1 1.06 0zm2.94-2.94a.75.75")
-							|| element.innerHTML.includes("2H14V4.757a1 1 0 1 1 2 0v1.829l4.293-4.293a1")
-							|| element.innerHTML.includes("M6.53 9.47a.75.75 0 0 1 0 1.06l-2.72 2.72h1.018a.75.75")
-							|| element.innerHTML.includes("M6.53 9.47a.75.75 0 010 1.06l-2.72 2.72h1.018a.75.75")
-						)
+						(element.attributes.getNamedItem("data-testid")?.value === "fullscreen-mode-button")
 						&& (element.id !== "BeautifulLyricsFullscreenButton")
 					) {
-						element.remove()
+						(element as HTMLElement).style.display = "none"
 					}
 				}
 			}
