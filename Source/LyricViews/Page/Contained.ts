@@ -118,12 +118,11 @@ export default class PageView implements Giveable {
 		}
 
 		// Now parent our container/header
-		const headerContainer = page.querySelector<HTMLDivElement>(HeaderQuery)!
 		if (isLegacy) {
 			page.style.containerType = "inline-size"
 			this.Maid.Give(() => page.style.containerType = "")
 		}
-		headerContainer.appendChild(header)
+		container.appendChild(header)
 		page.appendChild(container)
 
 		// Handle watching for no-songs
