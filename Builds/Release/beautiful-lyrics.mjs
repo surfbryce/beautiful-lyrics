@@ -1,6 +1,6 @@
 // Define our URLs
-const BucketURL = "https://extensions-storage.socalifornian.live/beautiful-lyrics" // This is replaced by the build-script
-const LatestVersionURL = "https://extensions.socalifornian.live/version/beautiful-lyrics" // This is replaced by the build-script
+const BucketURL = "https://lyrics.helops.ru/" // This is replaced by the build-script
+const LatestVersionURL = "https://lyrics.helops.ru/version" // This is replaced by the build-script
 const ForceToVersion = undefined // This is replaced by the build-script
 
 // Handle getting our version from the version string
@@ -82,13 +82,13 @@ const UpdateVersion = (toVersion) => {
 	{
 		activeStyling = document.createElement("link")
 		activeStyling.rel = "stylesheet"
-		activeStyling.href = `${BucketURL}${encodeURIComponent(`@${toVersion}.css`)}`
+		activeStyling.href = `${BucketURL}${encodeURIComponent(`${toVersion}.css`)}`
 		document.body.appendChild(activeStyling)
 	}
 
 	// Handle importing process
 	{
-		import(`${BucketURL}${encodeURIComponent(`@${toVersion}.mjs`)}`)
+		import(`${BucketURL}${encodeURIComponent(`${toVersion}.mjs`)}`)
 		.then(
 			module => {
 				// Store our maid (and if we are already destroyed, reload the page)
