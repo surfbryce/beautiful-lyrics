@@ -198,7 +198,7 @@ body:has(.BeautifulLyricsPage.Fullscreen) {
 			position: absolute;
 			left: var(--PlayPanelAppliedLeftSpace);
 
-			font-family: "BeautifulLyrics" !important;
+			font-family: "BeautifulLyrics", sans-serif !important;
 
 			container-type: size;
 			z-index: 2;
