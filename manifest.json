@@ -1,12 +1,13 @@
 [
 	{
-	  "name": "Beautiful Lyrics",
+	  "name": "Beautiful Lyrics (Fixed)",
 	  "description": "Adds Synced Lyrics, Dynamic Background, Fullscreen, Romanization, and more!",
 	  "preview": "./previews/icon.gif",
 	  "main": "./Builds/Release/beautiful-lyrics.mjs",
 	  "readme": "README.md",
 	  "authors": [
-		  { "name": "SoCalifornian", "url": "https://github.com/surfbryce" }
+		  { "name": "SoCalifornian", "url": "https://github.com/surfbryce" },
+		  { "name": "helops", "url": "https://github.com/iHelops" }
 	  ],
 	  "tags": ["lyrics", "fullscreen", "background", "romanization", "romaji", "romaja", "pinyin", "japanese", "korean", "chinese"]
 	}
