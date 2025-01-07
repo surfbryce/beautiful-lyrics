@@ -145,7 +145,6 @@ out
 # End of https://www.toptal.com/developers/gitignore/api/node
 
 # Non-Essential Files
-Tasks/Release.ts
 **/.DS_Store
 .DS_STORE
 Drafts/**/*
