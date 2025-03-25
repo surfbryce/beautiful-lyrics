@@ -4,9 +4,13 @@ import type { RomanizedLanguage } from "@socali/Spices/Player"
 // NPM Packages
 import seedrandom from "npm:seedrandom"
 
+// JSR
+import * as THREE from "jsr:@3d/three"
+
 // Web-Modules
 import { Signal } from "jsr:@socali/modules/Signal"
 import type { Maid } from "jsr:@socali/modules/Maid"
+import { OnPreRender } from "jsr:@socali/modules/Scheduler"
 
 // Spices
 import { GetInstantStore } from "jsr:@socali/spices/Spicetify/Services/Cache"
@@ -14,6 +18,12 @@ import {
 	Song, SongChanged,
 	SongContext, SongContextChanged
 } from "@socali/Spices/Player"
+
+// Shaders
+import {
+	GetShaderUniforms, type ShaderUniforms,
+	VertexShader, FragmentShader
+} from "./Shaders.ts"
 
 // Our store
 export const Store = GetInstantStore<
@@ -64,170 +74,13 @@ export const IsLanguageRomanized = (language: RomanizedLanguage): boolean => {
 	return (Store.Items.RomanizedLanguages[language] === true)
 }
 
-/* FUTURE PRE-BLUR SUPPORT
-// Behavior Constants
-const BlurSizeIncrease = 1.25
-const BlurSize = 40
-
-const CoverArtContainerFilters: Map<(CoverArtContainer | "Default"), string> = new Map()
-CoverArtContainerFilters.set("Default", "brightness(0.5) saturate(2.5)")
-CoverArtContainerFilters.set("SidePanel", "brightness(1) saturate(2.25)")
-
-// Store our Blurred-CoverArt
-const BlurredCoverArts: Map<string, Map<CoverArtContainer, Map<number, string>>> = new Map()
-
-// Handle generating blurred-images
-const GetCoverArtURLToBlur = (coverArt: CoverArtMetadata) => {
-	return coverArt.Default
-}
-export const GenerateBlurredCoverArt = (
-	coverArt: CoverArtMetadata, coverArtContainer: CoverArtContainer,
-	sizes: number[]
-) => { // Images are square so size is width/height
-	// Determine which cover-art we want to use
-	const desiredCoverArt = GetCoverArtURLToBlur(coverArt)
-
-	// Load our image
-	return (
-		new Promise<HTMLImageElement>(
-			(resolve, reject) => {
-				const img = new Image();
-				img.onload = () => resolve(img)
-				img.onerror = reject
-				img.src = desiredCoverArt
-			}
-		)
-	)
-		.then(
-			(image) => {
-				// Generate all our images
-				const blobPromises = []
-
-				for (const size of sizes) {
-					// Determine our images actual width/height
-					const imageWidth = size, imageHeight = size
-
-					// Create our canvas
-					const canvas = new OffscreenCanvas(imageWidth, imageHeight)
-					const context = canvas.getContext("2d")!
-
-					// Handle rendering our main-canvas
-					{
-						// Determine the center where we draw things at
-						const centerX = (canvas.width / 2), centerY = (canvas.height / 2)
-
-						// Create our crop
-						{
-							context.beginPath()
-							context.arc(centerX, centerY, centerX, 0, Math.PI * 2)
-							context.clip()
-						}
-
-						// Draw our image
-						context.drawImage(image, 0, 0, imageWidth, imageHeight)
-					}
-
-					// Create our blur-canvas
-					const blurCanvas = new OffscreenCanvas(
-						Math.round(imageWidth * BlurSizeIncrease),
-						Math.round(imageHeight * BlurSizeIncrease)
-					)
-					const blurContext = blurCanvas.getContext("2d")!
-
-					// Handle rendering our blur-canvas
-					{
-						// Determine the center where we draw things at
-						const centerX = (blurCanvas.width / 2), centerY = (blurCanvas.height / 2)
-
-						// Grab our other filters
-						const filters = (
-							CoverArtContainerFilters.get(coverArtContainer)
-							?? CoverArtContainerFilters.get("Default")!
-						)
-
-						// Apply our blur
-						blurContext.filter = `${filters} blur(${BlurSize}px)`
-						// blurContext.filter = filters
-
-						// Draw our main image onto our blur-canvas
-						blurContext.drawImage(canvas, (centerX - (canvas.width / 2)), (centerY - (canvas.height / 2)))
-					}
-
-					// Now store our blob
-					blobPromises.push(
-						blurCanvas.convertToBlob(
-							{
-								type: "image/webp",
-								quality: 1
-							}
-						)
-					)
-				}
-
-				// Generate our buffer
-				return Promise.all(blobPromises)
-			}
-		)
-		.then(
-			blobs => {
-				// Check if we have to create our main container
-				let storage = BlurredCoverArts.get(desiredCoverArt)
-				if (storage === undefined) {
-					storage = new Map()
-					BlurredCoverArts.set(desiredCoverArt, storage)
-				}
-
-				// Go through our old cover-art if we have any
-				const oldCoverArts = storage.get(coverArtContainer)
-				if (oldCoverArts !== undefined) {
-					for (const oldURL of oldCoverArts.values()) {
-						URL.revokeObjectURL(oldURL)
-					}
-				}
-
-				// Store our blurred image
-				const urls = new Map<number, string>()
-				for (let index = 0; index < blobs.length; index++) {
-					urls.set(sizes[index], URL.createObjectURL(blobs[index]))
-				}
-
-				// Return our url
-				return urls
-			}
-		)
-}
-export const GetBlurredCoverArt = (
-	coverArt: CoverArtMetadata, coverArtContainer: CoverArtContainer,
-	sizes: number[]
-) => {
-	// Determine which cover-art we want to use
-	const desiredCoverArt = GetCoverArtURLToBlur(coverArt)
-
-	// Determine if we already have a blurred version of this cover-art
-	const blurredCoversStorage = BlurredCoverArts.get(desiredCoverArt)
-	if (blurredCoversStorage !== undefined) {
-		const blurredCoverArt = blurredCoversStorage.get(coverArtContainer)
-
-		if (blurredCoverArt !== undefined) {
-			// Make sure that all our sizes exist
-			for (const size of sizes) {
-				if (blurredCoverArt.has(size) === false) {
-					return undefined
-				}
-			}
-
-			// Now return our blurred cover-art
-			return blurredCoverArt
-		}
-	}
-
-	return undefined
-}
-*/
+//* FUTURE PRE-BLUR SUPPORT
+//const CoverArtContainerFilters: Map<(CoverArtContainer | "Default"), string> = new Map()
+//CoverArtContainerFilters.set("Default", "brightness(0.5) saturate(2.5)")
+//CoverArtContainerFilters.set("SidePanel", "brightness(1) saturate(2.25)")
 
 // Handle applying our dynamic-background
 const BackgroundClassName = "BeautifulLyricsBackground"
-const BackgroundElements = ["Front", "Back", "BackCenter"]
 
 export const GetCoverArtForSong = (): [string, (number | undefined)] => {
 	// DJ is ALWAYS guaranteed to have a cover-art
@@ -257,6 +110,65 @@ export const GetCoverArtForSong = (): [string, (number | undefined)] => {
 	}
 }
 
+// Blurred Cover Art Generation
+let Blurred_CovertArt: OffscreenCanvas
+const CoverArtBlurred = new Signal()
+const GenerateBlurredCoverArt = async () => {
+	const [coverArt, placeholderHueShift] = GetCoverArtForSong()
+
+	const image = new Image()
+	image.src = coverArt
+	await image.decode()
+
+	const originalSize = Math.min(image.width, image.height) // Crop to a square
+	const blurExtent = Math.ceil(3 * 40) // Blur spread extent
+
+	// Create a square canvas to crop the image into a circle
+	const circleCanvas = new OffscreenCanvas(originalSize, originalSize)
+	const circleCtx = circleCanvas.getContext('2d')!
+
+	// Create circular clipping mask
+	circleCtx.beginPath()
+	circleCtx.arc(originalSize / 2, originalSize / 2, originalSize / 2, 0, Math.PI * 2)
+	circleCtx.closePath()
+	circleCtx.clip()
+
+	// Draw the original image inside the circular clip
+	circleCtx.drawImage(
+		image,
+		((image.width - originalSize) / 2), ((image.height - originalSize) / 2),
+		originalSize, originalSize,
+		0, 0,
+		originalSize, originalSize
+	)
+
+	// Expand canvas to accommodate blur effect
+	const padding = (blurExtent * 1.5)
+	const expandedSize = originalSize + padding
+	const blurredCanvas = new OffscreenCanvas(expandedSize, expandedSize)
+	const blurredCtx = blurredCanvas.getContext('2d')!
+
+	blurredCtx.filter = `hue-rotate(${placeholderHueShift ?? 0}deg) blur(${40}px)`
+
+	// Draw the cropped circular image in the center of the expanded canvas
+	blurredCtx.drawImage(circleCanvas, (padding / 2), (padding / 2))
+
+	if (GetCoverArtForSong()[0] === coverArt) {
+		Blurred_CovertArt = blurredCanvas
+		CoverArtBlurred.Fire()
+	}
+}
+GenerateBlurredCoverArt()
+SongChanged.Connect(GenerateBlurredCoverArt)
+SongContextChanged.Connect(GenerateBlurredCoverArt) // We might use Playlist cover instead
+
+// Setup Referential Renderer Objects
+const RenderCamera = new THREE.OrthographicCamera(
+	-1, 1, 1, -1, 0.1, 10
+) as ( THREE.OrthographicCamera & { position: THREE.Vector3 } )
+RenderCamera.position.z = 1
+const MeshGeometry = new THREE.PlaneGeometry(2, 2)
+
 export const ApplyDynamicBackground = (element: HTMLElement, maid: Maid) => {
 	// Give our element the class
 	{
@@ -271,34 +183,76 @@ export const ApplyDynamicBackground = (element: HTMLElement, maid: Maid) => {
 		)
 	}
 
-	// Create our container and child-images
-	const backgroundContainer = maid.Give(document.createElement('div'))
-	backgroundContainer.classList.add(`${BackgroundClassName}-Container`)
-
-	// Create all our elements
-	const elements: HTMLImageElement[] = []
-	for (const elementClass of BackgroundElements) {
-		// Create our image
-		const image = maid.Give(document.createElement('img'))
-		image.classList.add(elementClass)
-		backgroundContainer.appendChild(image)
-
-		// Now store our element
-		elements.push(image)
-	}
-
-	// Update our background-images
-	const UpdateBackgroundImages = () => {
-		const [coverArt, placeholderHueShift] = GetCoverArtForSong()
-		for (const element of elements) {
-			element.style.setProperty("--PlaceholderHueShift", `${placeholderHueShift ?? 0}deg`)
-			element.src = coverArt
+	const renderScene = new THREE.Scene()
+	const materialUniforms = GetShaderUniforms()
+	const meshMaterial = new THREE.ShaderMaterial(
+		{
+			uniforms: materialUniforms,
+			vertexShader: VertexShader,
+			fragmentShader: FragmentShader,
 		}
+	) as (THREE.MeshBasicMaterial & THREE.ShaderMaterial & { uniforms: ShaderUniforms })
+	const sceneMesh = new THREE.Mesh(MeshGeometry, meshMaterial)
+	renderScene.add(sceneMesh)
+
+	const renderer = new THREE.WebGLRenderer({ alpha: true })
+	const rendererElement = renderer.domElement
+	renderer.setPixelRatio(globalThis.devicePixelRatio)
+	rendererElement.classList.add(`${BackgroundClassName}-Container`)
+	maid.Give(() => renderer.dispose())
+	maid.Give(rendererElement)
+
+	const UpdateBackgroundImages = () => {
+		const texture = new THREE.CanvasTexture(Blurred_CovertArt)
+		texture.minFilter = THREE.NearestFilter
+		texture.magFilter = THREE.NearestFilter
+		materialUniforms.uImage.value = texture
+		renderer.render(renderScene, RenderCamera)
 	}
 	UpdateBackgroundImages()
-	maid.Give(SongChanged.Connect(UpdateBackgroundImages))
-	maid.Give(SongContextChanged.Connect(UpdateBackgroundImages))
+	maid.Give(CoverArtBlurred.Connect(UpdateBackgroundImages))
 
-	// Add our container to the background
-	element.prepend(backgroundContainer)
+	{
+		const UpdateDimensions = () => {
+			const width = element.clientWidth
+			const height = element.clientHeight
+			renderer.setSize(width, height)
+	
+			const scaledWidth = (width * globalThis.devicePixelRatio)
+			const scaledHeight = (height * globalThis.devicePixelRatio)
+	
+			const largestAxis = ((scaledWidth > scaledHeight) ? "X" : "Y")
+			const largestAxisSize = ((scaledWidth > scaledHeight) ? scaledWidth : scaledHeight)
+
+			materialUniforms.backgroundCircleOrigin.value.set((scaledWidth / 2), (scaledHeight / 2))
+			materialUniforms.backgroundCircleRadius.value = (largestAxisSize * 1.5)
+
+			materialUniforms.centerCircleOrigin.value.set((scaledWidth / 2), (scaledHeight / 2))
+			materialUniforms.centerCircleRadius.value = (
+				largestAxisSize
+				* ((largestAxis === "X") ? 1 : 0.75)
+			)
+	
+			materialUniforms.leftCircleOrigin.value.set(0, scaledHeight)
+			materialUniforms.leftCircleRadius.value = (largestAxisSize * 0.75)
+			
+			materialUniforms.rightCircleOrigin.value.set(scaledWidth, 0)
+			materialUniforms.rightCircleRadius.value = (
+				largestAxisSize
+				* ((largestAxis === "X") ? 0.65 : 0.5)
+			)
+		}
+		maid.Give(OnPreRender(UpdateDimensions))
+		const sizeObserver = maid.Give(new ResizeObserver(UpdateDimensions))
+		sizeObserver.observe(element)
+	}
+
+	const RenderUpdate = () => {
+		materialUniforms.uTime.value = (performance.now() / 3500)
+		renderer.render(renderScene, RenderCamera)
+		maid.Give(OnPreRender(RenderUpdate))
+	}
+	RenderUpdate()
+
+	element.prepend(renderer.domElement)
 }
