@@ -1867,6 +1867,11 @@ export default class PageView implements Giveable {
 		// Finally, parent our container
 		document.body.appendChild(container)
 
+		// Hide the main content for memory/rendering performance
+		const mainContent = document.querySelector<HTMLDivElement>("#main")!
+		mainContent.style.display = "none"
+		this.Maid.Give(() => mainContent.style.display = "")
+
 		// Handle watching for no-songs
 		{
 			const CheckForSongExistence = () => {
