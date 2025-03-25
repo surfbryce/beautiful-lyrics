@@ -3,36 +3,36 @@ import * as THREE from "jsr:@3d/three"
 
 // Shaders
 const Uniforms = `
-uniform float uTime;
-uniform sampler2D uImage;
+uniform float Time;
+uniform sampler2D BlurredCoverArt;
 
-uniform vec2 backgroundCircleOrigin;
-uniform float backgroundCircleRadius;
+uniform vec2 BackgroundCircleOrigin;
+uniform float BackgroundCircleRadius;
 
-uniform vec2 centerCircleOrigin;
-uniform float centerCircleRadius;
+uniform vec2 CenterCircleOrigin;
+uniform float CenterCircleRadius;
 
-uniform vec2 leftCircleOrigin;
-uniform float leftCircleRadius;
+uniform vec2 LeftCircleOrigin;
+uniform float LeftCircleRadius;
 
-uniform vec2 rightCircleOrigin;
-uniform float rightCircleRadius;
+uniform vec2 RightCircleOrigin;
+uniform float RightCircleRadius;
 `
 export type ShaderUniforms = {
-	uTime: { value: number };
-	uImage: { value: THREE.Texture };
+	Time: { value: number };
+	BlurredCoverArt: { value: THREE.Texture };
 
-	backgroundCircleOrigin: { value: THREE.Vector2 };
-	backgroundCircleRadius: { value: number };
+	BackgroundCircleOrigin: { value: THREE.Vector2 };
+	BackgroundCircleRadius: { value: number };
 
-	centerCircleOrigin: { value: THREE.Vector2 };
-	centerCircleRadius: { value: number };
+	CenterCircleOrigin: { value: THREE.Vector2 };
+	CenterCircleRadius: { value: number };
 
-	leftCircleOrigin: { value: THREE.Vector2 };
-	leftCircleRadius: { value: number };
+	LeftCircleOrigin: { value: THREE.Vector2 };
+	LeftCircleRadius: { value: number };
 
-	rightCircleOrigin: { value: THREE.Vector2 };
-	rightCircleRadius: { value: number };
+	RightCircleOrigin: { value: THREE.Vector2 };
+	RightCircleRadius: { value: number };
 }
 
 export const VertexShader = `
@@ -45,7 +45,7 @@ export const FragmentShader = `
 ${Uniforms}
 
 const vec2 rotateCenter = vec2(0.5, 0.5);
-vec2 rotate(vec2 point, float angle) {
+vec2 RotateAroundCenter(vec2 point, float angle) {
 	vec2 offset = (point - rotateCenter);
 
 	float s = sin(angle);
@@ -56,29 +56,29 @@ vec2 rotate(vec2 point, float angle) {
 	return (rotateCenter + offset);
 }
 
-const vec4 defaultColor = vec4(0.0, 0.0, 0.0, 0.0);
+const vec4 DefaultColor = vec4(0.0, 0.0, 0.0, 0.0);
 void main() {
-	gl_FragColor = defaultColor;
+	gl_FragColor = DefaultColor;
 
-	vec2 backgroundCircleOffset = (gl_FragCoord.xy - backgroundCircleOrigin);
-	if (length(backgroundCircleOffset) <= backgroundCircleRadius) {
+	vec2 BackgroundCircleOffset = (gl_FragCoord.xy - BackgroundCircleOrigin);
+	if (length(BackgroundCircleOffset) <= BackgroundCircleRadius) {
 		gl_FragColor = texture2D(
-			uImage,
-			rotate(
-				(((backgroundCircleOffset / backgroundCircleRadius) + 1.0) * 0.5),
-				(uTime * -0.25)
+			BlurredCoverArt,
+			RotateAroundCenter(
+				(((BackgroundCircleOffset / BackgroundCircleRadius) + 1.0) * 0.5),
+				(Time * -0.25)
 			)
 		);
 		gl_FragColor.a = 1.0;
 	}
 
-	vec2 centerCircleOffset = (gl_FragCoord.xy - centerCircleOrigin);
-	if (length(centerCircleOffset) <= centerCircleRadius) {
+	vec2 CenterCircleOffset = (gl_FragCoord.xy - CenterCircleOrigin);
+	if (length(CenterCircleOffset) <= CenterCircleRadius) {
 		vec4 newColor = texture2D(
-			uImage,
-			rotate(
-				(((centerCircleOffset / centerCircleRadius) + 1.0) * 0.5),
-				(uTime * 0.5)
+			BlurredCoverArt,
+			RotateAroundCenter(
+				(((CenterCircleOffset / CenterCircleRadius) + 1.0) * 0.5),
+				(Time * 0.5)
 			)
 		);
 		newColor.a *= 0.75;
@@ -87,13 +87,13 @@ void main() {
 		gl_FragColor.a = (newColor.a + (gl_FragColor.a * (1.0 - newColor.a)));
 	}
 
-	vec2 leftCircleOffset = (gl_FragCoord.xy - leftCircleOrigin);
-	if (length(leftCircleOffset) <= leftCircleRadius) {
+	vec2 LeftCircleOffset = (gl_FragCoord.xy - LeftCircleOrigin);
+	if (length(LeftCircleOffset) <= LeftCircleRadius) {
 		vec4 newColor = texture2D(
-			uImage,
-			rotate(
-				(((leftCircleOffset / leftCircleRadius) + 1.0) * 0.5),
-				(uTime * 1.0)
+			BlurredCoverArt,
+			RotateAroundCenter(
+				(((LeftCircleOffset / LeftCircleRadius) + 1.0) * 0.5),
+				(Time * 1.0)
 			)
 		);
 		newColor.a *= 0.5;
@@ -102,13 +102,13 @@ void main() {
 		gl_FragColor.a = (newColor.a + (gl_FragColor.a * (1.0 - newColor.a)));
 	}
 
-	vec2 rightCircleOffset = (gl_FragCoord.xy - rightCircleOrigin);
-	if (length(rightCircleOffset) <= rightCircleRadius) {
+	vec2 RightCircleOffset = (gl_FragCoord.xy - RightCircleOrigin);
+	if (length(RightCircleOffset) <= RightCircleRadius) {
 		vec4 newColor = texture2D(
-			uImage,
-			rotate(
-				(((rightCircleOffset / rightCircleRadius) + 1.0) * 0.5),
-				(uTime * -0.75)
+			BlurredCoverArt,
+			RotateAroundCenter(
+				(((RightCircleOffset / RightCircleRadius) + 1.0) * 0.5),
+				(Time * -0.75)
 			)
 		);
 		newColor.a *= 0.5;

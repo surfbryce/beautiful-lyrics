@@ -206,7 +206,7 @@ export const ApplyDynamicBackground = (element: HTMLElement, maid: Maid) => {
 		const texture = new THREE.CanvasTexture(Blurred_CovertArt)
 		texture.minFilter = THREE.NearestFilter
 		texture.magFilter = THREE.NearestFilter
-		materialUniforms.uImage.value = texture
+		materialUniforms.BlurredCoverArt.value = texture
 		renderer.render(renderScene, RenderCamera)
 	}
 	UpdateBackgroundImages()
@@ -224,20 +224,20 @@ export const ApplyDynamicBackground = (element: HTMLElement, maid: Maid) => {
 			const largestAxis = ((scaledWidth > scaledHeight) ? "X" : "Y")
 			const largestAxisSize = ((scaledWidth > scaledHeight) ? scaledWidth : scaledHeight)
 
-			materialUniforms.backgroundCircleOrigin.value.set((scaledWidth / 2), (scaledHeight / 2))
-			materialUniforms.backgroundCircleRadius.value = (largestAxisSize * 1.5)
+			materialUniforms.BackgroundCircleOrigin.value.set((scaledWidth / 2), (scaledHeight / 2))
+			materialUniforms.BackgroundCircleRadius.value = (largestAxisSize * 1.5)
 
-			materialUniforms.centerCircleOrigin.value.set((scaledWidth / 2), (scaledHeight / 2))
-			materialUniforms.centerCircleRadius.value = (
+			materialUniforms.CenterCircleOrigin.value.set((scaledWidth / 2), (scaledHeight / 2))
+			materialUniforms.CenterCircleRadius.value = (
 				largestAxisSize
 				* ((largestAxis === "X") ? 1 : 0.75)
 			)
 	
-			materialUniforms.leftCircleOrigin.value.set(0, scaledHeight)
-			materialUniforms.leftCircleRadius.value = (largestAxisSize * 0.75)
+			materialUniforms.LeftCircleOrigin.value.set(0, scaledHeight)
+			materialUniforms.LeftCircleRadius.value = (largestAxisSize * 0.75)
 			
-			materialUniforms.rightCircleOrigin.value.set(scaledWidth, 0)
-			materialUniforms.rightCircleRadius.value = (
+			materialUniforms.RightCircleOrigin.value.set(scaledWidth, 0)
+			materialUniforms.RightCircleRadius.value = (
 				largestAxisSize
 				* ((largestAxis === "X") ? 0.65 : 0.5)
 			)
@@ -248,7 +248,7 @@ export const ApplyDynamicBackground = (element: HTMLElement, maid: Maid) => {
 	}
 
 	const RenderUpdate = () => {
-		materialUniforms.uTime.value = (performance.now() / 3500)
+		materialUniforms.Time.value = (performance.now() / 3500)
 		renderer.render(renderScene, RenderCamera)
 		maid.Give(OnPreRender(RenderUpdate))
 	}
