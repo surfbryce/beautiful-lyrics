@@ -57,10 +57,14 @@ body:has(.SliderBar.Active) {
 
 	.main-nowPlayingView-section {
 		background-color: var(--background-tinted-base) !important;
+
+		button div div:has(a) {
+			background-color: transparent !important;
+		}
 	}
 
 	button[type="button"] {
-		background-color: var(--background-tinted-base) !important;
+		background-color: transparent !important;
 		color: rgba(255, 255, 255, 0.8);
 
 		.Button-sm-buttonSecondary-useBrowserDefaultFocusStyle,
@@ -69,7 +73,6 @@ body:has(.SliderBar.Active) {
 		}
 	}
 }
-
 
 // Improves scroll-bar
 .os-host:has(.BeautifulLyricsBackground),
@@ -90,6 +93,7 @@ body:has(.SliderBar.Active) {
 	// This is the overarching container, the parent of the container class
 	overflow: hidden;
 	position: relative;
+	border-radius: var(--section-border-radius, 8px);
 
 	// This is needed so that the gradient-background can be visible
 	&.main-nowPlayingView-sectionHeaderSpacing.main-nowPlayingView-lyricsGradient, .main-buddyFeed-content {
@@ -98,20 +102,7 @@ body:has(.SliderBar.Active) {
 
 	// These are full-screen background specific classes to make the gradient-background work/show properly
 	&.BeautifulLyricsPage &-Container {
-		max-width: 35%;
-		max-height: 55%;
-
-		scale: 290% 185%;
-		transform-origin: left top;
-
 		filter: saturate(2.5) brightness(0.65); // Blur-related
-	}
-
-	&.BeautifulLyricsPage.Fullscreen &-Container {
-		max-width: 20%;
-		max-height: 60%;
-
-		scale: 500% 170%;
 	}
 
 	// These are right-side card background specific classes to adjust for contrast issues
@@ -119,20 +110,7 @@ body:has(.SliderBar.Active) {
 		filter: saturate(2) brightness(0.7); // Blur-related
 	}
 
-	/*
-		The idea behind this is to create a gradient-background that resembles Apple Music.
-
-		We could technically simulate blob-merging of these colors and extract colors out of the
-		cover-art. However - that is ridiculously expensive computationaly - and more importantly;
-		I don't want to extract the colors from the cover-art in the first place.
-
-		The easier solution is to use the cover-art as an image and blur it. To simulate blob-merging
-		we have two circles with the image (two images cropped circularly) blurred significantly. We then
-		apply a blend-mode to one of the circles and layer it on top. This helps sell the illusion that
-		these colors are merging in blobs.
-	*/
-
-	// As the name suggests, this contains the color/back images - which make up the gradient itself
+	// Gradient Background Container
 	&-Container {
 		position: absolute;
 		top: 0;
@@ -141,70 +119,8 @@ body:has(.SliderBar.Active) {
 		height: 100%;
 		pointer-events: none;
 		overflow: hidden;
+		border-radius: var(--section-border-radius, 8px);
 
 		filter: saturate(1.5) brightness(0.8); // Blur-related
-
-		// Sharable properties
-		.Front,
-		.Back,
-		.BackCenter {
-			/* This is to align our img element */
-			position: absolute;
-			width: 200%;
-			/*aspect-ratio: 1/1;*/
-			animation: rotate 35s linear infinite;
-
-			/* Align our image to the center of our div */
-			/*img, canvas {
-				position: absolute;
-				top: 50%;
-				left: 50%;
-				translate: -50% -50%;
-			}*/
-
-			filter: hue-rotate(var(--PlaceholderHueShift)) blur(40px); // Blur-related
-			border-radius: 100em; // Blur-related
-		}
-
-		// The primary image which gives the blending effect it's illusional property
-		.Front {
-			right: 0;
-			top: 0;
-			z-index: 10;
-
-			/*mix-blend-mode: soft-light;*/
-		}
-
-		// Additional image to cover space that the primary image doesn't cover (and to develop blob-blending)
-		.Back {
-			left: 0;
-			bottom: 0;
-			z-index: 1;
-			animation-direction: reverse;
-		}
-
-		// Final image to cover the center
-		.BackCenter {
-			z-index: 0;
-
-			width: 300%;
-			right: -50%;
-			top: -20%;
-
-			animation-direction: reverse;
-		}
-	}
-}
-
-:root {
-	--beautiful-lyrics-random-degree: 258deg;
-}
-@keyframes rotate {
-	0% {
-		transform: rotate(var(--beautiful-lyrics-random-degree));
-	}
-
-	100% {
-		transform: rotate(calc(var(--beautiful-lyrics-random-degree) + 360deg));
 	}
 }
