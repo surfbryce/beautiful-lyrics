@@ -1,0 +1,222 @@
+#BeautifulLyrics_UpdatePopup {
+	display: flex;
+	width: 100cqw;
+	height: 100cqh;
+	background-color: hsl(0deg 0% 0% / 75%);
+	backdrop-filter: blur(10px);
+
+	position: absolute;
+	top: 0;
+	left: 0;
+
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+
+	z-index: 1000; // Force rendering in ANY situation
+
+	.UpdateTitle {
+		margin-top: 0cqh;
+
+		font-weight: normal;
+		font-size: 2.5cqh;
+		color: white;
+	}
+
+	.ExtensionTitle {
+		margin-top: -0.75cqh;
+
+		font-weight: bold;
+		font-size: 5cqh;
+	}
+
+	.BackgroundRenderingImprovements {
+		--Width: min(50cqw, 75cqh);
+
+		width: var(--Width);
+		height: calc(var(--Width) * (9 / 16));
+		border-radius: 0.5cqw;
+		border: #ffffff12 solid 0.25cqw;
+
+		box-shadow: 0px 5px 20px 0px #0000008f;
+
+		margin-top: 1cqh;
+		margin-bottom: 2.5cqh;
+
+		position: relative;
+
+		overflow: hidden;
+
+		container-type: size;
+
+		.Title {
+			width: 100cqw;
+
+			color: white;
+			font-family: "BeautifulLyrics";
+			font-size: 11cqh;
+			font-weight: bold;
+			text-align: center;
+
+			position: absolute;
+			top: 10cqh;
+
+			z-index: 3;
+		}
+		.SubTitle {
+			width: 100cqw;
+
+			color: white;
+			font-family: "BeautifulLyrics";
+			font-size: 5cqh;
+			font-weight: bold;
+			text-align: center;
+			opacity: 0.5;
+
+			position: absolute;
+			top: 23cqh;
+
+			z-index: 3;
+		}
+		.TechnicalExplanation {
+			cursor: pointer;
+
+			width: 100cqw;
+
+			color: white;
+			font-family: "BeautifulLyrics";
+			font-size: 5cqh;
+			font-weight: normal;
+			text-align: center;
+			opacity: 0.15;
+			text-decoration: underline;
+
+			position: absolute;
+			bottom: 3.5cqh;
+
+			z-index: 3;
+		}
+
+		video, .VideoGradient {
+			width: 100cqw;
+			height: 100cqh;
+
+			position: absolute;
+			top: 0;
+			left: 0;
+
+			margin: 0;
+		}
+		.VideoGradient {
+			background: linear-gradient(
+				0deg,
+				#00000000 0, #00000000 0px,
+				#00000000 0px, #00000073 70%,
+				#000000bf 100%, transparent
+			);
+			z-index: 2;
+		}
+	}
+
+	.PopupButtons {
+		display: flex;
+		height: 5cqh;
+		background: #615d5d21;
+
+		flex-direction: row;
+		gap: 10px;
+		justify-content: center;
+
+		container-type: size;
+
+		--Button-Padding: 15px;
+
+		.DiscordButton {
+			display: flex;
+			background-color: hsl(235, 86%, 65%);
+			border-style: none;
+			border-radius: 10cqh;
+	
+			padding-top: var(--Button-Padding);
+			padding-bottom: var(--Button-Padding);
+			padding-left: calc(var(--Button-Padding) * 2.5);
+			padding-right: calc(var(--Button-Padding) * 2.5);
+	
+			justify-content: center;
+			align-items: center;
+
+			transform-origin: center center;
+
+			will-change: background-color, scale;
+			transition: background-color 0.125s ease-in-out;
+
+			&:hover {
+				cursor: pointer;
+
+				background-color: hsl(235, 86%, 60%);
+
+				transform: scale(1.05);
+			}
+			&.Pressed {
+				transition:
+					background-color 0.075s ease-in-out,
+					transform 0.075s ease-in-out;
+
+				background-color: hsl(235, 60%, 50%);
+
+				transform: scale(1);
+			}
+
+			img {
+				height: 50cqh;
+				padding-right: calc(var(--Button-Padding) * 0.75);
+			}
+			span {
+				padding-bottom: 1cqh;
+
+				color: #ffffff;
+				font-weight: bolder;
+				font-size: 50cqh;
+				white-space: nowrap;
+			}
+		}
+
+		.CloseButton {
+			display: flex;
+			background: hsl(21.61deg 31.27% 16.13%);
+			border-style: none;
+			border-radius: 10cqh;
+
+			padding: var(--Button-Padding);
+
+			justify-content: center;
+			align-items: center;
+
+			transform-origin: center center;
+
+			will-change: background-color, scale;
+			transition: background-color 0.125s ease-in-out;
+
+			&:hover {
+				cursor: pointer;
+
+				background-color: hsl(21.61deg 31.27% 20.13%);
+			}
+			&.Pressed {
+				transition:
+					background-color 0.075s ease-in-out,
+					transform 0.075s ease-in-out;
+
+				background-color: hsl(21.61deg 31.27% 14.13%);
+
+				transform: scale(0.975);
+			}
+
+			span {
+				color: #e3d6d6;
+				font-weight: normal;
+				font-size: 45cqh;
+			}
+		}
+	}
+}

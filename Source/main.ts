@@ -25,6 +25,9 @@ import "./LyricViews/mod.ts"
 // Shared Methods
 import { CreateElement } from "./LyricViews/Shared.ts"
 
+// Modules
+import OpenUpdatePopup from "./UpdatePopup/mod.ts"
+
 const Load = async () => {
 	{
 		const fontPromises: Promise<FontFaceSet>[] = []
@@ -73,8 +76,8 @@ const Load = async () => {
 	await OnSpotifyReady
 
 	// Custom text rendering, still expirementing so not final yet
-	/*{
-		const canvas = GlobalMaid.Give(CreateElement<HTMLCanvasElement>("<canvas></canvas>"))
+	{
+		/*const canvas = GlobalMaid.Give(CreateElement<HTMLCanvasElement>("<canvas></canvas>"))
 		canvas.style.backgroundColor = "rgba(255, 255, 255, 0.5)"
 		canvas.style.pointerEvents = "none"
 		canvas.style.width = `${document.body.clientWidth}px`
@@ -175,7 +178,7 @@ const Load = async () => {
 				),
 				190
 			)
-		}
+		}*/
 
 		/*const HBounds = context.measureText("H")
 		const eBounds = context.measureText("e")
@@ -223,8 +226,8 @@ const Load = async () => {
 			"e",
 			100 - HBounds.actualBoundingBoxLeft + HWidth + spaceBetweenHande + eBounds.actualBoundingBoxLeft,
 			200
-		)/
-	}*/
+		)*/
+	}
 
 	{ // Handle our Debugging (gives Linux an opportunity to get this information)
 		const OnGetSpotifyAndSpicetifyInformation = () => {
@@ -360,6 +363,9 @@ const Load = async () => {
 
 		UpdateAnalytics()
 	}
+
+	// Only opens the Update Popup IF we haven't seen it yet
+	OpenUpdatePopup()
 }
 Load()
 
