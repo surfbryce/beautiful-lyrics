@@ -2,7 +2,7 @@
 import { Maid, Giveable } from 'jsr:@socali/modules/Maid'
 
 // Imported Types
-import { TextMetadata } from "../../../../../Shared/Lyrics.ts"
+import { TextMetadata } from "jsr:@socali/beautiful-lyrics/Types/Lyrics"
 import { BaseVocals } from '../Types.d.ts'
 
 // Class

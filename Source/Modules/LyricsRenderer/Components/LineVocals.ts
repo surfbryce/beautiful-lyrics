@@ -8,7 +8,7 @@ import { GetSpline, Clamp } from "../SharedMethods.ts"
 
 // Imported Types
 import { SyncedVocals, LyricState } from "../Types.d.ts"
-import { LineVocal } from "../../../../../Shared/Lyrics.ts"
+import { LineVocal } from "jsr:@socali/beautiful-lyrics/Types/Lyrics"
 
 // Visual Constants
 const GlowRange = [

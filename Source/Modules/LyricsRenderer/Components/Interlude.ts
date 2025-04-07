@@ -12,7 +12,7 @@ import { GetSpline, Clamp } from "../SharedMethods.ts"
 
 // Imported Types
 import { SyncedVocals, LyricState } from "../Types.d.ts"
-import { Interlude } from "../../../../../Shared/Lyrics.ts"
+import { Interlude } from "jsr:@socali/beautiful-lyrics/Types/Lyrics"
 
 // Types
 type DotSprings = {

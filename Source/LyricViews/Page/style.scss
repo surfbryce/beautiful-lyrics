@@ -212,6 +212,8 @@ body:has(.BeautifulLyricsPage.Fullscreen) {
 				height: 100cqw;
 
 				margin-bottom: 4cqw;
+
+				position: relative;
 	
 				container-type: size;
 
@@ -1068,6 +1070,8 @@ body:has(.BeautifulLyricsPage.Fullscreen) {
 
 				margin-bottom: 1.75cqh;
 
+				position: relative;
+
 				.Position {
 					padding-right: 1.5cqw;
 				}
@@ -1099,6 +1103,8 @@ body:has(.BeautifulLyricsPage.Fullscreen) {
 					var(--TraveledColor) 0px, var(--TraveledColor) calc(100% * var(--SliderProgress)),
 					var(--RemainingColor) calc(100% * var(--SliderProgress)), var(--RemainingColor)
 				);
+
+				position: relative;
 				
 				container-type: size;
 
@@ -1282,53 +1288,50 @@ body:has(.BeautifulLyricsPage.Fullscreen) {
 		.main-view-container__scroll-node-child {
 			pointer-events: none;
 		}
-
-		.main-view-container__scroll-node-child-spacer, .main-view-container__scroll-node-child {
-			min-height: unset !important;
-
-			display: flex;
-			z-index: 200000;
-
-			width: 12cqh;
-
-			position: relative;
-			left: calc(50cqw - 6cqw);
-
-			.ViewControls {
-				display: flex;
-
-				gap: 8px;
-
-				margin: auto;
-				padding-top: 5cqh;
-
-				opacity: 0;
-				transition: opacity .2s;
-
-				--ViewControlSize: 4.25cqh;
-
-				button {
-					cursor: pointer;
-				}
-
-				#Cinema svg {
-					height: calc(var(--ViewControlSize) * 0.45);
-					width: auto;
-					aspect-ratio: 1;
-				}
-			}
-
-			&:hover {
-				.ViewControls {
-					opacity: 1 !important;
-				}
-			}
-		}
 	}
 
-	&:has(.BeautifulLyricsPage.Contained):hover {
+	&:has(.BeautifulLyricsPage.Contained) {
 		.ViewControls {
-			opacity: 0.3;
+			display: flex;
+			width: 100cqw;
+			height: 5cqh;
+
+			justify-content: center;
+			gap: 8px;
+
+			position: absolute;
+			bottom: 24px;
+
+			opacity: 0;
+			transition: opacity .2s;
+
+			z-index: 101;
+
+			container-type: size;
+
+			--ViewControlSize: 100cqh;
+
+			button {
+				cursor: pointer;
+			}
+
+			#Cinema svg {
+				height: calc(var(--ViewControlSize) * 0.45);
+				width: auto;
+				aspect-ratio: 1;
+			}
+		}
+
+		&:hover {
+			.ViewControls {
+				opacity: 1 !important;
+			}
+		}
+
+		&:hover {
+			.ViewControls {
+				opacity: 0.3;
+			}
 		}
 	}
 }
