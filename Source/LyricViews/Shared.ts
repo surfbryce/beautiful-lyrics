@@ -199,7 +199,12 @@ export const ApplyDynamicBackground = (element: HTMLElement, maid: Maid) => {
 	const rendererElement = renderer.domElement
 	renderer.setPixelRatio(globalThis.devicePixelRatio)
 	rendererElement.classList.add(`${BackgroundClassName}-Container`)
-	maid.Give(() => renderer.dispose())
+	maid.Give(
+		() => {
+			renderer.dispose()
+			renderer.forceContextLoss()
+		}
+	)
 	maid.Give(rendererElement)
 
 	const UpdateBackgroundImages = () => {
