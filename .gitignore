@@ -152,3 +152,4 @@ Drafts/**/*
 Builds/Test/*
 Builds/Release/bundle@*.*
 deno.lock
+.DS_Store
