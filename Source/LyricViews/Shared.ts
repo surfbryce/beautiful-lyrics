@@ -118,6 +118,10 @@ const GenerateBlurredCoverArt = async () => {
 
 	const image = new Image()
 	image.src = coverArt
+	// Added a check to see if the cover art is external. This fixed the SongPlaceholder Image not being able to load.
+	if (coverArt.includes("https://") || coverArt.includes("http://")) {
+        image.crossOrigin = "anonymous";
+    }
 	await image.decode()
 
 	const originalSize = Math.min(image.width, image.height) // Crop to a square
