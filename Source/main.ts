@@ -20,6 +20,7 @@ import { GetInstantStore } from "jsr:@socali/spices/Spicetify/Services/Cache"
 import { Timeout } from 'jsr:@socali/modules/Scheduler'
 
 // Singletons
+import "./DiscordVerification/mod.ts"
 import "./LyricViews/mod.ts"
 
 // Shared Methods

@@ -1,7 +1,7 @@
 {
 	"$schema": "https://schemas.socalifornian.live/Spices/Build/Schema.json",
 	"Name": "beautiful-lyrics",
-	"Version": "5.0.1",
+	"Version": "5.1.0",
 
 	"ReleaseLocation": {
 		"Type": "Hosted",
