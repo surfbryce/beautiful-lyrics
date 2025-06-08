@@ -10,6 +10,7 @@ import {
 
 // Modules
 import LyricsRenderer from "../../Modules/LyricsRenderer.ts"
+import type { CustomTransformedLyrics } from "../../../Utils/CustomLyricsParser.ts" // Added
 
 // Our Modules
 import Icons from "./Icons.ts"
@@ -23,44 +24,67 @@ export const CreateLyricsRenderer = (
 	container: HTMLDivElement,
 	maid: Maid,
 	noLyricsTemplate?: string,
+	customTransformedLyrics?: CustomTransformedLyrics | null // Added parameter
 ) => {
 	const UpdateLyricsRenderer = () => {
 		// Wipe our previous renderer
 		maid.Clean("LyricsRenderer")
 
-		// If we don't have lyrics we need to display that
-		if (HaveSongLyricsLoaded === false) {
-			if (noLyricsTemplate === undefined) {
-				container.classList.remove("NoLyrics")
+		if (customTransformedLyrics) { // Prioritize custom lyrics
+			if (noLyricsTemplate === undefined) { // Standard page views don't use noLyricsTemplate with renderer
+				container.classList.remove("NoLyrics");
 			}
-
-			container.appendChild(maid.Give(CreateElement<HTMLElement>(Icons.LoadingLyrics), "LyricsRenderer"))
-		} else if (SongLyrics === undefined) {
-			if (noLyricsTemplate === undefined) {
-				container.classList.add("NoLyrics")
-			} else {
-				container.appendChild(maid.Give(CreateElement<HTMLSpanElement>(noLyricsTemplate), "LyricsRenderer"))
-			}
-		} else { // Otherwise, render our lyrics
-			if (noLyricsTemplate === undefined) {
-				container.classList.remove("NoLyrics")
-			}
-
 			maid.Give(
 				new LyricsRenderer(
-					container, SongLyrics,
-					(
-						(SongLyrics.RomanizedLanguage !== undefined)
-						&& IsLanguageRomanized(SongLyrics.RomanizedLanguage)
-					)
+					container,
+					customTransformedLyrics as any, // Use type assertion
+					false // isRomanized is false for custom lyrics
 				),
 				"LyricsRenderer"
-			)
+			);
+		} else { // Fallback to default SongLyrics logic
+			// If we don't have lyrics we need to display that
+			if (HaveSongLyricsLoaded === false) {
+				if (noLyricsTemplate === undefined) {
+					container.classList.remove("NoLyrics")
+				}
+				container.appendChild(maid.Give(CreateElement<HTMLElement>(Icons.LoadingLyrics), "LyricsRenderer"))
+			} else if (SongLyrics === undefined) {
+				if (noLyricsTemplate === undefined) {
+					container.classList.add("NoLyrics")
+				} else {
+					container.appendChild(maid.Give(CreateElement<HTMLSpanElement>(noLyricsTemplate), "LyricsRenderer"))
+				}
+			} else { // Otherwise, render our lyrics
+				if (noLyricsTemplate === undefined) {
+					container.classList.remove("NoLyrics")
+				}
+				maid.Give(
+					new LyricsRenderer(
+						container, SongLyrics,
+						(
+							(SongLyrics.RomanizedLanguage !== undefined)
+							&& IsLanguageRomanized(SongLyrics.RomanizedLanguage)
+						)
+					),
+					"LyricsRenderer"
+				)
+			}
 		}
 	}
-	UpdateLyricsRenderer()
+	UpdateLyricsRenderer() // Initial call
+
+	// Re-render if the song changes OR if default lyrics load (in case custom lyrics were not present)
+	// The `loadCustomLyrics` in `LyricViews/mod.ts` is connected to SongChanged and will update `activeCustomTransformedLyrics`.
+	// If a view is already open, it needs to re-render.
+	// The `UpdateLyricsRenderer` function itself is returned, so the calling module can trigger it upon specific state changes if needed.
+	// However, for simplicity with current structure, we rely on SongChanged to re-evaluate.
+	// If `customTransformedLyrics` was passed initially, it won't change unless the whole view is re-created or an explicit update method is called.
+	// The `Contained.ts` and `Fullscreen.ts` get `activeCustomTransformedLyrics` at creation.
+	// If `activeCustomTransformedLyrics` changes while a view is open, that view won't update unless `UpdateLyricsRenderer` is called again.
+	// `SongChanged` will re-evaluate `activeCustomTransformedLyrics` AND then will cause `UpdateLyricsRenderer` to run again here.
 	maid.Give(SongChanged.Connect(UpdateLyricsRenderer))
-	maid.Give(SongLyricsLoaded.Connect(UpdateLyricsRenderer))
+	maid.Give(SongLyricsLoaded.Connect(UpdateLyricsRenderer)) // Still relevant for the fallback case
 
 	// For external use to combine with romanization toggling
 	return UpdateLyricsRenderer

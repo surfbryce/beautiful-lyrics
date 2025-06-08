@@ -47,6 +47,7 @@ import Button from "../../Components/Button.ts"
 
 // Our Modules
 import { CreateLyricsRenderer, SetupRomanizationButton } from "./Shared.ts"
+import type { CustomTransformedLyrics } from "../../../Utils/CustomLyricsParser.ts" // Added import
 import { CreateElement, GetCoverArtForSong, ApplyDynamicBackground } from "../Shared.ts"
 import LyricViewIcons from "../Icons.ts"
 import Icons from "./Icons.ts"
@@ -198,12 +199,14 @@ let LastPageLocation: (string | undefined)
 export default class PageView implements Giveable {
 	// Private Properties
 	private readonly Maid = new Maid()
+	private readonly customTransformedLyrics?: CustomTransformedLyrics | null;
 
 	// Public Properties
 	public readonly Closed = this.Maid.Destroyed
 
 	// Constructor
-	constructor(makeSpotifyFullscreen?: true) {
+	constructor(makeSpotifyFullscreen?: true, customTransformedLyrics?: CustomTransformedLyrics | null) {
+		this.customTransformedLyrics = customTransformedLyrics;
 		// Determine our last-page
 		const lastPage = SpotifyHistory.entries[SpotifyHistory.entries.length - 2]
 		if ((lastPage !== undefined) && (lastPage.pathname.startsWith("/BeautifulLyrics") === false)) {
@@ -218,7 +221,32 @@ export default class PageView implements Giveable {
 
 		// Handle lyric-rendering changes
 		const content = container.querySelector<HTMLDivElement>(".Content")!
-		const UpdateLyricsRenderer = CreateLyricsRenderer(content, this.Maid)
+
+		// Add custom lyrics indicator if applicable
+		if (this.customTransformedLyrics) {
+			const indicator = CreateElement<HTMLDivElement>("<div class='beautiful-lyrics-custom-indicator'>(Custom)</div>");
+			// Basic inline style for visibility, actual styling in SCSS
+			indicator.style.position = "absolute"; // Position it relative to the content or play panel
+			indicator.style.top = "10px"; // Example positioning
+			indicator.style.left = "50%";
+			indicator.style.transform = "translateX(-50%)";
+			indicator.style.zIndex = "10"; // Ensure it's visible
+			indicator.style.padding = "2px 8px";
+			indicator.style.background = "rgba(0,0,0,0.3)";
+			indicator.style.borderRadius = "4px";
+			indicator.style.fontSize = "0.9em";
+			indicator.style.opacity = "0.7";
+			// Prepend to content, or to playPanel if that's more appropriate
+			const playPanel = content.querySelector<HTMLDivElement>(".PlayPanel");
+			if (playPanel) {
+				playPanel.prepend(indicator);
+			} else {
+				content.prepend(indicator);
+			}
+			this.Maid.Give(() => indicator.remove());
+		}
+
+		const UpdateLyricsRenderer = CreateLyricsRenderer(content, this.Maid, undefined, this.customTransformedLyrics); // Pass custom lyrics
 
 		// Handle our play-panel
 		{
@@ -1142,7 +1170,12 @@ export default class PageView implements Giveable {
 				}*/
 
 				// Setup our romanization button
-				SetupRomanizationButton(romanizeButton, UpdateLyricsRenderer, this.Maid)
+				// If using custom lyrics, or if SongLyrics doesn't have romanization, remove the button.
+				if (this.customTransformedLyrics || !SongLyrics?.RomanizedLanguage) { // Need to import SongLyrics if not already
+					romanizeButton.remove();
+				} else {
+					SetupRomanizationButton(romanizeButton, UpdateLyricsRenderer, this.Maid)
+				}
 			}
 
 			// Handle our like state

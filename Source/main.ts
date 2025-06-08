@@ -23,6 +23,9 @@ import { Timeout } from 'jsr:@socali/modules/Scheduler'
 import "./DiscordVerification/mod.ts"
 import "./LyricViews/mod.ts"
 
+// Components
+import { CustomLyricsSettings } from "./Components/Settings.ts";
+
 // Shared Methods
 import { CreateElement } from "./LyricViews/Shared.ts"
 

@@ -25,6 +25,8 @@ import {
 
 // Components
 import CardView from "./Card/mod.ts"
+import { getCustomLyric, CustomLyricEntry } from "../Components/Settings.ts" // Import for custom lyrics
+import { parseCustomLyrics, CustomTransformedLyrics } from "../Utils/CustomLyricsParser.ts" // Import for custom lyrics parser
 import ContainedPageView from "./Page/Contained.ts"
 import FullscreenPageView from "./Page/Fullscreen.ts"
 
@@ -49,9 +51,67 @@ const SpotifyCardViewQuery = ".main-nowPlayingView-section:not(:is(#BeautifulLyr
 // Store our internal utilities
 let SetPlaybarPageIconActiveState: (isActive: boolean) => void
 let ActivePageView: (ContainedPageView | FullscreenPageView | undefined)
+let activeCustomLyricText: string | null = null; // Variable to store fetched custom lyric text
+let activeCustomTransformedLyrics: CustomTransformedLyrics | null = null; // Variable to store parsed custom lyrics
 
 // Wait for Spotify to start our processing
 OnSpotifyReady
+.then( // Custom Lyrics Loading on Song Change
+	() => {
+		const loadCustomLyrics = () => {
+			activeCustomLyricText = null; // Reset on each song change
+			activeCustomTransformedLyrics = null; // Reset parsed lyrics
+
+			const track = globalThis.Spicetify?.Player?.data?.track;
+			if (track && track.metadata) {
+				const title = track.metadata.title;
+				const artist = track.metadata.artist_name;
+
+				if (title && artist) {
+					console.log(`Beautiful Lyrics: Checking custom lyrics for ${title} - ${artist}`);
+					const customLyricEntry = getCustomLyric(title, artist);
+					if (customLyricEntry && customLyricEntry.lyricsText) {
+						activeCustomLyricText = customLyricEntry.lyricsText;
+						console.log("Beautiful Lyrics: Found custom lyrics text.");
+						activeCustomTransformedLyrics = parseCustomLyrics(activeCustomLyricText);
+						if (activeCustomTransformedLyrics) {
+							console.log("Beautiful Lyrics: Successfully parsed custom lyrics.");
+							// If views need to be updated reactively after they are already loaded,
+							// an event/signal here would be useful. For now, views will get it at instantiation.
+							// HaveSongLyricsLoaded = true; // Potentially set this true
+							// SongLyricsLoaded.Dispatch(); // And dispatch if custom lyrics make them "loaded"
+						} else {
+							console.warn("Beautiful Lyrics: Failed to parse custom lyrics text.");
+						}
+					} else {
+						console.log("Beautiful Lyrics: No custom lyrics found or text is empty.");
+					}
+				} else {
+					console.warn("Beautiful Lyrics: Could not retrieve title or artist for current song.");
+				}
+			} else {
+				console.warn("Beautiful Lyrics: Spicetify Player data or track metadata not available for custom lyric check.");
+			}
+		};
+
+		// Initial load
+		loadCustomLyrics();
+
+		// Listen for song changes
+		ViewMaid.Give(SongChanged.Connect(() => {
+			loadCustomLyrics();
+			// Potentially trigger re-render of views if they are active
+			// This is important if a view is already open and song changes.
+			// For now, new views get the new lyrics. Existing views might not update unless they also listen to SongChanged.
+			// Or, we could explicitly update ActivePageView if it exists.
+			if (ActivePageView && typeof (ActivePageView as any).updateLyrics === 'function') {
+				// This assumes views will have an updateLyrics method, which they don't yet.
+				// (ActivePageView as any).updateLyrics(activeCustomTransformedLyrics);
+			}
+			// Similarly for CardView, if a direct reference is kept or an event system is used.
+		}));
+	}
+)
 .then( // Playbar Icons
 	() => {
 		// Store references for our buttons
@@ -179,26 +239,32 @@ OnSpotifyReady
 			// Also handle our own card
 			const ShouldCreateCard = () => {
 				if (
-					// We shouldn't be rendering the card-view when we have another of our views open
-					SpotifyHistory.location.pathname.startsWith("/BeautifulLyrics")
-					|| (Song === undefined)
-					|| (HaveSongLyricsLoaded && (SongLyrics === undefined))
+					SpotifyHistory.location.pathname.startsWith("/BeautifulLyrics") ||
+					Song === undefined ||
+					// If no custom lyrics, AND default lyrics are loaded but undefined (error state for default)
+					(!activeCustomTransformedLyrics && HaveSongLyricsLoaded && SongLyrics === undefined)
 				) {
-					nowPlayingViewMaid.Clean("Card")
-					return
-				} else if (HaveSongLyricsLoaded === false) { // Render a template if we're still loading our lyrics
-					const card = nowPlayingViewMaid.Give(CreateElement<HTMLDivElement>(LoadingLyricsCard), "Card")
-					cardAnchor.after(card)
-
-					return
+					nowPlayingViewMaid.Clean("Card");
+					return;
+					// If no custom lyrics, AND default lyrics are still loading
+				} else if (!activeCustomTransformedLyrics && !HaveSongLyricsLoaded) {
+					const card = nowPlayingViewMaid.Give(CreateElement<HTMLDivElement>(LoadingLyricsCard), "Card");
+					cardAnchor.after(card);
+					return;
 				}
 
-				nowPlayingViewMaid.Give(new CardView(cardAnchor), "Card")
+				// Pass activeCustomTransformedLyrics to CardView
+				// If we have activeCustomTransformedLyrics, we can render immediately.
+				// Otherwise, SongLyrics must be available (implicit from conditions above).
+				nowPlayingViewMaid.Give(new CardView(cardAnchor, activeCustomTransformedLyrics), "Card");
 			}
 			ShouldCreateCard()
+			// Re-evaluate card creation if custom lyrics become available/unavailable (via SongChanged -> loadCustomLyrics),
+			// or if normal lyrics load, or navigation changes.
 			nowPlayingViewMaid.GiveItems(
-				SongLyricsLoaded.Connect(ShouldCreateCard),
-				SpotifyHistory.listen(ShouldCreateCard)
+				SongLyricsLoaded.Connect(ShouldCreateCard), // For when normal lyrics load
+				SongChanged.Connect(ShouldCreateCard),      // For when song changes (custom lyrics might appear/disappear)
+				SpotifyHistory.listen(ShouldCreateCard)   // For navigation changes
 			)
 		}
 		const DeferCheckForNowPlaying = () => ViewMaid.Give(Defer(CheckForNowPlaying), "CheckForNowPlaying")
@@ -264,11 +330,13 @@ OnSpotifyReady
 			// Now handle our page-view
 			if (location.pathname === "/BeautifulLyrics/Page") {
 				SetPlaybarPageIconActiveState(true)
-				ActivePageView = ViewMaid.Give(new ContainedPageView(pageContainer, pageContainerIsLegacy), "PageView")
+				// Pass activeCustomTransformedLyrics to ContainedPageView
+				ActivePageView = ViewMaid.Give(new ContainedPageView(pageContainer, pageContainerIsLegacy, activeCustomTransformedLyrics), "PageView")
 				ActivePageView.Closed.Connect(() => SetPlaybarPageIconActiveState(false))
 				ActivePageView.Closed.Connect(() => ActivePageView = undefined)
 			} else if (location.pathname === "/BeautifulLyrics/Fullscreen") {
-				ActivePageView = ViewMaid.Give(new FullscreenPageView(location.state.FromPlaybar), "PageView")
+				// Pass activeCustomTransformedLyrics to FullscreenPageView
+				ActivePageView = ViewMaid.Give(new FullscreenPageView(location.state.FromPlaybar, activeCustomTransformedLyrics), "PageView")
 				ActivePageView.Closed.Connect(() => ActivePageView = undefined)
 			}
 		}

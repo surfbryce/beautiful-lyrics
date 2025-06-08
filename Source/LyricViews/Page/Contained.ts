@@ -10,10 +10,11 @@ import {
 	Spotify,
 	SpotifyHistory
 } from "@socali/Spices/Session"
-import { Song, SongChanged } from "@socali/Spices/Player"
+import { Song, SongChanged, SongLyrics } from "@socali/Spices/Player" // Added SongLyrics import
 
 // Our Modules
 import { CreateLyricsRenderer, SetupRomanizationButton } from "./Shared.ts"
+import type { CustomTransformedLyrics } from "../../../Utils/CustomLyricsParser.ts" // Added import
 import { CreateElement, ApplyDynamicBackground } from "../Shared.ts"
 
 // Templates
@@ -49,12 +50,14 @@ let LastPageLocation: (string | undefined)
 export default class PageView implements Giveable {
 	// Private Properties
 	private readonly Maid = new Maid()
+	private readonly customTransformedLyrics?: CustomTransformedLyrics | null;
 
 	// Public Properties
 	public readonly Closed = this.Maid.Destroyed
 
 	// Constructor
-	constructor(page: HTMLDivElement, isLegacy: boolean) {
+	constructor(page: HTMLDivElement, isLegacy: boolean, customTransformedLyrics?: CustomTransformedLyrics | null) {
+		this.customTransformedLyrics = customTransformedLyrics;
 		// Determine our last-page
 		const lastPage = SpotifyHistory.entries[SpotifyHistory.entries.length - 2]
 		if ((lastPage !== undefined) && (lastPage.pathname.startsWith("/BeautifulLyrics") === false)) {
@@ -70,7 +73,20 @@ export default class PageView implements Giveable {
 
 		// Handle lyric-rendering changes
 		const content = container.querySelector<HTMLDivElement>(".Content")!
-		const UpdateLyricsRenderer = CreateLyricsRenderer(content, this.Maid, NoLyrics)
+
+		// Add custom lyrics indicator if applicable
+		if (this.customTransformedLyrics) {
+			const indicator = CreateElement<HTMLDivElement>("<div class='beautiful-lyrics-custom-indicator'>(Custom)</div>");
+			// Style will be handled in SCSS, but basic inline style for visibility:
+			indicator.style.textAlign = "center";
+			indicator.style.padding = "4px";
+			indicator.style.fontSize = "0.9em";
+			indicator.style.opacity = "0.7";
+			content.prepend(indicator); // Prepend to content area
+			this.Maid.Give(() => indicator.remove());
+		}
+
+		const UpdateLyricsRenderer = CreateLyricsRenderer(content, this.Maid, NoLyrics, this.customTransformedLyrics) // Pass custom lyrics
 
 		// Handle our controls
 		{
@@ -78,6 +94,11 @@ export default class PageView implements Giveable {
 			const changeButton = header.querySelector<HTMLButtonElement>("#Cinema")!
 			const romanizeButton = header.querySelector<HTMLButtonElement>("#Romanize")!
 			const closeButton = header.querySelector<HTMLButtonElement>("#Close")!
+
+			// If using custom lyrics, or if SongLyrics doesn't have romanization, remove the button.
+			if (this.customTransformedLyrics || !SongLyrics?.RomanizedLanguage) {
+				romanizeButton.remove();
+			}
 
 			// Handle our close button
 			{
@@ -114,7 +135,10 @@ export default class PageView implements Giveable {
 			}
 
 			// Setup our romanization button
-			SetupRomanizationButton(romanizeButton, UpdateLyricsRenderer, this.Maid)
+			// Only setup if the button hasn't been removed
+			if (!this.customTransformedLyrics && SongLyrics?.RomanizedLanguage) {
+				SetupRomanizationButton(romanizeButton, UpdateLyricsRenderer, this.Maid)
+			}
 		}
 
 		// Now parent our container/header

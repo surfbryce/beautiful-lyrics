@@ -13,6 +13,7 @@ import { SongLyrics } from "@socali/Spices/Player"
 
 // Our Modules
 import LyricsRenderer from "../../Modules/LyricsRenderer.ts"
+import type { CustomTransformedLyrics } from "../../../Utils/CustomLyricsParser.ts" // Added import
 import {
 	CreateElement,
 	ToggleLanguageRomanization, IsLanguageRomanized, LanguageRomanizationChanged,
@@ -61,6 +62,7 @@ const LyricsContainer = `<div class="LyricsContent"><div class="ContentContainer
 export default class CardView implements Giveable {
 	// Private Properties
 	private readonly Maid = new Maid()
+	private readonly customTransformedLyrics?: CustomTransformedLyrics | null;
 
 	// Private Elements
 	private readonly Container: HTMLDivElement
@@ -78,14 +80,25 @@ export default class CardView implements Giveable {
 	private readonly LyricsContentContainer: HTMLDivElement
 
 	// Constructor
-	constructor(insertAfter: HTMLDivElement) {
+	constructor(insertAfter: HTMLDivElement, customTransformedLyrics?: CustomTransformedLyrics | null) {
+		this.customTransformedLyrics = customTransformedLyrics;
 		// Handle creating our elements
 		{
 			// Create our container first
 			this.Container = this.Maid.Give(CreateElement<HTMLDivElement>(CardContainer))
 	
-			// Reference our header
-			this.Header = this.Container.querySelector<HTMLDivElement>(".Header")!
+			// Reference our header and title element
+			this.Header = this.Container.querySelector<HTMLDivElement>(".Header")!;
+			const titleElement = this.Header.querySelector<HTMLDivElement>(".Title");
+			if (titleElement) {
+				if (this.customTransformedLyrics) {
+					titleElement.textContent = "Lyrics (Custom)";
+					titleElement.classList.add("beautiful-lyrics-custom-indicator-parent"); // For potential specific styling
+				} else {
+					titleElement.textContent = "Lyrics";
+					titleElement.classList.remove("beautiful-lyrics-custom-indicator-parent");
+				}
+			}
 	
 			// Create our show lyrics button
 			this.ShowLyricsButton = this.Maid.Give(CreateElement<HTMLButtonElement>(ShowLyricsButton))
@@ -99,8 +112,8 @@ export default class CardView implements Giveable {
 				CloseButton: expandedControlsContainer.querySelector<HTMLButtonElement>("#Close")!,
 			}
 
-			// Remove our romanize-button if we aren't a romanized lyric
-			if (SongLyrics!.RomanizedLanguage === undefined) {
+			// Remove our romanize-button if we are using custom lyrics or if the original lyrics aren't romanized
+			if (this.customTransformedLyrics || !SongLyrics?.RomanizedLanguage) {
 				this.ExpandedControls.RomanizeButton.remove()
 			}
 
@@ -131,7 +144,8 @@ export default class CardView implements Giveable {
 			)
 			this.Maid.Give(() => pageTooltip.destroy())
 
-			if (SongLyrics!.RomanizedLanguage !== undefined) {
+			// Only create romanize tooltip if the button is present (i.e., not custom lyrics and romanizable)
+			if (!this.customTransformedLyrics && SongLyrics?.RomanizedLanguage) {
 				const romanizeTooltip = Spotify.Tippy(
 					this.ExpandedControls.RomanizeButton,
 					{
@@ -145,7 +159,8 @@ export default class CardView implements Giveable {
 		}
 
 		// Handle romanization updates
-		if (SongLyrics!.RomanizedLanguage !== undefined) {
+		// Only set up romanization if not custom lyrics and romanizable
+		if (!this.customTransformedLyrics && SongLyrics?.RomanizedLanguage) {
 			const SetContent = (isRomanized: boolean) => {
 				this.RomanizeTooltip.setContent(isRomanized ? "Disable Romanization" : "Enable Romanization")
 				this.ExpandedControls.RomanizeButton.innerHTML = (
@@ -193,8 +208,9 @@ export default class CardView implements Giveable {
 			)
 
 			// Handle our romanization button
-			if (SongLyrics!.RomanizedLanguage !== undefined) {
-				const romanizedLanguage = SongLyrics!.RomanizedLanguage
+			// Only add listener if not custom lyrics and romanizable
+			if (!this.customTransformedLyrics && SongLyrics?.RomanizedLanguage) {
+				const romanizedLanguage = SongLyrics.RomanizedLanguage
 				this.ExpandedControls.RomanizeButton.addEventListener(
 					"click",
 					() => ToggleLanguageRomanization(romanizedLanguage, !IsLanguageRomanized(romanizedLanguage))
@@ -217,17 +233,34 @@ export default class CardView implements Giveable {
 	}
 
 	private CreateLyricsRenderer() {
-		this.Maid.Give(
-			new LyricsRenderer(
-				this.LyricsContentContainer, SongLyrics!,
-				(
-					(SongLyrics!.RomanizedLanguage === undefined)
-					? false
-					: IsLanguageRomanized(SongLyrics!.RomanizedLanguage)
-				)
-			),
-			"LyricsRenderer"
-		)
+		// Try to use custom lyrics first
+		if (this.customTransformedLyrics) {
+			this.Maid.Give(
+				new LyricsRenderer(
+					this.LyricsContentContainer,
+					this.customTransformedLyrics as any, // Use type assertion as structure is compatible
+					false // isRomanized is false for custom lyrics
+				),
+				"LyricsRenderer"
+			);
+		} else if (SongLyrics) { // Fallback to default SongLyrics
+			this.Maid.Give(
+				new LyricsRenderer(
+					this.LyricsContentContainer, SongLyrics,
+					(
+						(SongLyrics.RomanizedLanguage === undefined)
+						? false
+						: IsLanguageRomanized(SongLyrics.RomanizedLanguage)
+					)
+				),
+				"LyricsRenderer"
+			);
+		} else {
+			// Fallback or error: No lyrics to render
+			// This case should ideally be prevented by ShouldCreateCard logic in mod.ts
+			this.LyricsContentContainer.textContent = "No lyrics available to render.";
+			console.warn("Beautiful Lyrics: No lyrics (neither customTransformedLyrics nor SongLyrics) available for CardView renderer.");
+		}
 	}
 
 	private ReactToLyricsVisibility() {
