@@ -30,50 +30,6 @@ import { CreateElement } from "./LyricViews/Shared.ts"
 import OpenUpdatePopup from "./UpdatePopup/mod.ts"
 
 const Load = async () => {
-	{
-		const fontPromises: Promise<FontFaceSet>[] = []
-		const fonts = [
-			new FontFace(
-				"BeautifulLyrics",
-				"url(https://fonts.socalifornian.live/LyricsRegular.woff2)",
-				{
-					weight: "400",
-					style: "normal"
-				}
-			),
-			new FontFace(
-				"BeautifulLyrics",
-				"url(https://fonts.socalifornian.live/LyricsMedium.woff2)",
-				{
-					weight: "500",
-					style: "normal"
-				}
-			),
-			new FontFace(
-				"BeautifulLyrics",
-				"url(https://fonts.socalifornian.live/LyricsSemibold.woff2)",
-				{
-					weight: "600",
-					style: "normal"
-				}
-			),
-			new FontFace(
-				"BeautifulLyrics",
-				"url(https://fonts.socalifornian.live/LyricsBold.woff2)",
-				{
-					weight: "700",
-					style: "normal"
-				}
-			)
-		]
-		for (const font of fonts) {
-			fontPromises.push(
-				font.load().then(font => document.fonts.add(font))
-			)
-		}
-		await Promise.all(fontPromises)
-	}
-
 	await OnSpotifyReady
 
 	// Custom text rendering, still expirementing so not final yet
