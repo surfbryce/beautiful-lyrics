@@ -26,6 +26,17 @@ body:has(.BeautifulLyricsPage) {
 		width: auto;
 		aspect-ratio: 1;
 	}
+
+	#Translate svg {
+		height: calc(var(--ViewControlSize) * 0.46);
+		width: auto;
+		aspect-ratio: 1;
+	}
+
+	#Translate.Active {
+		color: var(--spice-button-active, #1ed760);
+		opacity: 1;
+	}
 }
 
 .BeautifulLyricsPage {

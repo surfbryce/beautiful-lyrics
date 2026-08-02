@@ -92,6 +92,9 @@ export class LyricsScroller<V extends (BaseVocals | SyncedVocals)> implements Gi
 			)
 		)
 		resizeObserver.observe(this.ScrollContainer)
+		for (const vocalGroup of this.VocalGroups) {
+			resizeObserver.observe(vocalGroup.GroupContainer)
+		}
 
 		// Immediately update our heights
 		this.UpdateLyricHeights()

@@ -54,6 +54,21 @@
 	contain: layout paint;
 }
 
+.LyricsTranslation {
+	display: none;
+	margin-top: 0.24em;
+	font-family: "BeautifulLyrics", var(--encore-body-font-stack, CircularSp, sans-serif);
+	font-size: max(0.68em, 16px);
+	font-weight: 600;
+	line-height: 1.3;
+	opacity: 0.84;
+	pointer-events: none;
+}
+
+body.BeautifulLyricsTranslationsEnabled .LyricsTranslation {
+	display: block;
+}
+
 /* Group */
 .VocalsGroup {
 	margin: 0;

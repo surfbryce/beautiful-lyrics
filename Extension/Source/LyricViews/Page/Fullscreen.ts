@@ -46,7 +46,7 @@ import Slider from "../../Components/Slider.ts"
 import Button from "../../Components/Button.ts"
 
 // Our Modules
-import { CreateLyricsRenderer, SetupRomanizationButton } from "./Shared.ts"
+import { CreateLyricsRenderer, SetupRomanizationButton, SetupTranslationButton } from "./Shared.ts"
 import { CreateElement, GetCoverArtForSong, ApplyDynamicBackground } from "../Shared.ts"
 import LyricViewIcons from "../Icons.ts"
 import Icons from "./Icons.ts"
@@ -111,6 +111,7 @@ const Container = `
 					<div class="ViewControls">
 						<button id="AddToPlaylist" class="ViewControl">${Icons.AddToPlaylist}</button>
 						<button id="Romanize" class="ViewControl"></button>
+						<button id="Translate" class="ViewControl"></button>
 						<button id="SmallerView" class="ViewControl"></button>
 						<button id="Fullscreen" class="ViewControl">${LyricViewIcons.FullscreenOpen}</button>
 						<button id="Close" class="ViewControl">${Icons.CloseView}</button>
@@ -944,6 +945,7 @@ export default class PageView implements Giveable {
 				// Grab our controls
 				const addToPlaylistButton = viewControls.querySelector<HTMLButtonElement>("#AddToPlaylist")!
 				const romanizeButton = viewControls.querySelector<HTMLButtonElement>("#Romanize")!
+				const translateButton = viewControls.querySelector<HTMLButtonElement>("#Translate")!
 				const fullscreenButton = viewControls.querySelector<HTMLButtonElement>("#Fullscreen")!
 				const smallViewButton = viewControls.querySelector<HTMLButtonElement>("#SmallerView")!
 				const closeButton = viewControls.querySelector<HTMLButtonElement>("#Close")!
@@ -1143,6 +1145,7 @@ export default class PageView implements Giveable {
 
 				// Setup our romanization button
 				SetupRomanizationButton(romanizeButton, UpdateLyricsRenderer, this.Maid)
+				SetupTranslationButton(translateButton, container, this.Maid)
 			}
 
 			// Handle our like state
