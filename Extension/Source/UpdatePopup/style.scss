@@ -53,7 +53,7 @@
 			width: 100cqw;
 
 			color: white;
-			font-family: "BeautifulLyrics";
+			font-family: var(--encore-body-font-stack, CircularSp, sans-serif);
 			font-size: 11cqh;
 			font-weight: bold;
 			text-align: center;
@@ -67,7 +67,7 @@
 			width: 100cqw;
 
 			color: white;
-			font-family: "BeautifulLyrics";
+			font-family: var(--encore-body-font-stack, CircularSp, sans-serif);
 			font-size: 5cqh;
 			font-weight: bold;
 			text-align: center;
@@ -84,7 +84,7 @@
 			width: 100cqw;
 
 			color: white;
-			font-family: "BeautifulLyrics";
+			font-family: var(--encore-body-font-stack, CircularSp, sans-serif);
 			font-size: 5cqh;
 			font-weight: normal;
 			text-align: center;

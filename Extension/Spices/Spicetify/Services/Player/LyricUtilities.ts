@@ -46,6 +46,11 @@ const RightToLeftLanguages = [
 
 const RomajiConverter = new Kuroshiro()
 const RomajiPromise = RomajiConverter.init(KuromojiAnalyzer)
+	.then(() => true)
+	.catch(error => {
+		console.warn("Beautiful Lyrics: Japanese romanization unavailable", error)
+		return false
+	})
 
 const KoreanTextTest = /[\uac00-\ud7af]|[\u1100-\u11ff]|[\u3130-\u318f]|[\ua960-\ua97f]|[\ud7b0-\ud7ff]/
 const ChineseTextText = /([\u4E00-\u9FFF])/
@@ -84,16 +89,17 @@ const GenerateJapaneseRomanization = <L extends TextMetadata>(
 	if ((primaryLanguage === "jpn") || JapaneseTextText.test(lyricMetadata.Text)) {
 		return (
 			RomajiPromise.then(
-				() => RomajiConverter.convert(
+				ready => ready ? RomajiConverter.convert(
 					lyricMetadata.Text,
 					{
 						to: "romaji",
 						mode: "spaced"
 					}
-				)
+				) : undefined
 			)
 			.then(
 				result => {
+					if (result === undefined) return
 					lyricMetadata.RomanizedText = result
 					return "Japanese"
 				}
