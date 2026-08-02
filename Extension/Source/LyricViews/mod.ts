@@ -268,7 +268,7 @@ OnSpotifyReady
 				ActivePageView.Closed.Connect(() => SetPlaybarPageIconActiveState(false))
 				ActivePageView.Closed.Connect(() => ActivePageView = undefined)
 			} else if (location.pathname === "/BeautifulLyrics/Fullscreen") {
-				ActivePageView = ViewMaid.Give(new FullscreenPageView(location.state.FromPlaybar), "PageView")
+				ActivePageView = ViewMaid.Give(new FullscreenPageView(location.state?.FromPlaybar), "PageView")
 				ActivePageView.Closed.Connect(() => ActivePageView = undefined)
 			}
 		}
