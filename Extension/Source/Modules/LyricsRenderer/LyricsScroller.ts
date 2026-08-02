@@ -92,6 +92,9 @@ export class LyricsScroller<V extends (BaseVocals | SyncedVocals)> implements Gi
 			)
 		)
 		resizeObserver.observe(this.ScrollContainer)
+		for (const vocalGroup of this.VocalGroups) {
+			resizeObserver.observe(vocalGroup.GroupContainer)
+		}
 
 		// Immediately update our heights
 		this.UpdateLyricHeights()
@@ -175,7 +178,11 @@ export class LyricsScroller<V extends (BaseVocals | SyncedVocals)> implements Gi
 		}
 
 		// Update our container height
-		this.LyricsContainer.style.height = `${totalHeight}px`
+		// Keep enough real scrollable space after the final lyric so it can be
+		// brought above the player controls. Using an explicit calculated height
+		// is important here because SimpleBar does not reliably include a flex
+		// child's trailing margin/padding in its scroll extent.
+		this.LyricsContainer.style.height = `calc(${totalHeight}px + var(--lyrics-scroll-tail, 70cqh))`
 		this.Scroller.recalculate()
 	}
 

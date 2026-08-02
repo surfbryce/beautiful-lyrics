@@ -35,9 +35,10 @@
 	flex-direction: column;
 
 	width: 100cqw;
-	height: 0;
+	height: max-content;
+	min-height: 100%;
 
-	container-type: size;
+	container-type: inline-size;
 
 	--vocal-idle-opacity: 0.51;
 	--vocal-active-opacity: 1;
@@ -49,9 +50,12 @@
 	--vocal-lyrics-scale: 7;
 	--maximum-lyrics-size: 3.5rem;
 	--minimum-lyrics-size: 1.85rem;
+	--lyrics-scroll-tail: 70cqh;
 
 	will-change: transform;
-	contain: layout paint;
+	contain: none;
+	box-sizing: border-box;
+	padding-bottom: 0;
 }
 
 /* Group */
@@ -77,7 +81,11 @@
 	margin-bottom: 1cqw;
 
 	will-change: transform;
-	contain: layout paint;
+	contain: layout;
+	width: 100%;
+	max-width: 100%;
+	box-sizing: border-box;
+	overflow: visible;
 }
 
 .VocalsGroup:is(button) {
@@ -161,11 +169,13 @@
 			var(--maximum-lyrics-size));
 
 	will-change: transform, opacity;
-	contain: layout paint;
+	contain: layout;
+	max-width: 100%;
+	overflow: visible;
 }
 
 .Lyrics .Vocals {
-	width: 95cqw;
+	width: 100%;
 }
 
 .Lyrics:has(.AlignedOpposite) .Vocals {
@@ -309,6 +319,8 @@
 	/* Make it so text can wrap and we expand to its size */
 	display: flex;
 	white-space: pre-wrap;
+	max-width: 100%;
+	overflow-wrap: anywhere;
 }
 
 .Vocals.Lead .Line {
