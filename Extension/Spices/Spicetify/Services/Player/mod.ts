@@ -12,7 +12,7 @@ import {
 	GlobalMaid,
 	OnSpotifyReady,
 	SpotifyPlayer, SpotifyPlatform, SpotifyURI, SpotifyRequestBuilder,
-	GetSpotifyAccessToken
+	SpotifyInternalFetch
 } from "../Session.ts"
 import { GetExpireStore } from '../Cache.ts'
 
@@ -329,7 +329,7 @@ const LoadSongDetails = () => {
 
 // Handle our Lyrics
 const ProviderLyricsStore = GetExpireStore<ProviderLyrics | false>(
-	"Player_ProviderLyrics", 3,
+	"Player_ProviderLyricsSpotifyEs", 1,
 	{
 		Duration: 1,
 		Unit: "Months"
@@ -337,7 +337,7 @@ const ProviderLyricsStore = GetExpireStore<ProviderLyrics | false>(
 	true
 )
 const TransformedLyricsStore = GetExpireStore<TransformedLyrics | false>(
-	"Player_TransformedLyrics", 3,
+	"Player_TransformedLyricsSpotifyEs", 1,
 	{
 		Duration: 1,
 		Unit: "Months"
@@ -367,41 +367,41 @@ const LoadSongLyrics = () => {
 			providerLyrics => {
 				if (providerLyrics === undefined) { // Otherwise, get our lyrics
 					return (
-						(
-							GetSpotifyAccessToken()
-							.then(
-								accessToken => fetch(
-									`https://beautiful-lyrics.socalifornian.live/lyrics/${encodeURIComponent(songAtUpdate.Id)}`,
-									// `http://localhost:8787/lyrics/${encodeURIComponent(songAtUpdate.Id)}`,
-									{
-										method: "GET",
-										headers: {
-											Authorization: `Bearer ${accessToken}`
-										}
-									}
-								)
-							)
-							.then(
-								(response) => {
-									if (response.ok === false) {
-										throw `Failed to load Lyrics for Track (${
-											songAtUpdate.Id
-										}), Error: ${response.status} ${response.statusText}`
-									}
-				
-									return response.text()
-								}
-							)
-							.then(
-								text => {
-									if (text.length === 0) {
-										return undefined
-									} else {
-										return JSON.parse(text)
-									}
-								}
-							)
+						SpotifyInternalFetch.get(
+							`https://spclient.wg.spotify.com/color-lyrics/v2/track/${encodeURIComponent(songAtUpdate.Id)}?format=json&vocalRemoval=false&market=from_token`
 						)
+						.then(response => {
+							const spotifyLyrics = response?.lyrics
+							const lines = spotifyLyrics?.lines
+							if (!Array.isArray(lines) || lines.length === 0) return undefined
+
+							if (spotifyLyrics.syncType !== "LINE_SYNCED") {
+								return {
+									Type: "Static",
+									Lines: lines.map((line: { words?: string }) => ({ Text: line.words ?? "" }))
+								} as ProviderLyrics
+							}
+
+							const timedLines = lines
+								.map((line: { startTimeMs?: string | number, words?: string }) => ({
+									StartTime: Number(line.startTimeMs ?? 0) / 1000,
+									Text: line.words ?? ""
+								}))
+								.filter((line: { Text: string }) => line.Text.trim().length > 0)
+
+							return {
+								Type: "Line",
+								StartTime: timedLines[0]?.StartTime ?? 0,
+								EndTime: songAtUpdate.Duration,
+								Content: timedLines.map((line: { StartTime: number, Text: string }, index: number) => ({
+									Type: "Vocal",
+									StartTime: line.StartTime,
+									EndTime: timedLines[index + 1]?.StartTime ?? songAtUpdate.Duration,
+									Text: line.Text,
+									OppositeAligned: false
+								}))
+							} as ProviderLyrics
+						})
 						.then(
 							(providerLyrics) => {
 								const lyrics = (providerLyrics ?? false)
@@ -447,6 +447,10 @@ const LoadSongLyrics = () => {
 				}
 			}
 		)
+		.catch(error => {
+			console.warn("Beautiful Lyrics: failed to load lyrics", error)
+			return undefined
+		})
 		.then(
 			transformedLyrics => {
 				// Make sure we still have the same song active
