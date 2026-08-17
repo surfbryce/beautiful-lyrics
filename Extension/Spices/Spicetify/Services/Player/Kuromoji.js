@@ -942,6 +942,9 @@
 						var len = okeys.length;
 						return function next() {
 							var key = okeys[++i];
+							if (key === '__proto__') {
+								return next();
+							}
 							return i < len ? { value: obj[key], key: key } : null;
 						};
 					}
